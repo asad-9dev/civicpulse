@@ -170,20 +170,26 @@ in a browser, re-run with `--headed` to watch what the page does and update thos
 It installs Python 3.11, the requirements and Chromium, then runs:
 
 ```bash
-python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer claude --write-public
+python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer dummy --write-public
 ```
+
+This uses the free built-in summarizer, so no API key or secret is needed. Each published
+meeting shows its date, committee and first three agenda items, with a keyword guess at category,
+towns and urgency; the student/parent explanation points readers to the original agenda.
 
 If `public/data/meetings.json` changed, it commits the file as `github-actions[bot]` and pushes
 it. The downloaded PDFs are kept as a run artifact for 14 days.
 
 Before the first run:
 
-1. Add an `ANTHROPIC_API_KEY` secret under **Settings → Secrets and variables → Actions**. The
-   workflow stops with an error if it's missing rather than publishing placeholder summaries.
-2. Check that **Settings → Actions → General → Workflow permissions** allows read and write
+1. Check that **Settings → Actions → General → Workflow permissions** allows read and write
    access, or the push is rejected.
-3. Connect the Vercel project to the repository (Vercel → Project → Settings → Git), so each
+2. Connect the Vercel project to the repository (Vercel → Project → Settings → Git), so each
    bot commit redeploys the site.
+
+To switch to Claude summaries later, add an `ANTHROPIC_API_KEY` repository secret, pass it to
+the scrape step as an environment variable, and change `--summarizer dummy` to `claude`. Meetings
+already published by the built-in summarizer are kept as they are until you run once with `--refresh`.
 
 ## Project structure
 

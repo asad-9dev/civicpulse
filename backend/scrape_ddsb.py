@@ -432,11 +432,12 @@ def summarize_dummy(agenda_text: str, source: AgendaSource) -> dict:
         "townsAffected": towns,
         "category": category,
         "executiveSummary": bullets,
+        # Shown to visitors on the live site, so written for parents rather than developers.
         "studentParentImpact": (
-            "Placeholder summary generated without an AI model. Re-run with --summarizer claude "
-            "for a plain-language explanation of what this meeting means for students and parents."
+            "This entry lists the agenda's main items; a plain-language explanation of what they mean "
+            "for students and parents isn't available yet. Open the original agenda for the full details."
         ),
-        "policyChanges": "Not analysed by the dummy summarizer.",
+        "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
     }
 
 
