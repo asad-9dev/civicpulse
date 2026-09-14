@@ -6,7 +6,7 @@ import { ArrowRight, CircleCheck, LoaderCircle } from "lucide-react";
 type Status =
   | { kind: "idle" }
   | { kind: "submitting" }
-  | { kind: "success"; message: string }
+  | { kind: "success" }
   | { kind: "error"; message: string };
 
 export function NewsletterForm() {
@@ -29,12 +29,12 @@ export function NewsletterForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = (await res.json().catch(() => ({}))) as { message?: string; error?: string };
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         setStatus({ kind: "error", message: data.error ?? "Something went wrong. Please try again." });
         return;
       }
-      setStatus({ kind: "success", message: data.message ?? "You're on the list." });
+      setStatus({ kind: "success" });
       setEmail("");
     } catch {
       setStatus({ kind: "error", message: "Couldn't reach the server. Check your connection and try again." });
@@ -90,10 +90,13 @@ export function NewsletterForm() {
 
       <div id="subscribe-status" role="status" aria-live="polite" className="min-h-6 text-[15px]">
         {status.kind === "success" && (
-          <p className="flex items-center gap-2 font-bold text-marker">
-            <CircleCheck aria-hidden size={18} strokeWidth={2.25} />
-            {status.message}
-          </p>
+          <div className="flex items-start gap-3 rounded-[10px] border border-marker/40 bg-white/10 px-4 py-3">
+            <CircleCheck aria-hidden size={22} strokeWidth={2.25} className="mt-0.5 shrink-0 text-marker" />
+            <div className="flex flex-col gap-0.5">
+              <p className="text-[17px] font-bold text-white">You&apos;re subscribed!</p>
+              <p className="text-[15px] text-night-text">Look out for the next board meeting summary in your inbox.</p>
+            </div>
+          </div>
         )}
         {error && <p className="font-bold text-[#FFB4AB]">{error}</p>}
       </div>

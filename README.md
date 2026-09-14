@@ -18,8 +18,23 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>. That's it: the front end reads the JSON files in `public/data/`, so
-no Python or API key is needed just to view the app.
+Open <http://localhost:3000>. The front end reads `public/data/meetings.json`, so no Python or
+API key is needed just to view the app.
+
+### Newsletter sign-ups (Supabase)
+
+Sign-ups are stored in a Supabase table. To enable them:
+
+1. In the Supabase dashboard, open **SQL Editor**, paste `backend/schema.sql` and run it. It
+   creates `subscribers` (`id`, `email` unique, `created_at`) with Row Level Security on and no
+   policies, so the public key can't read the list.
+2. Copy `.env.example` to `.env.local` and set `SUPABASE_SERVICE_ROLE_KEY` to the project's
+   **secret** key (Project Settings → API Keys). It's used only on the server. Never commit it,
+   and never give it a `NEXT_PUBLIC_` prefix.
+3. For the deployed site, add the same two variables in Vercel (Project → Settings →
+   Environment Variables), then redeploy.
+
+Without these variables the form still works but replies that sign-ups aren't open yet.
 
 | Script | What it does |
 | --- | --- |
@@ -35,8 +50,8 @@ no Python or API key is needed just to view the app.
 - **Open a card** for the full breakdown: executive summary, what it means for students and
   parents, policy changes, and a link to the original agenda. Each breakdown has a shareable URL
   (`/?meeting=<id>`).
-- **Subscribe** to meeting alerts. The form posts to `/api/subscribe`, which appends the email to
-  `public/data/subscribers.json`.
+- **Subscribe** to meeting alerts. The form posts to `/api/subscribe`, which validates the email
+  and saves it to the Supabase `subscribers` table.
 
 ## How it fits together
 
@@ -50,7 +65,7 @@ flowchart LR
   D -->|--write-public| E[(public/data/meetings.json)]
   E -->|read on every request| F[Next.js page<br/>server component]
   F --> G[MeetingExplorer<br/>search, filters, modal]
-  H[Newsletter form] -->|POST /api/subscribe| I[(public/data/subscribers.json)]
+  H[Newsletter form] -->|POST /api/subscribe| I[(Supabase: subscribers)]
 ```
 
 The JSON file is the contract between the two halves. The Python pipeline writes records in
@@ -198,7 +213,7 @@ app/
   layout.tsx              fonts (Newsreader, Atkinson Hyperlegible, IBM Plex Mono), metadata
   page.tsx                header, hero, feed, newsletter band, footer (server component)
   globals.css             Tailwind layers, dialog and bottom-sheet styles, reduced-motion
-  api/subscribe/route.ts  validates and appends emails to public/data/subscribers.json
+  api/subscribe/route.ts  validates emails and inserts them into Supabase
 components/
   MeetingExplorer.tsx     search, town/category chips, results count, feed, empty state
   MeetingCard.tsx         feed card
@@ -207,8 +222,8 @@ components/
   HeroIllustration.tsx    agenda-page graphic
   NewsletterForm.tsx      email sign-up with loading, success and error states
 lib/                      types, date/urgency helpers, meetings.json loader
-middleware.ts             returns 404 for /data/subscribers.json
-public/data/              meetings.json (written by the pipeline), subscribers.json (local only)
+middleware.ts             returns 404 for the old /data/subscribers.json path
+public/data/              meetings.json (written by the pipeline)
 backend/                  scrape_ddsb.py, requirements.txt, .env.example
   agendas/                downloaded agenda PDFs (git-ignored)
 design/                   Claude Design canvas source (.dc.html artboards)
@@ -216,11 +231,9 @@ design/                   Claude Design canvas source (.dc.html artboards)
 
 ## Notes
 
-- **Subscriber privacy.** The spec stores emails in `public/data/subscribers.json`, and Next.js
-  serves everything in `public/` as a static file. `middleware.ts` blocks that one path (it
-  returns 404), and the file is git-ignored. For production, move subscribers to a database or
-  an email provider. The API also returns the same response for new and existing emails, so it
-  can't be used to check who has signed up.
+- **Subscriber privacy.** Emails are stored in Supabase behind Row Level Security, and only the
+  server holds the secret key. The API gives the same response for new and existing emails, so
+  it can't be used to check who has signed up.
 - **Not yet built:** sending the emails, rate limiting the sign-up endpoint, and an unsubscribe flow.
 - **Accessibility.** WCAG AA contrast, visible focus rings, keyboard-operable filters and
   dialog, 44px touch targets on phones, and `prefers-reduced-motion` support.
