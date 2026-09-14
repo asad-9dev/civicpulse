@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #FFFFFF; color: #1A1A1A; font-family: 'Kalam', 'Comic Sans MS', 'Segoe Print', cursive; }
+    a { color: #1E48C7; } a:hover { color: #1A1A1A; }
+  </style>
+</helmet>
+<div style="width: 680px; height: 900px; box-sizing: border-box; padding: 32px; background: #FFFFFF; display: flex; flex-direction: column; gap: 18px;">
+  <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #1A1A1A; padding-bottom: 10px;">
+    <span style="font-size: 30px; font-weight: 700;">Alt A · The Ledger</span>
+    <span style="font-size: 16px; color: #666666;">dense, data-first</span>
+  </div>
+  <p style="margin: 0; font-size: 17px; line-height: 1.4; color: #444444;">Every decision is one row, like a meeting minutes index. Scan 20 decisions at a glance; the row expands in place instead of opening a modal.</p>
+  <div style="display: flex; gap: 8px;">
+    <div style="flex-grow: 1; height: 40px; border: 2px dashed #999999; border-radius: 6px; display: flex; align-items: center; padding: 0 12px; font-size: 16px; color: #888888;">search…</div>
+    <div style="width: 110px; height: 40px; border: 2px solid #1A1A1A; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px;">Town</div>
+    <div style="width: 130px; height: 40px; border: 2px solid #1A1A1A; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px;">Category</div>
+  </div>
+  <div style="display: grid; grid-template-columns: 90px minmax(0, 1fr) 110px 60px; gap: 0; border: 2px solid #1A1A1A; border-radius: 6px; overflow: hidden; font-size: 16px;">
+    <span style="padding: 8px 10px; background: #1A1A1A; color: #FFFFFF;">Date</span>
+    <span style="padding: 8px 10px; background: #1A1A1A; color: #FFFFFF;">Decision</span>
+    <span style="padding: 8px 10px; background: #1A1A1A; color: #FFFFFF;">Towns</span>
+    <span style="padding: 8px 10px; background: #1A1A1A; color: #FFFFFF;">Urg.</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">Sep 8</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">Seaton school boundaries drafted</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">PIC · AJX</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC; color: #C62828; font-weight: 700;">5 High</span>
+    <span style="grid-column: 1 / -1; padding: 10px 14px 14px 100px; border-bottom: 1px solid #CCCCCC; background: #FFF6CC; font-size: 15px; line-height: 1.4;">1. New school opens Sept 2027 · 2. ~640 students move · 3. Comment by Oct 9 · [ Full breakdown ]</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">Jun 15</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">Bus routes + bell times approved</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">UXB · WHT · OSH</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC; color: #B26A00; font-weight: 700;">3 Med</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">Jun 1</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">Phone rules updated</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC;">All</span>
+    <span style="padding: 10px; border-bottom: 1px solid #CCCCCC; color: #2E7D32; font-weight: 700;">2 Low</span>
+    <span style="padding: 10px; color: #AAAAAA;">…</span>
+    <span style="padding: 10px; color: #AAAAAA;">older meetings</span>
+    <span style="padding: 10px; color: #AAAAAA;">…</span>
+    <span style="padding: 10px; color: #AAAAAA;">…</span>
+  </div>
+  <div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 2px dashed #999999; border-radius: 8px; font-size: 16px; line-height: 1.4;">
+    <span><strong>+</strong> Scales best once there are dozens of meetings; great for power users and reporters.</span>
+    <span><strong>−</strong> Less welcoming for parents skimming on a phone; tables get cramped under 400px.</span>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

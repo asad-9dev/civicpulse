@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# env files
+.env
+.env*.local
+backend/.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/output/
+backend/agendas/
+
+# collected emails stay local
+public/data/subscribers.json
+
+# machine-specific tooling; the assembled design canvas (large, rebuilt from design/*.dc.html)
+.claude/
+design/ddsb-civicpulse.html
+
+# misc
+.DS_Store
+npm-debug.log*
+
+.vercel
+.env*
+!.env.example

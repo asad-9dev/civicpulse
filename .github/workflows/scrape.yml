@@ -1,0 +1,80 @@
+name: Scrape DDSB agendas
+
+on:
+  schedule:
+    # 11:00 UTC every Monday = 6:00 AM EST. GitHub cron only runs in UTC, so while
+    # Eastern daylight time is in effect (March to November) this fires at 7:00 AM local.
+    - cron: "0 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write # push the updated meetings.json back to the repo
+
+concurrency:
+  group: scrape-ddsb
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Install Chromium for Playwright
+        # --with-deps also installs the Linux system libraries headless Chromium needs.
+        run: python -m playwright install --with-deps chromium
+
+      - name: Check for the Claude API key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Add an ANTHROPIC_API_KEY repository secret (Settings > Secrets and variables > Actions). Without it the pipeline would publish placeholder summaries."
+            exit 1
+          fi
+
+      - name: Scrape, summarize and update meetings.json
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # --write-public upserts into public/data/meetings.json. Agendas that are already
+        # published are skipped, so the overlapping one-month window costs nothing extra;
+        # --limit 10 keeps a busy week from pushing a new agenda out of the window.
+        run: python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer claude --write-public
+
+      - name: Commit and push updated meetings
+        run: |
+          if git diff --quiet -- public/data/meetings.json; then
+            echo "No new or revised agendas; nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/meetings.json
+          git commit -m "Update decoded DDSB meetings ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Keep downloaded agendas for debugging
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ddsb-agendas-${{ github.run_id }}
+          path: |
+            backend/agendas/
+            backend/output/
+          if-no-files-found: ignore
+          retention-days: 14

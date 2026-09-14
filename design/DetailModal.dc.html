@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F6F4EE; color: #0F1B2D; font-family: 'Atkinson Hyperlegible', 'Segoe UI', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #1E48C7; text-decoration: none; }
+    a:hover { color: #0F1B2D; }
+    .serif { font-family: 'Newsreader', Georgia, 'Times New Roman', serif; }
+    .mono { font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace; }
+    svg { flex-shrink: 0; }
+  </style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 1200px; overflow: hidden; background: #F6F4EE;">
+
+  <div style="display: flex; flex-direction: column;">
+    <div style="display: flex; align-items: center; justify-content: space-between; height: 76px; padding: 0 120px; border-bottom: 1px solid #DDD8CC;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: #0F1B2D;"></div>
+        <span class="serif" style="font-size: 25px; font-weight: 700;">CivicPulse</span>
+      </div>
+      <div style="width: 190px; height: 44px; border-radius: 10px; background: #0F1B2D;"></div>
+    </div>
+    <div style="padding: 72px 120px 0; display: flex; flex-direction: column; gap: 24px;">
+      <span class="serif" style="font-size: 80px; line-height: 1; font-weight: 600; letter-spacing: -0.025em; width: 700px;">DDSB Trustee Decisions, Decoded</span>
+      <div style="width: 600px; height: 90px; border-radius: 8px; background: #E8E4DA;"></div>
+    </div>
+    <div style="padding: 60px 120px 0;">
+      <div style="height: 210px; border-radius: 16px; background: #FFFFFF; border: 1px solid #DDD8CC;"></div>
+    </div>
+    <div style="padding: 72px 120px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;">
+      <div style="height: 560px; border-radius: 14px; background: #FFFFFF; border: 1px solid #DDD8CC;"></div>
+      <div style="height: 560px; border-radius: 14px; background: #FFFFFF; border: 1px solid #DDD8CC;"></div>
+      <div style="height: 560px; border-radius: 14px; background: #FFFFFF; border: 1px solid #DDD8CC;"></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(15, 27, 45, 0.66);"></div>
+
+  <div style="position: absolute; top: 48px; left: 50%; transform: translateX(-50%); width: 780px; display: flex; flex-direction: column; background: #FFFFFF; border-radius: 18px; overflow: hidden; box-shadow: 0 48px 96px -40px rgba(0, 0, 0, 0.6);">
+
+    <div style="display: flex; flex-direction: column; gap: 14px; padding: 26px 32px 24px; background: #FBFAF6; border-bottom: 1px solid #E8E4DA;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="mono" style="display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 10px; border-radius: 6px; background: #F1EEE6; font-size: 13px; font-weight: 500;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+            Sep 8, 2026
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; background: #FCE8E6; border: 1px solid #F2B8B5; color: #A4161A; font-size: 13px; font-weight: 700;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            Urgency 5/5 · High
+          </span>
+          <span style="display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 10px; border-radius: 6px; border: 1px solid #C9C3B5; font-size: 13px; font-weight: 700; color: #3B4658;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15M9 3.236v15"></path></svg>
+            Boundary Review
+          </span>
+        </div>
+        <span style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; border: 1.5px solid #C9C3B5; background: #FFFFFF;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F1B2D" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </span>
+      </div>
+      <span class="mono" style="font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #5B6474;">Committee of the Whole - Standing</span>
+      <h2 class="serif" style="margin: 0; font-size: 36px; line-height: 1.12; font-weight: 600; letter-spacing: -0.018em; text-wrap: balance;">Draft boundaries set for the new Seaton elementary school</h2>
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span style="font-size: 14px; font-weight: 700; color: #3B4658;">Affects:</span>
+        <span style="display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid #C9C3B5; font-size: 14px; color: #3B4658;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          Pickering
+        </span>
+        <span style="display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid #C9C3B5; font-size: 14px; color: #3B4658;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          Ajax
+        </span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 28px; padding: 28px 32px 32px;">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <h3 class="mono" style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3B4658;">Executive summary</h3>
+        <ol style="display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none;">
+          <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; font-size: 17px; line-height: 1.55;">
+            <span class="mono" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #0F1B2D; color: #FFE27A; font-size: 13px; font-weight: 600;">1</span>
+            <span>Trustees reviewed draft attendance boundaries for the new Seaton-area elementary school opening September 2027.</span>
+          </li>
+          <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; font-size: 17px; line-height: 1.55;">
+            <span class="mono" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #0F1B2D; color: #FFE27A; font-size: 13px; font-weight: 600;">2</span>
+            <span>About 640 students at three nearby Pickering and Ajax schools would move to the new school.</span>
+          </li>
+          <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; font-size: 17px; line-height: 1.55;">
+            <span class="mono" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #0F1B2D; color: #FFE27A; font-size: 13px; font-weight: 600;">3</span>
+            <span>Public feedback is open until October 9; a final vote is expected October 20.</span>
+          </li>
+        </ol>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 24px; border-top: 1px solid #E8E4DA;">
+        <h3 class="mono" style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3B4658;">What this means for students &amp; parents</h3>
+        <p style="margin: 0; font-size: 17px; line-height: 1.65; color: #1F2A3C; text-wrap: pretty;">If you live north of Taunton Road in Pickering, or in west Ajax near the Pickering border, your child's home school may change in September 2027. Students now in Grade 7 could finish Grade 8 at their current school, and younger siblings could stay with them for one transition year if families ask. Bus eligibility would be recalculated from the new school, so some families who walk today may qualify for busing, and some who ride may not. The consultation survey, open until October 9, is the only formal chance to comment before trustees vote on October 20.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 20px 22px; border-radius: 12px; background: #F6F4EE; border: 1px solid #E8E4DA;">
+        <h3 class="mono" style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3B4658;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"></path></svg>
+          Policy changes
+        </h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #1F2A3C;">No board policy is being rewritten. The draft updates the elementary attendance boundary map under the board's boundary review procedure, and adds a one-year grandparenting rule for current Grade 7 students and their siblings.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 32px; border-top: 1px solid #E8E4DA; background: #FBFAF6;">
+      <span style="font-size: 14px; color: #5B6474;">Opens ddsb.ca in a new tab</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="display: flex; align-items: center; height: 48px; padding: 0 20px; border-radius: 10px; border: 1.5px solid #C9C3B5; background: #FFFFFF; font-size: 15px; font-weight: 700;">Close</span>
+        <a href="https://www.ddsb.ca/about-ddsb/board-of-trustees/board-meetings/" style="display: flex; align-items: center; gap: 9px; height: 48px; padding: 0 22px; border-radius: 10px; background: #1E48C7; color: #FFFFFF; font-size: 15px; font-weight: 700;">
+          View Original DDSB PDF Agenda
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

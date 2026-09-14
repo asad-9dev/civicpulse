@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F6F4EE; color: #0F1B2D; font-family: 'Atkinson Hyperlegible', 'Segoe UI', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #1E48C7; text-decoration: none; }
+    a:hover { color: #0F1B2D; }
+    .serif { font-family: 'Newsreader', Georgia, 'Times New Roman', serif; }
+    .mono { font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace; }
+    svg { flex-shrink: 0; }
+  </style>
+</helmet>
+<div style="width: 1440px; min-height: 2240px; background: #F6F4EE; display: flex; flex-direction: column;">
+
+  <header style="display: flex; align-items: center; justify-content: space-between; height: 76px; padding: 0 120px; border-bottom: 1px solid #DDD8CC;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 38px; height: 38px; border-radius: 10px; background: #0F1B2D; display: flex; align-items: center; justify-content: center;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFE27A" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+      </div>
+      <span class="serif" style="font-size: 25px; font-weight: 700; letter-spacing: -0.015em; line-height: 1;">CivicPulse</span>
+      <span class="mono" style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; padding: 3px 7px; border: 1.5px solid #0F1B2D; border-radius: 5px; line-height: 1.2;">DDSB</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 24px;">
+      <span class="mono" style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6474;">Prototype · sample summaries</span>
+      <a href="#subscribe" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 10px; background: #0F1B2D; color: #FFFFFF; font-size: 15px; font-weight: 700;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+        Get meeting alerts
+      </a>
+    </div>
+  </header>
+
+  <section style="display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 64px; align-items: center; padding: 72px 120px 0;">
+    <div style="display: flex; flex-direction: column; gap: 28px;">
+      <span class="mono" style="display: flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #3B4658;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #1E48C7;"></span>
+        Durham District School Board · Trustee meetings
+      </span>
+      <h1 class="serif" style="margin: 0; font-size: 80px; line-height: 1.0; font-weight: 600; letter-spacing: -0.025em; text-wrap: balance;">DDSB Trustee Decisions, <em style="font-style: italic; font-weight: 500; padding: 0 6px; background: linear-gradient(transparent 56%, #FFE27A 56%, #FFE27A 90%, transparent 90%);">Decoded</em></h1>
+      <p style="margin: 0; max-width: 610px; font-size: 21px; line-height: 1.55; color: #3B4658; text-wrap: pretty;">Every board agenda runs past 100 pages. CivicPulse reads each one and boils it down to three plain-language points: what changed, who it affects, and when you can speak up. That saves parents and students <strong style="color: #0F1B2D;">15+ hours of PDF reading per meeting</strong>.</p>
+    </div>
+
+    <div style="position: relative; height: 420px;">
+      <div style="position: absolute; top: 22px; right: -14px; width: 360px; height: 392px; background: #FFFFFF; border: 1px solid #DDD8CC; border-radius: 6px; transform: rotate(3deg);"></div>
+      <div style="position: absolute; top: 10px; right: -4px; width: 360px; height: 392px; background: #FFFFFF; border: 1px solid #DDD8CC; border-radius: 6px; transform: rotate(1.4deg);"></div>
+      <div style="position: absolute; top: 0; right: 8px; width: 360px; height: 392px; background: #FFFFFF; border: 1px solid #CFC9BC; border-radius: 6px; padding: 26px 26px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 24px 48px -32px rgba(15, 27, 45, 0.45);">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #E8E4DA;">
+          <span class="mono" style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #3B4658;">Agenda · Committee of the Whole</span>
+          <span class="mono" style="font-size: 10.5px; color: #5B6474;">p. 47 / 118</span>
+        </div>
+        <div style="height: 8px; width: 92%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="height: 8px; width: 100%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="height: 8px; width: 78%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="height: 8px; width: 96%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="padding: 6px 8px; margin: 2px -8px; background: #FFE27A; border-radius: 3px; font-size: 13px; font-weight: 700; line-height: 1.35; color: #0F1B2D;">7.3 Draft attendance boundaries: Seaton elementary school (opening Sept. 2027)</div>
+        <div style="height: 8px; width: 88%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="height: 8px; width: 100%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="height: 8px; width: 64%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="height: 8px; width: 94%; border-radius: 4px; background: #E8E4DA;"></div>
+        <div style="height: 8px; width: 82%; border-radius: 4px; background: #E8E4DA;"></div>
+      </div>
+      <div style="position: absolute; left: -8px; bottom: -6px; width: 300px; background: #FFFFFF; border: 1.5px solid #0F1B2D; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 28px 50px -24px rgba(15, 27, 45, 0.5);">
+        <span class="mono" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #1E48C7;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          Decoded in 3 points
+        </span>
+        <div style="display: flex; gap: 10px; font-size: 14px; line-height: 1.4;"><span class="mono" style="font-weight: 600; color: #5B6474;">1</span><span>New Seaton school opens Sept. 2027</span></div>
+        <div style="display: flex; gap: 10px; font-size: 14px; line-height: 1.4;"><span class="mono" style="font-weight: 600; color: #5B6474;">2</span><span>About 640 students would switch schools</span></div>
+        <div style="display: flex; gap: 10px; font-size: 14px; line-height: 1.4;"><span class="mono" style="font-weight: 600; color: #5B6474;">3</span><span>Comment by Oct 9, vote on Oct 20</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding: 60px 120px 0;">
+    <div style="display: flex; flex-direction: column; gap: 20px; padding: 24px 28px; background: #FFFFFF; border: 1px solid #DDD8CC; border-radius: 16px; box-shadow: 0 20px 44px -32px rgba(15, 27, 45, 0.4);">
+      <div style="display: flex; align-items: flex-end; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+          <span style="font-size: 15px; font-weight: 700;">Search summaries</span>
+          <div style="display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 16px; border: 1.5px solid #7D8797; border-radius: 10px; background: #FFFFFF;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B4658" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <span style="font-size: 17px; color: #5B6474;">Try “Seaton”, “bus routes” or “phones”</span>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px; padding-bottom: 8px; min-width: 170px;">
+          <span class="mono" style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6474;">Showing</span>
+          <span style="font-size: 17px;"><strong>3</strong> of 3 meetings</span>
+        </div>
+      </div>
+      <div style="height: 1px; background: #E8E4DA;"></div>
+      <div style="display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 14px 16px; align-items: center;">
+        <span class="mono" style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3B4658;">Town</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <sc-for list="{{towns}}" as="chip" hint-placeholder-count="6">
+            <sc-if value="{{chip.selected}}" hint-placeholder-val="{{false}}">
+              <span style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 999px; background: #0F1B2D; border: 1.5px solid #0F1B2D; color: #FFFFFF; font-size: 15px; font-weight: 700;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFE27A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>{{chip.label}}</span>
+            </sc-if>
+            <sc-if value="{{chip.unselected}}" hint-placeholder-val="{{true}}">
+              <span style="display: flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #C9C3B5; color: #0F1B2D; font-size: 15px;">{{chip.label}}</span>
+            </sc-if>
+          </sc-for>
+        </div>
+        <span class="mono" style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3B4658;">Category</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <sc-for list="{{cats}}" as="chip" hint-placeholder-count="5">
+            <sc-if value="{{chip.selected}}" hint-placeholder-val="{{false}}">
+              <span style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 999px; background: #0F1B2D; border: 1.5px solid #0F1B2D; color: #FFFFFF; font-size: 15px; font-weight: 700;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFE27A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>{{chip.label}}</span>
+            </sc-if>
+            <sc-if value="{{chip.unselected}}" hint-placeholder-val="{{true}}">
+              <span style="display: flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #C9C3B5; color: #0F1B2D; font-size: 15px;">{{chip.label}}</span>
+            </sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 24px; padding: 72px 120px 0;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 14px; border-bottom: 2px solid #0F1B2D;">
+      <h2 class="serif" style="margin: 0; font-size: 40px; font-weight: 600; letter-spacing: -0.015em;">Latest decisions</h2>
+      <span class="mono" style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6474;">Newest first</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;">
+      <sc-for list="{{meetings}}" as="m" hint-placeholder-count="3">
+        <article style="display: flex; flex-direction: column; gap: 18px; padding: 24px; background: #FFFFFF; border: 1px solid #DDD8CC; border-radius: 14px; box-shadow: 0 18px 36px -30px rgba(15, 27, 45, 0.45);">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+            <span class="mono" style="display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 10px; border-radius: 6px; background: #F1EEE6; font-size: 13px; font-weight: 500;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+              {{m.date}}
+            </span>
+            <sc-if value="{{m.isHigh}}" hint-placeholder-val="{{true}}">
+              <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; background: #FCE8E6; border: 1px solid #F2B8B5; color: #A4161A; font-size: 13px; font-weight: 700;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4M12 17h.01"></path></svg>
+                Urgency {{m.urgency}}/5 · High
+              </span>
+            </sc-if>
+            <sc-if value="{{m.isMed}}" hint-placeholder-val="{{false}}">
+              <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; background: #FDF0D5; border: 1px solid #F0CF8E; color: #8A4B00; font-size: 13px; font-weight: 700;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                Urgency {{m.urgency}}/5 · Medium
+              </span>
+            </sc-if>
+            <sc-if value="{{m.isLow}}" hint-placeholder-val="{{false}}">
+              <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; background: #E3F3E8; border: 1px solid #A9D8B8; color: #1B6B3A; font-size: 13px; font-weight: 700;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+                Urgency {{m.urgency}}/5 · Low
+              </span>
+            </sc-if>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <span class="mono" style="font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #5B6474;">{{m.committee}}</span>
+            <h3 class="serif" style="margin: 0; font-size: 25px; line-height: 1.18; font-weight: 600; letter-spacing: -0.01em; text-wrap: pretty;">{{m.title}}</h3>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{m.towns}}" as="t" hint-placeholder-count="2">
+              <span style="display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid #C9C3B5; font-size: 14px; color: #3B4658;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                {{t.name}}
+              </span>
+            </sc-for>
+          </div>
+          <ol style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; margin: 0; padding: 18px 0 0; list-style: none; border-top: 1px solid #E8E4DA;">
+            <sc-for list="{{m.bullets}}" as="b" hint-placeholder-count="3">
+              <li style="display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; font-size: 16px; line-height: 1.5; color: #1F2A3C;">
+                <span class="mono" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; background: #0F1B2D; color: #FFE27A; font-size: 13px; font-weight: 600;">{{b.n}}</span>
+                <span>{{b.text}}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 18px; border-top: 1px solid #E8E4DA;">
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #3B4658;">
+              <sc-if value="{{m.isBoundary}}" hint-placeholder-val="{{true}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15M9 3.236v15"></path></svg></sc-if>
+              <sc-if value="{{m.isTransport}}" hint-placeholder-val="{{false}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6M15 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"></path><circle cx="7" cy="18" r="2"></circle><path d="M9 18h5"></path><circle cx="16" cy="18" r="2"></circle></svg></sc-if>
+              <sc-if value="{{m.isPolicy}}" hint-placeholder-val="{{false}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg></sc-if>
+              {{m.category}}
+            </span>
+            <span style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid #0F1B2D; font-size: 15px; font-weight: 700; color: #0F1B2D;">
+              View full breakdown
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+            </span>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="margin-top: 96px; padding: 72px 120px; background: #0F1B2D; color: #FFFFFF;">
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; align-items: center;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <span class="mono" style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #FFE27A;">Meeting alerts · Free</span>
+        <h2 class="serif" style="margin: 0; font-size: 50px; line-height: 1.04; font-weight: 600; letter-spacing: -0.02em; text-wrap: balance;">Get every board meeting decoded in your inbox.</h2>
+        <p style="margin: 0; font-size: 18px; line-height: 1.55; color: #C7CFDB;">One short email after each trustee meeting: the three things that changed, which towns they affect, and any deadline to have your say.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 15px; font-weight: 700;">Email address</span>
+        <div style="display: flex; gap: 10px;">
+          <div style="display: flex; align-items: center; flex-grow: 1; height: 56px; padding: 0 18px; border-radius: 10px; background: #FFFFFF; color: #5B6474; font-size: 17px;">you@example.com</div>
+          <span style="display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 26px; border-radius: 10px; background: #FFE27A; color: #0F1B2D; font-size: 17px; font-weight: 700;">
+            Subscribe
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+          </span>
+        </div>
+        <span style="font-size: 14px; color: #AEB8C7;">No spam. Unsubscribe in one click. We never share your email.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer style="display: flex; justify-content: space-between; align-items: flex-start; gap: 48px; padding: 40px 120px 56px;">
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 720px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="serif" style="font-size: 20px; font-weight: 700;">CivicPulse</span>
+        <span class="mono" style="font-size: 10px; font-weight: 600; letter-spacing: 0.1em; padding: 2px 6px; border: 1.5px solid #0F1B2D; border-radius: 4px;">DDSB</span>
+      </div>
+      <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3B4658;">CivicPulse is an independent civic project. It is not affiliated with or endorsed by the Durham District School Board. Summaries are AI-assisted and can contain mistakes, so always confirm details in the original agenda.</p>
+    </div>
+    <a href="https://www.ddsb.ca/about-ddsb/board-of-trustees/board-meetings/" style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; white-space: nowrap;">
+      Official DDSB board meetings
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+    </a>
+  </footer>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":2240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const chips = (labels) => labels.map((label, i) => ({ label: label, selected: i === 0, unselected: i !== 0 }));
+    const raw = [
+      { date: 'Sep 8, 2026', committee: 'Committee of the Whole - Standing', title: 'Draft boundaries set for the new Seaton elementary school', urgency: 5, category: 'Boundary Review', towns: ['Pickering', 'Ajax'],
+        bullets: ['Trustees reviewed draft attendance boundaries for the new Seaton-area elementary school opening September 2027.', 'About 640 students at three nearby Pickering and Ajax schools would move to the new school.', 'Public feedback is open until October 9; a final vote is expected October 20.'] },
+      { date: 'Jun 15, 2026', committee: 'Regular Board Meeting', title: '2026–27 bus routes and bell times approved for Uxbridge, Whitby and Oshawa', urgency: 3, category: 'Transport', towns: ['Uxbridge', 'Whitby', 'Oshawa'],
+        bullets: ['Trustees approved the 2026–27 student transportation plan, merging 11 low-ridership rural routes.', 'Bell times at six schools in Uxbridge and north Whitby move 10–15 minutes earlier.', 'Final pickup times post to the transportation portal the week of August 24.'] },
+      { date: 'Jun 1, 2026', committee: 'Committee of the Whole - Standing', title: 'Personal mobile device rules updated for the 2026–27 school year', urgency: 2, category: 'Policy', towns: ['Ajax', 'Pickering', 'Whitby', 'Oshawa', 'Uxbridge'],
+        bullets: ['Trustees reviewed an updated procedure on personal mobile devices, aligned with the provincial directive.', 'Phones stay silenced and out of sight during class; K–6 students store them all day.', 'Written exceptions cover medical needs, accessibility supports and teacher-directed learning.'] }
+    ];
+    const meetings = raw.map((m) => ({
+      date: m.date, committee: m.committee, title: m.title, urgency: m.urgency, category: m.category,
+      isHigh: m.urgency >= 4, isMed: m.urgency === 3, isLow: m.urgency <= 2,
+      isBoundary: m.category === 'Boundary Review', isTransport: m.category === 'Transport', isPolicy: m.category === 'Policy',
+      towns: m.towns.map((name) => ({ name: name })),
+      bullets: m.bullets.map((text, i) => ({ n: i + 1, text: text }))
+    }));
+    return {
+      towns: chips(['All', 'Ajax', 'Pickering', 'Whitby', 'Oshawa', 'Uxbridge']),
+      cats: chips(['All', 'Boundary Review', 'Transport', 'Policy', 'Budget']),
+      meetings: meetings
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Desktop · Feed", "x": 0, "y": 0, "w": 1440, "h": 2240 },
+    { "file": "DetailModal.dc.html", "title": "Desktop · Full breakdown modal", "x": 1540, "y": 0, "w": 1440, "h": 1200 },
+    { "file": "AltLedger.dc.html", "title": "Alt A · Ledger (sketch)", "x": 1540, "y": 1360, "w": 680, "h": 900 },
+    { "file": "AltBulletin.dc.html", "title": "Alt B · Bulletin (sketch)", "x": 2300, "y": 1360, "w": 680, "h": 900 },
+    { "file": "Mobile.dc.html", "title": "Mobile · Feed", "x": 3080, "y": 0, "w": 390, "h": 4300 },
+    { "file": "MobileDetail.dc.html", "title": "Mobile · Breakdown sheet", "x": 3550, "y": 0, "w": 390, "h": 844 }
+  ],
+  "annotations": [
+    { "id": "direction", "x": 0, "y": -230, "w": 640, "text": "Direction: civic editorial, like a public notice.\nWarm paper, navy ink, civic blue, plus a highlighter yellow that pulls the one line that matters out of a 100+ page agenda.\nType: Newsreader (headlines) · Atkinson Hyperlegible (body, built for legibility) · IBM Plex Mono (dates and labels).\nUrgency always pairs color with an icon and words, never color alone. Meeting content is sample data." },
+    { "id": "alternates", "x": 3550, "y": 960, "w": 390, "text": "Alt A and Alt B (below the modal) are rough sketches of two other directions: a dense ledger and a bold front-page bulletin. Pick one if you prefer it and I'll take it hi-fi." }
+  ],
+  "launch": { "view": "canvas" }
+}

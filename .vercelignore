@@ -1,0 +1,18 @@
+# Collected emails never leave this machine.
+public/data/subscribers.json
+
+# The Python pipeline runs locally; it isn't part of the web deployment.
+backend/
+.venv/
+venv/
+
+# Design canvas sources and local tooling
+design/
+.claude/
+
+# Build output and dependencies (Vercel installs and builds itself)
+node_modules/
+.next/
+*.tsbuildinfo
+.env
+.env*.local
