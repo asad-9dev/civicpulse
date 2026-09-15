@@ -165,20 +165,39 @@ def wait_for_calendar(page: Page) -> None:
         raise PipelineError(f"The meeting calendar did not render within {RENDER_TIMEOUT_MS // 1000}s ({page.url}).") from exc
 
 
+def open_calendar(page: Page, url: str, attempts: int = 3) -> None:
+    """Load a calendar page and wait for its meeting table, retrying slow or failed loads."""
+    for attempt in range(1, attempts + 1):
+        try:
+            page.goto(url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
+            wait_for_calendar(page)
+            return
+        except (PipelineError, PlaywrightError) as exc:
+            reason = str(exc).strip().splitlines()[0]
+            if attempt == attempts:
+                # Say what the page actually showed: a block or challenge page reads very
+                # differently from a slow one.
+                try:
+                    seen = f'title "{page.title()}", text "{" ".join(page.inner_text("body").split())[:160]}"'
+                except PlaywrightError:
+                    seen = "page content unavailable"
+                raise PipelineError(f"The meeting calendar didn't load after {attempts} tries ({url}): {reason}; {seen}") from exc
+            log.warning("Calendar didn't load (try %d of %d): %s; retrying", attempt, attempts, reason)
+            page.wait_for_timeout(10_000 * attempt)
+
+
 def discover_agendas(context: BrowserContext, months_back: int, limit: int) -> list[AgendaSource]:
     """List meetings on the rendered calendar and return those with a published agenda, newest first."""
     page = context.new_page()
     try:
-        page.goto(CALENDAR_URL, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
-        wait_for_calendar(page)
+        open_calendar(page, CALENDAR_URL)
         # The listing runs from the start of the current month onward. Each "‹" link moves
         # the start back one month (its URL carries a StartDate and a per-page token).
         for _ in range(months_back):
             previous = page.locator("table a", has_text="‹").first.get_attribute("href")
             if not previous:
                 break
-            page.goto(urljoin(page.url, previous), wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
-            wait_for_calendar(page)
+            open_calendar(page, urljoin(page.url, previous))
         rows = page.evaluate(READ_MEETING_ROWS_JS)
     finally:
         page.close()
@@ -778,6 +797,10 @@ def main(argv: list[str] | None = None) -> int:
                 records.append(to_meeting_record(source, summarize_dummy(text, source), "built-in"))
     except (PipelineError, PlaywrightError) as exc:
         log.error("%s", exc)
+        if os.environ.get("GITHUB_ACTIONS"):
+            # Shows on the run's summary page (and in the public API), not only in the raw log.
+            message = " ".join(str(exc).split())[:900]
+            print(f"::error title=Scrape failed::{message}")
         return 1
 
     write_json(args.out, records)
