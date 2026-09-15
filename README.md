@@ -36,6 +36,32 @@ Sign-ups are stored in a Supabase table. To enable them:
 
 Without these variables the form still works but replies that sign-ups aren't open yet.
 
+### Welcome emails and unsubscribing
+
+Each new subscriber gets a welcome email: what CivicPulse will send (one short email after each
+trustee meeting: the decisions, towns affected, deadlines to have your say, and the original
+agenda), how often, and an unsubscribe link. Re-submitting an address that's already on the list
+doesn't send a second one. Emails go out over SMTP, so any provider works. Set these in
+`.env.local` and in Vercel, as plain values:
+
+| Variable | Gmail | Resend |
+| --- | --- | --- |
+| `SMTP_HOST` | `smtp.gmail.com` | `smtp.resend.com` |
+| `SMTP_PORT` | `465` | `465` |
+| `SMTP_USER` | your Gmail address | `resend` |
+| `SMTP_PASS` | a 16-character [app password](https://myaccount.google.com/apppasswords) (needs 2-Step Verification) | your `re_...` API key |
+| `EMAIL_FROM` | `CivicPulse <you@gmail.com>` | `CivicPulse <alerts@yourdomain>` (a domain verified in Resend) |
+
+Also set `SITE_URL=https://ddsb-civicpulse.vercel.app` so email links always point at the public
+site. If SMTP isn't configured, sign-ups still save and the email is skipped, with a log line.
+
+Every email carries an unsubscribe link to `/unsubscribe`, a page with a confirm button, so link
+scanners that open URLs can't unsubscribe anyone. It also sets `List-Unsubscribe` and
+`List-Unsubscribe-Post` headers, so Gmail and Apple Mail show their built-in one-click
+unsubscribe. Links are signed per subscriber (id + HMAC of the email). They carry no email
+address, and they stop working if the Supabase secret key is rotated, unless `UNSUBSCRIBE_SECRET`
+is set. Unsubscribing deletes the row.
+
 | Script | What it does |
 | --- | --- |
 | `npm run dev` | Development server with hot reload on port 3000 |
@@ -213,7 +239,9 @@ app/
   layout.tsx              fonts (Newsreader, Atkinson Hyperlegible, IBM Plex Mono), metadata
   page.tsx                header, hero, feed, newsletter band, footer (server component)
   globals.css             Tailwind layers, dialog and bottom-sheet styles, reduced-motion
-  api/subscribe/route.ts  validates emails and inserts them into Supabase
+  api/subscribe/route.ts  validates emails, inserts them into Supabase, sends the welcome email
+  api/unsubscribe/route.ts  verifies a signed link and removes the subscriber (POST only)
+  unsubscribe/page.tsx    unsubscribe confirmation page
 components/
   MeetingExplorer.tsx     search, town/category chips, results count, feed, empty state
   MeetingCard.tsx         feed card
@@ -221,7 +249,8 @@ components/
   Badges.tsx              date, urgency (color + icon + words), town and category labels
   HeroIllustration.tsx    agenda-page graphic
   NewsletterForm.tsx      email sign-up with loading, success and error states
-lib/                      types, date/urgency helpers, meetings.json loader
+lib/                      types, date/urgency helpers, meetings.json loader,
+                          Supabase admin client, welcome email (SMTP), signed unsubscribe links
 middleware.ts             returns 404 for the old /data/subscribers.json path
 public/data/              meetings.json (written by the pipeline)
 backend/                  scrape_ddsb.py, requirements.txt, .env.example
@@ -234,6 +263,7 @@ design/                   Claude Design canvas source (.dc.html artboards)
 - **Subscriber privacy.** Emails are stored in Supabase behind Row Level Security, and only the
   server holds the secret key. The API gives the same response for new and existing emails, so
   it can't be used to check who has signed up.
-- **Not yet built:** sending the emails, rate limiting the sign-up endpoint, and an unsubscribe flow.
+- **Not yet built:** the after-each-meeting digest emails (only the welcome email is sent today),
+  double opt-in confirmation, and rate limiting on the sign-up endpoint.
 - **Accessibility.** WCAG AA contrast, visible focus rings, keyboard-operable filters and
   dialog, 44px touch targets on phones, and `prefers-reduced-motion` support.

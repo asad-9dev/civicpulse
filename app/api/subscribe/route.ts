@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { isEmailConfigured, sendWelcomeEmail } from "@/lib/email";
+import { getSupabaseAdmin } from "@/lib/supabase";
+import { oneClickUnsubscribeUrl, unsubscribeToken, unsubscribeUrl } from "@/lib/unsubscribe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,28 +13,9 @@ const UNIQUE_VIOLATION = "23505"; // Postgres error code: email already in the t
 const NOT_OPEN = "Sign-ups aren't open on this site yet. Please check back soon.";
 const TRY_AGAIN = "We couldn't save your email just now. Please try again.";
 
-type SupabaseConfig = { url: string; key: string } | { problem: string };
-
-/**
- * Reads the Supabase settings and says exactly what's wrong if they're unusable, so a bad
- * value shows up as one clear log line instead of an exception inside createClient().
- */
-function readSupabaseConfig(): SupabaseConfig {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!url) return { problem: "NEXT_PUBLIC_SUPABASE_URL is not set" };
-  if (!key) return { problem: "SUPABASE_SERVICE_ROLE_KEY is not set" };
-  let parsed: URL | null = null;
-  try {
-    parsed = new URL(url);
-  } catch {
-    // fall through to the message below
-  }
-  if (!parsed || parsed.protocol !== "https:") {
-    // The project URL isn't secret, so it's safe to log what was actually configured.
-    return { problem: `NEXT_PUBLIC_SUPABASE_URL must be a plain https URL, got ${JSON.stringify(url.slice(0, 120))}` };
-  }
-  return { url, key };
+/** Links in emails point here: SITE_URL when set (e.g. https://ddsb-civicpulse.vercel.app), else this request's origin. */
+function siteUrl(request: Request): string {
+  return process.env.SITE_URL?.trim() || new URL(request.url).origin;
 }
 
 export async function POST(request: Request) {
@@ -49,29 +32,44 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enter an email address like name@example.com." }, { status: 400 });
   }
 
-  const config = readSupabaseConfig();
-  if ("problem" in config) {
-    console.error(`[subscribe] Supabase is misconfigured: ${config.problem}`);
+  const supabase = getSupabaseAdmin();
+  if ("problem" in supabase) {
+    console.error(`[subscribe] Supabase is misconfigured: ${supabase.problem}`);
     return NextResponse.json({ error: NOT_OPEN }, { status: 503 });
   }
 
+  let newSubscriberId: number | null = null;
   try {
-    // The secret (service role) key bypasses the table's Row Level Security; it never leaves the server.
-    const supabase = createClient(config.url, config.key, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
     // id and created_at are filled in by the database (see backend/schema.sql).
-    const { error } = await supabase.from("subscribers").insert({ email });
-    // An address that's already subscribed gets the same reply as a new one,
-    // so the form can't be used to probe who has signed up.
+    const { data, error } = await supabase.client.from("subscribers").insert({ email }).select("id").single();
     if (error && error.code !== UNIQUE_VIOLATION) {
       console.error("[subscribe] Supabase insert failed:", error.code, error.message, error.details ?? "", error.hint ?? "");
       return NextResponse.json({ error: TRY_AGAIN }, { status: 500 });
     }
+    newSubscriberId = data?.id ?? null;
   } catch (error) {
     console.error("[subscribe] Unexpected error while saving subscriber:", error);
     return NextResponse.json({ error: TRY_AGAIN }, { status: 500 });
   }
 
-  return NextResponse.json({ message: "You're subscribed!" }, { status: 201 });
+  // Only a brand-new sign-up gets the welcome email, so re-submitting an address can't be used
+  // to flood someone's inbox. A failed email never fails the sign-up itself.
+  if (newSubscriberId !== null) {
+    const token = unsubscribeToken(newSubscriberId, email);
+    const site = siteUrl(request);
+    if (token) {
+      const result = await sendWelcomeEmail({
+        to: email,
+        siteUrl: site,
+        unsubscribePageUrl: unsubscribeUrl(site, newSubscriberId, token),
+        oneClickUnsubscribeUrl: oneClickUnsubscribeUrl(site, newSubscriberId, token),
+      });
+      if (!result.sent) console.error(`[subscribe] Welcome email not sent: ${result.reason}`);
+    }
+  }
+
+  // Existing and new addresses get the same reply, so the form can't reveal who has signed up.
+  // (An existing address simply doesn't get a second welcome email.) emailsEnabled describes the
+  // site's setup, not this address, so it's safe to return.
+  return NextResponse.json({ message: "You're subscribed!", emailsEnabled: isEmailConfigured() }, { status: 201 });
 }

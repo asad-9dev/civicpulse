@@ -6,7 +6,7 @@ import { ArrowRight, CircleCheck, LoaderCircle } from "lucide-react";
 type Status =
   | { kind: "idle" }
   | { kind: "submitting" }
-  | { kind: "success" }
+  | { kind: "success"; emailsEnabled: boolean }
   | { kind: "error"; message: string };
 
 export function NewsletterForm() {
@@ -29,12 +29,12 @@ export function NewsletterForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      const data = (await res.json().catch(() => ({}))) as { error?: string; emailsEnabled?: boolean };
       if (!res.ok) {
         setStatus({ kind: "error", message: data.error ?? "Something went wrong. Please try again." });
         return;
       }
-      setStatus({ kind: "success" });
+      setStatus({ kind: "success", emailsEnabled: data.emailsEnabled === true });
       setEmail("");
     } catch {
       setStatus({ kind: "error", message: "Couldn't reach the server. Check your connection and try again." });
@@ -94,7 +94,11 @@ export function NewsletterForm() {
             <CircleCheck aria-hidden size={22} strokeWidth={2.25} className="mt-0.5 shrink-0 text-marker" />
             <div className="flex flex-col gap-0.5">
               <p className="text-[17px] font-bold text-white">You&apos;re subscribed!</p>
-              <p className="text-[15px] text-night-text">Look out for the next board meeting summary in your inbox.</p>
+              <p className="text-[15px] text-night-text">
+                {status.emailsEnabled
+                  ? "Check your inbox for a welcome email with what to expect."
+                  : "Look out for the next board meeting summary in your inbox."}
+              </p>
             </div>
           </div>
         )}
