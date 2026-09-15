@@ -356,9 +356,13 @@ def summary_prompt(agenda_text: str, source: AgendaSource) -> str:
         timing = "The meeting date is unknown; describe what is on the agenda without saying when."
     elif source.meeting_date < today:
         timing = (
-            f"This meeting already took place on {source.meeting_date} (today is {today}). Write in the past "
-            "tense about what was on the agenda (\"Trustees were set to vote on...\"). The outcome isn't in the "
-            "agenda, so don't state one, and don't invite readers to attend."
+            f"This meeting already took place on {source.meeting_date} (today is {today}), but an agenda only "
+            "shows what was scheduled, not what happened. In the title, the bullets and the paragraph alike, "
+            "describe every agenda item as scheduled: \"was on the agenda\", \"trustees were set to vote on\", "
+            "\"a presentation was scheduled\". Don't write that an agenda item was presented, announced, "
+            "delivered, discussed, reviewed, approved or decided. Exception: something the agenda itself reports "
+            "as already done (for example a memo saying someone was appointed on a past date) may be stated as "
+            "fact. Don't invite readers to attend."
         )
     else:
         timing = (
