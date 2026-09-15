@@ -1,1 +1,69 @@
-[]
+[
+  {
+    "id": "2026-09-10-special-education-advisory-committee",
+    "meetingDate": "2026-09-10",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "Special Education Plan Update",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Agenda item: Special Education Plan Update.",
+      "Agenda item: Impact Updates for the 2026-2027 School Year.",
+      "Agenda item: DDSB Exceptionality Data - update."
+    ],
+    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
+    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-10-1830-SEAC-Meeting/be0fbe2d-a3be-417b-ae46-b4bb00c85254"
+  },
+  {
+    "id": "2026-09-09-committee-of-the-whole-standing",
+    "meetingDate": "2026-09-09",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "Update on Policing and Police Governance in Durham Region",
+    "urgencyScore": 3,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Agenda item: Update on Policing and Police Governance in Durham Region.",
+      "Agenda item: 2026-2027 Student Trustee Introductory Report.",
+      "Agenda item: OPSBA Update."
+    ],
+    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
+    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-09-1900-Standing-Committee-Meeting/1b62b947-2c3c-4946-8662-b4ba01018d6a"
+  },
+  {
+    "id": "2026-08-26-special-board-meeting",
+    "meetingDate": "2026-08-26",
+    "committeeName": "Special Board Meeting",
+    "title": "Acceptance of the Resignation of Trustee Mark Jacula",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Agenda item: Acceptance of the Resignation of Trustee Mark Jacula."
+    ],
+    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
+    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-08-26-1800-Special-Board-Meeting/9fe38af9-e421-4879-aa60-b4b0014b09d8"
+  }
+]
