@@ -31,6 +31,11 @@ export const metadata: Metadata = {
   title: "DDSB CivicPulse · Trustee decisions, decoded",
   description:
     "Durham District School Board trustee meeting agendas, turned into three-point summaries for students and parents in Ajax, Pickering, Whitby, Oshawa and Uxbridge.",
+  // app/icon.png (512x512, transparent corners); also used for iOS home-screen shortcuts.
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export const viewport: Viewport = {
