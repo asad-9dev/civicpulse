@@ -111,8 +111,7 @@ function emailShell({ title, preheader, body, links, reason }: {
           ${body}
         </td></tr>
         <tr><td style="padding:20px 28px 26px;border-top:1px solid #E8E4DA;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;color:#5B6474;">
-          CivicPulse is an independent civic project, not affiliated with or endorsed by the DDSB. Summaries are
-          generated from public agendas and can contain mistakes; always check the original agenda.<br>
+          CivicPulse is an independent civic project, not affiliated with or endorsed by the DDSB.<br>
           ${escapeHtml(reason)}<br>
           <a href="${escapeHtml(links.unsubscribePageUrl)}" style="color:#1E48C7;">Unsubscribe</a>
         </td></tr>
@@ -127,7 +126,6 @@ function textFooter(links: RecipientLinks, reason: string): string {
   return [
     "--",
     "CivicPulse is an independent civic project, not affiliated with or endorsed by the DDSB.",
-    "Summaries are generated from public agendas and can contain mistakes; always check the original agenda.",
     reason,
     `Unsubscribe: ${links.unsubscribePageUrl}`,
   ].join("\n");
