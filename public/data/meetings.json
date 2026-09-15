@@ -3,67 +3,76 @@
     "id": "2026-09-10-special-education-advisory-committee",
     "meetingDate": "2026-09-10",
     "committeeName": "Special Education Advisory Committee",
-    "title": "Special Education Plan Update",
-    "urgencyScore": 2,
+    "title": "DDSB committee scheduled to review Special Education Plan and transition guide",
+    "urgencyScore": 1,
     "townsAffected": [
       "Ajax",
       "Pickering",
       "Whitby",
       "Oshawa",
-      "Uxbridge"
+      "Uxbridge",
+      "Brock",
+      "Scugog"
     ],
     "category": "Policy",
     "executiveSummary": [
-      "Agenda item: Special Education Plan Update.",
-      "Agenda item: Impact Updates for the 2026-2027 School Year.",
-      "Agenda item: DDSB Exceptionality Data - update."
+      "Staff were set to present updates on the board Special Education Plan and impacts for the current school year.",
+      "Committee members were scheduled to review an updated Transition Guide and draft communication guidelines.",
+      "The agenda included updates on student exceptionality data and reports from community associations."
     ],
-    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
-    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
-    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-10-1830-SEAC-Meeting/be0fbe2d-a3be-417b-ae46-b4bb00c85254"
+    "studentParentImpact": "These updates were set to review key supports for students receiving special education services across Durham Region. The committee was scheduled to discuss the updated Transition Guide, which helps students move between grades or programs, alongside draft guidelines for augmentative and alternative communication tools. Staff were also prepared to present updates to the Special Education Plan for the 2026-2027 school year. While the agenda provided information on these upcoming resources, it did not list any public consultation deadlines or direct actions required from families.",
+    "policyChanges": "The agenda included reviews of the Special Education Plan and draft communication guidelines, but no formal board policy creation or revision was scheduled for a vote.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-10-1830-SEAC-Meeting/be0fbe2d-a3be-417b-ae46-b4bb00c85254",
+    "summarySource": "gemini"
   },
   {
     "id": "2026-09-09-committee-of-the-whole-standing",
     "meetingDate": "2026-09-09",
     "committeeName": "Committee of the Whole - Standing",
-    "title": "Update on Policing and Police Governance in Durham Region",
-    "urgencyScore": 3,
+    "title": "Durham school board splits top job into business and education roles",
+    "urgencyScore": 1,
     "townsAffected": [
       "Ajax",
       "Pickering",
       "Whitby",
       "Oshawa",
-      "Uxbridge"
+      "Uxbridge",
+      "Brock",
+      "Scugog"
     ],
     "category": "Policy",
     "executiveSummary": [
-      "Agenda item: Update on Policing and Police Governance in Durham Region.",
-      "Agenda item: 2026-2027 Student Trustee Introductory Report.",
-      "Agenda item: OPSBA Update."
+      "Trustees received an update on new provincial rules splitting the board's top job into two distinct leadership roles.",
+      "Jim Markovski became the new Chief Education Officer to focus on student achievement and well-being.",
+      "Camille Williams-Taylor continues as Chief Executive Officer, managing the board's organizational and financial leadership."
     ],
-    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
-    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
-    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-09-1900-Standing-Committee-Meeting/1b62b947-2c3c-4946-8662-b4ba01018d6a"
+    "studentParentImpact": "This leadership split means families now have a dedicated executive, the Chief Education Officer, focused entirely on classroom learning, student well-being, and achievement. Meanwhile, the Chief Executive Officer will handle the business and financial side of running the school board. This change was mandated by a new provincial law designed to improve school board accountability. While this shifts how the school board is run behind the scenes, day-to-day school routines remain the same. Parents do not need to take any action, as this was an information item presented to the trustees.",
+    "policyChanges": "The board updated its leadership titles to comply with Ontario Regulation 206/26 under the Education Act, which officially establishes the separate role of Chief Education Officer.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-09-1900-Standing-Committee-Meeting/1b62b947-2c3c-4946-8662-b4ba01018d6a",
+    "summarySource": "gemini"
   },
   {
     "id": "2026-08-26-special-board-meeting",
     "meetingDate": "2026-08-26",
     "committeeName": "Special Board Meeting",
-    "title": "Acceptance of the Resignation of Trustee Mark Jacula",
-    "urgencyScore": 2,
+    "title": "Trustees set to consider the resignation of Trustee Mark Jacula",
+    "urgencyScore": 1,
     "townsAffected": [
       "Ajax",
       "Pickering",
       "Whitby",
       "Oshawa",
-      "Uxbridge"
+      "Uxbridge",
+      "Brock",
+      "Scugog"
     ],
     "category": "Policy",
     "executiveSummary": [
-      "Agenda item: Acceptance of the Resignation of Trustee Mark Jacula."
+      "Trustees were set to vote on accepting the resignation of Trustee Mark Jacula."
     ],
-    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
-    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
-    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-08-26-1800-Special-Board-Meeting/9fe38af9-e421-4879-aa60-b4b0014b09d8"
+    "studentParentImpact": "Trustees were scheduled to formally consider accepting the resignation of Trustee Mark Jacula during this special meeting. A trustee resignation changes the leadership structure for families across the school board, as trustees make decisions about board budgets, policies, and local school programs. This item was informational for parents and students following board governance. The agenda did not outline any public consultation or direct action for families to take.",
+    "policyChanges": "No policies or procedures were proposed for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-08-26-1800-Special-Board-Meeting/9fe38af9-e421-4879-aa60-b4b0014b09d8",
+    "summarySource": "gemini"
   }
 ]

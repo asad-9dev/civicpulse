@@ -19,4 +19,6 @@ export interface Meeting {
   studentParentImpact: string;
   policyChanges: string;
   originalPdfUrl: string;
+  /** Which summarizer wrote this record: "gemini", "claude" or "built-in". */
+  summarySource?: string;
 }

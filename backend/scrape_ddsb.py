@@ -28,8 +28,12 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import re
 import sys
+import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -58,6 +62,16 @@ DDSB_TOWNS = ["Ajax", "Pickering", "Whitby", "Oshawa", "Uxbridge", "Brock", "Scu
 CATEGORIES = ["Boundary Review", "Transport", "Policy", "Budget"]
 
 CLAUDE_MODEL = "claude-opus-5"
+
+# Gemini models to try in order (override with GEMINI_MODELS="a,b"). Each model has its own
+# free-tier quota, so when the first is used up for the day the next one takes over.
+GEMINI_MODELS = [
+    m.strip()
+    for m in os.environ.get("GEMINI_MODELS", "gemini-3.6-flash,gemini-3.5-flash,gemini-3.5-flash-lite").split(",")
+    if m.strip()
+]
+GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+GEMINI_PAUSE_SECONDS = 5  # between agendas, to stay under free-tier requests-per-minute
 
 log = logging.getLogger("civicpulse")
 
@@ -283,7 +297,7 @@ SUMMARY_SCHEMA = {
         "urgencyScore": {"type": "integer", "description": "1 = informational ... 5 = families must act soon."},
         "townsAffected": {"type": "array", "items": {"type": "string", "enum": DDSB_TOWNS}},
         "category": {"type": "string", "enum": CATEGORIES},
-        "executiveSummary": {"type": "array", "items": {"type": "string"}, "description": "Exactly 3 one-sentence bullets."},
+        "executiveSummary": {"type": "array", "items": {"type": "string"}, "description": "1 to 3 one-sentence bullets."},
         "studentParentImpact": {"type": "string"},
         "policyChanges": {"type": "string"},
     },
@@ -305,7 +319,50 @@ plain-language briefings for students and parents in Durham Region, Ontario.
 Write for a busy parent or a Grade 9 student: short sentences, no board jargon, no acronyms \
 without explanation. Be concrete about dates, deadlines, grades and neighbourhoods when the \
 agenda states them, and never add facts that are not in the agenda. Focus on the single agenda \
-item with the biggest consequence for families; mention others only if they share a deadline."""
+item with the biggest consequence for families; mention others only if they share a deadline.
+
+An agenda is published before the meeting: it says what trustees will discuss or vote on, not \
+what they decided. Never state an outcome the agenda doesn't contain. Procedural items (call to \
+order, land acknowledgement, approving minutes, adjournment) aren't news; skip them.
+
+Mention a way to take part (attending, a consultation, a deadline) only if the agenda text itself \
+gives it. Don't mention livestreams, websites, phone numbers or other details the agenda doesn't \
+include."""
+
+
+def summary_prompt(agenda_text: str, source: AgendaSource) -> str:
+    """The user message shared by the Claude and Gemini summarizers."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    if not source.meeting_date:
+        timing = "The meeting date is unknown; describe what is on the agenda without saying when."
+    elif source.meeting_date < today:
+        timing = (
+            f"This meeting already took place on {source.meeting_date} (today is {today}). Write in the past "
+            "tense about what was on the agenda (\"Trustees were set to vote on...\"). The outcome isn't in the "
+            "agenda, so don't state one, and don't invite readers to attend."
+        )
+    else:
+        timing = (
+            f"This meeting is on {source.meeting_date} (today is {today}). Describe what's coming up "
+            "(\"Trustees will vote on...\")."
+        )
+    return f"""Committee: {source.committee_name}
+Meeting date: {source.meeting_date or "unknown"}
+Source: {source.pdf_url or source.page_url}
+{timing}
+
+Summarize the agenda below into:
+- title: a headline under 90 characters about the item that matters most to families
+- urgencyScore: 1 (informational) to 5 (families must act soon, e.g. an open consultation or a vote on where students attend school)
+- townsAffected: which of {", ".join(DDSB_TOWNS)} are affected (list all of them for board-wide items)
+- category: the closest of {", ".join(CATEGORIES)}
+- executiveSummary: up to 3 bullets, one sentence each, under 25 words; fewer if the agenda has fewer substantive items
+- studentParentImpact: one paragraph of 60-120 words on what this could change for students and parents, and what they can do if the agenda gives a way (for example attend the public session, or respond to a consultation it mentions)
+- policyChanges: one or two sentences naming any policy or procedure up for creation, revision or rescinding, or saying none is on this agenda
+
+<agenda>
+{agenda_text}
+</agenda>"""
 
 
 def summarize_with_claude(agenda_text: str, source: AgendaSource) -> dict:
@@ -314,22 +371,7 @@ def summarize_with_claude(agenda_text: str, source: AgendaSource) -> dict:
 
     # Anthropic() resolves credentials itself: ANTHROPIC_API_KEY (e.g. from backend/.env) or an `ant auth login` profile.
     client = anthropic.Anthropic()
-    prompt = f"""Committee: {source.committee_name}
-Meeting date: {source.meeting_date or "unknown"}
-Source: {source.pdf_url or source.page_url}
-
-Summarize the agenda below into:
-- title: a headline under 90 characters
-- urgencyScore: 1 (informational) to 5 (families must act soon, e.g. an open consultation or a vote on where students attend school)
-- townsAffected: the municipalities affected (list all of them for board-wide changes)
-- category: the closest of {", ".join(CATEGORIES)}
-- executiveSummary: exactly 3 bullets, one sentence each, under 25 words
-- studentParentImpact: one paragraph of 80-130 words on what changes for students and parents, and what they can do
-- policyChanges: one or two sentences naming any policy or procedure created, revised or rescinded, or saying none is
-
-<agenda>
-{agenda_text}
-</agenda>"""
+    prompt = summary_prompt(agenda_text, source)
 
     try:
         # Streaming keeps long agendas (100+ pages) clear of HTTP timeouts. The server-side
@@ -362,6 +404,114 @@ Summarize the agenda below into:
     if text is None:
         raise PipelineError(f"Claude returned no text for {source.page_url}.")
     return json.loads(text)
+
+
+class GeminiUnavailable(Exception):
+    """Gemini couldn't produce a summary (no key, quota used up, outage); the caller falls back."""
+
+
+def _gemini_retry_delay(error_body: str) -> float | None:
+    """Seconds Google asks us to wait on a 429, or None when it's a daily quota (no point waiting)."""
+    try:
+        details = json.loads(error_body).get("error", {}).get("details", [])
+    except ValueError:
+        return None
+    for detail in details:
+        for violation in detail.get("violations", []):
+            if "PerDay" in violation.get("quotaId", ""):
+                return None
+    for detail in details:
+        delay = detail.get("retryDelay")  # e.g. "37s"
+        if isinstance(delay, str) and delay.endswith("s"):
+            try:
+                return float(delay[:-1])
+            except ValueError:
+                pass
+    return 20.0
+
+
+def _gemini_text(response: dict) -> tuple[str | None, str]:
+    """The model's answer text (skipping any thought parts), and why there's none if so."""
+    candidates = response.get("candidates") or []
+    if not candidates:
+        return None, f"no candidates (prompt feedback: {response.get('promptFeedback')})"
+    candidate = candidates[0]
+    parts = (candidate.get("content") or {}).get("parts") or []
+    text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+    return (text or None), f"finishReason={candidate.get('finishReason')}"
+
+
+def summarize_with_gemini(agenda_text: str, source: AgendaSource) -> dict:
+    """
+    Summarize one agenda with Google's Gemini API (free tier works), as JSON matching SUMMARY_SCHEMA.
+
+    Per-minute rate limits (HTTP 429 with a retry delay) are waited out and retried; a used-up
+    daily quota moves on to the next model in GEMINI_MODELS. If every model fails, raises
+    GeminiUnavailable so the caller can fall back to the built-in summarizer.
+    """
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not key:
+        raise GeminiUnavailable("GEMINI_API_KEY is not set")
+
+    payload = json.dumps({
+        "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "contents": [{"role": "user", "parts": [{"text": summary_prompt(agenda_text, source)}]}],
+        "generationConfig": {
+            "temperature": 0.2,
+            "responseMimeType": "application/json",
+            "responseJsonSchema": SUMMARY_SCHEMA,
+        },
+    }).encode("utf-8")
+
+    problems = []
+    for model in GEMINI_MODELS:
+        for attempt in range(3):
+            request = urllib.request.Request(
+                GEMINI_ENDPOINT.format(model=model),
+                data=payload,
+                headers={"Content-Type": "application/json", "x-goog-api-key": key},
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=180) as response:
+                    body = json.loads(response.read())
+            except urllib.error.HTTPError as exc:
+                error_body = exc.read().decode("utf-8", errors="replace")
+                if exc.code == 429:
+                    delay = _gemini_retry_delay(error_body)
+                    if delay is not None and delay <= 60 and attempt < 2:
+                        log.info("Gemini %s rate-limited; retrying in %.0fs", model, delay)
+                        time.sleep(delay + 1)
+                        continue
+                    problems.append(f"{model}: quota used up (429)")
+                elif exc.code in (500, 502, 503, 504) and attempt < 2:
+                    time.sleep(10 * (attempt + 1))
+                    continue
+                else:
+                    message = error_body[:300].replace(key, "<key>")
+                    problems.append(f"{model}: HTTP {exc.code} {message}")
+                break
+            except (urllib.error.URLError, TimeoutError) as exc:
+                if attempt < 2:
+                    time.sleep(10)
+                    continue
+                problems.append(f"{model}: {exc}")
+                break
+
+            text, why = _gemini_text(body)
+            if text is None:
+                problems.append(f"{model}: empty answer ({why})")
+                break
+            try:
+                summary = json.loads(text)
+            except ValueError:
+                problems.append(f"{model}: answer wasn't valid JSON ({why})")
+                break
+            log.info("Summarized with %s", model)
+            return summary
+        if problems:
+            log.info("Gemini %s skipped: %s", model, problems[-1].splitlines()[0][:200])
+    raise GeminiUnavailable("; ".join(problems) or "no Gemini models configured")
 
 
 KEYWORDS = {
@@ -463,25 +613,40 @@ def source_link(source: AgendaSource) -> str:
     return source.pdf_url or source.page_url or BOARD_MEETINGS_URL
 
 
-def to_meeting_record(source: AgendaSource, summary: dict) -> dict:
-    """Merge discovery metadata with a summary into the public/data/meetings.json shape."""
-    meeting_date = source.meeting_date or datetime.now().strftime("%Y-%m-%d")
-    bullets = list(dict.fromkeys(str(b).strip() for b in summary["executiveSummary"] if str(b).strip()))[:3]
-    if not bullets:
-        raise PipelineError(f"No summary bullets for {source.page_url}.")
-    category = summary["category"] if summary["category"] in CATEGORIES else "Policy"
+def to_meeting_record(source: AgendaSource, summary: dict, summary_source: str) -> dict:
+    """
+    Merge discovery metadata with a summary into the public/data/meetings.json shape.
+
+    Validates the summary as it goes (an AI answer can be malformed): raises PipelineError on
+    anything unusable so the caller can fall back to the built-in summarizer.
+    """
+    try:
+        bullets = list(dict.fromkeys(str(b).strip() for b in summary["executiveSummary"] if str(b).strip()))[:3]
+        title = str(summary["title"]).strip()
+        impact = str(summary["studentParentImpact"]).strip()
+        policy = str(summary["policyChanges"]).strip()
+        urgency = max(1, min(5, int(summary["urgencyScore"])))
+        towns = [t for t in dict.fromkeys(summary["townsAffected"]) if t in DDSB_TOWNS] or DDSB_TOWNS[:5]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise PipelineError(f"Unusable summary for {source.page_url}: {exc!r}") from exc
+    if not bullets or not title:
+        raise PipelineError(f"Summary for {source.page_url} has no title or bullets.")
+
     return {
         "id": record_id(source),
-        "meetingDate": meeting_date,
+        "meetingDate": source.meeting_date or datetime.now().strftime("%Y-%m-%d"),
         "committeeName": source.committee_name,
-        "title": summary["title"].strip(),
-        "urgencyScore": max(1, min(5, int(summary["urgencyScore"]))),
-        "townsAffected": list(dict.fromkeys(summary["townsAffected"])),
-        "category": category,
+        "title": title,
+        "urgencyScore": urgency,
+        "townsAffected": towns,
+        "category": summary.get("category") if summary.get("category") in CATEGORIES else "Policy",
         "executiveSummary": bullets,
-        "studentParentImpact": summary["studentParentImpact"].strip(),
-        "policyChanges": summary["policyChanges"].strip(),
+        "studentParentImpact": impact,
+        "policyChanges": policy,
         "originalPdfUrl": source_link(source),
+        # Which summarizer wrote this: "gemini", "claude" or "built-in". A built-in record is
+        # upgraded automatically the next time an AI summarizer runs.
+        "summarySource": summary_source,
     }
 
 
@@ -514,7 +679,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scrape and summarize DDSB trustee meeting agendas.")
     parser.add_argument("--offline", action="store_true", help="skip the network and use a simulated agenda")
     parser.add_argument("--pdf", action="append", type=Path, default=[], help="summarize a local agenda PDF (repeatable)")
-    parser.add_argument("--summarizer", choices=["dummy", "claude"], default="dummy", help="default: dummy (free, offline)")
+    parser.add_argument(
+        "--summarizer", choices=["dummy", "gemini", "claude"], default="dummy",
+        help="dummy = built-in (free, offline); gemini = Google Gemini, free tier, falls back to built-in; claude = paid",
+    )
     parser.add_argument("--limit", type=int, default=3, help="max agendas to process from the live calendar (default 3)")
     parser.add_argument(
         "--months-back", type=int, default=1,
@@ -573,19 +741,41 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(levelname)s %(message)s")
     load_dotenv(BACKEND_DIR / ".env")
 
-    summarize = summarize_with_claude if args.summarizer == "claude" else summarize_dummy
-    # Scheduled runs overlap (--months-back 1 every week): don't pay to re-summarize an agenda
-    # that is already published. A revised agenda has a new document link, so it's redone.
+    ai_summarizer = args.summarizer in ("gemini", "claude")
+    # Scheduled runs overlap (--months-back 1, daily): don't re-summarize an agenda that is
+    # already published. Exceptions: a revised agenda (new document link) is redone, and when an
+    # AI summarizer is running, a record written by the built-in summarizer is upgraded.
     published = read_public_meetings() if args.write_public and not args.refresh else {}
+    gemini_calls = 0
     try:
         records = []
         for source, text in collect_agendas(args):
             prior = published.get(record_id(source))
             if prior and prior.get("originalPdfUrl") == source_link(source):
-                log.info("Already published, skipping %s (%s)", source.committee_name, source.meeting_date)
-                continue
+                upgradable = ai_summarizer and prior.get("summarySource", "built-in") == "built-in"
+                if not upgradable:
+                    log.info("Already published, skipping %s (%s)", source.committee_name, source.meeting_date)
+                    continue
             log.info("Summarizing %s (%s, %s chars) with %s", source.committee_name, source.meeting_date, f"{len(text):,}", args.summarizer)
-            records.append(to_meeting_record(source, summarize(text, source)))
+
+            if args.summarizer == "claude":
+                records.append(to_meeting_record(source, summarize_with_claude(text, source), "claude"))
+            elif args.summarizer == "gemini":
+                if gemini_calls:
+                    time.sleep(GEMINI_PAUSE_SECONDS)
+                gemini_calls += 1
+                try:
+                    records.append(to_meeting_record(source, summarize_with_gemini(text, source), "gemini"))
+                except (GeminiUnavailable, PipelineError) as exc:
+                    # Never let Gemini trouble take the site down: publish the built-in summary
+                    # now; tomorrow's run upgrades it once Gemini is available again.
+                    warning = f"Gemini unavailable for {source.committee_name} ({source.meeting_date}); used the built-in summary. {exc}"
+                    log.warning(warning)
+                    if os.environ.get("GITHUB_ACTIONS"):
+                        print(f"::warning title=Gemini fallback::{warning}")
+                    records.append(to_meeting_record(source, summarize_dummy(text, source), "built-in"))
+            else:
+                records.append(to_meeting_record(source, summarize_dummy(text, source), "built-in"))
     except (PipelineError, PlaywrightError) as exc:
         log.error("%s", exc)
         return 1

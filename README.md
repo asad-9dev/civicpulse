@@ -163,9 +163,12 @@ the next page load with no rebuild.
    The suffix is the calendar's document id, so a reposted, revised agenda is fetched again.
 3. **Extract**: pulls the text with `pdfplumber`, keeping `--- page N ---` markers.
    `simulate_pdfplumber_extraction()` is the dummy stand-in used by `--offline`.
-4. **Summarize**: `summarize_with_claude()` sends the full agenda text to Claude
-   (`claude-opus-5`) with a JSON schema, so the reply always parses into the record shape.
-   `summarize_dummy()` is a free keyword-based placeholder with the same output shape.
+4. **Summarize**: one of three summarizers, all producing the same record shape:
+   `summarize_with_gemini()` (Google Gemini, free tier; what the daily workflow uses),
+   `summarize_with_claude()` (Claude, paid), or `summarize_dummy()` (built-in keyword parser,
+   free and offline). The AI summarizers share one prompt: plain language, no facts beyond the
+   agenda, and past tense for meetings that have already happened, since an agenda never says
+   what was decided.
 5. **Publish**: writes `backend/output/meetings.generated.json`; with `--write-public` it
    upserts the records (by `id`) into `public/data/meetings.json`.
 
@@ -202,7 +205,7 @@ python backend/scrape_ddsb.py --pdf backend/agendas/<file>.pdf --summarizer clau
 | --- | --- | --- |
 | `--offline` | off | Skip the browser and network; use the simulated agenda text |
 | `--pdf FILE` | none | Summarize local PDF(s) instead of scraping (repeatable) |
-| `--summarizer {dummy,claude}` | `dummy` | `claude` calls the Claude API (costs money) |
+| `--summarizer {dummy,gemini,claude}` | `dummy` | `gemini`: free tier, falls back to built-in; `claude`: paid |
 | `--limit N` | `3` | Max agendas to process from the calendar, newest first |
 | `--months-back N` | `1` | Start the calendar listing N months before the current month |
 | `--headed` | off | Show the browser window (useful when the calendar's markup changes) |
@@ -217,8 +220,17 @@ document link triggers a fresh summary.
 The calendar lists every upcoming meeting, but agendas are only posted a few days before each
 one, so most rows have no Agenda link yet and are skipped.
 
-The dummy summarizer only reads the agenda's order of business: it lists the first three
-substantive items and guesses a category. Use `--summarizer claude` for real summaries.
+The built-in summarizer only reads the agenda's order of business: it lists up to three
+substantive items and guesses a category. The AI summarizers write real summaries.
+
+**Gemini.** Put a Google AI Studio key in `backend/.env` as `GEMINI_API_KEY` (and in the
+`GEMINI_API_KEY` GitHub secret for the workflow). It tries `gemini-3.6-flash`, then
+`gemini-3.5-flash`, then `gemini-3.5-flash-lite` (override with `GEMINI_MODELS`). Each model
+has its own free-tier quota. Per-minute rate limits are waited out and retried. When every
+model is out of quota or unavailable, that meeting gets the built-in summary instead, and the
+next run upgrades it (records carry a `summarySource` field). Nothing is charged unless you add
+billing to the Google project. On the free tier, Google may use requests to improve its products;
+only public agenda text is sent.
 
 **Claude credentials.** `--summarizer claude` uses the SDK's default credential lookup: set
 `ANTHROPIC_API_KEY` in `backend/.env` (copy `backend/.env.example`), or sign in once with
@@ -245,26 +257,26 @@ posted agenda is on the site within a day; on days without one, nothing changes.
 Python 3.11, the requirements and Chromium, then runs:
 
 ```bash
-python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer dummy --write-public
+python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer gemini --write-public
 ```
 
-This uses the free built-in summarizer, so no API key or secret is needed. Each published
-meeting shows its date, committee and first three agenda items, with a keyword guess at category,
-towns and urgency; the student/parent explanation points readers to the original agenda.
+It summarizes with Gemini using the `GEMINI_API_KEY` repository secret. If the secret is missing
+or Gemini is unavailable, meetings get the built-in summary, the run shows a "Gemini fallback"
+warning, and a later run upgrades them.
 
 If `public/data/meetings.json` changed, it commits the file as `github-actions[bot]` and pushes
 it. The downloaded PDFs are kept as a run artifact for 14 days.
 
 Before the first run:
 
-1. Check that **Settings → Actions → General → Workflow permissions** allows read and write
+1. Add the `GEMINI_API_KEY` secret under **Settings → Secrets and variables → Actions**.
+2. Check that **Settings → Actions → General → Workflow permissions** allows read and write
    access, or the push is rejected.
-2. Connect the Vercel project to the repository (Vercel → Project → Settings → Git), so each
+3. Connect the Vercel project to the repository (Vercel → Project → Settings → Git), so each
    bot commit redeploys the site.
 
-To switch to Claude summaries later, add an `ANTHROPIC_API_KEY` repository secret, pass it to
-the scrape step as an environment variable, and change `--summarizer dummy` to `claude`. Meetings
-already published by the built-in summarizer are kept as they are until you run once with `--refresh`.
+To use Claude instead, add an `ANTHROPIC_API_KEY` repository secret, pass it to the scrape step
+as an environment variable, and change `--summarizer gemini` to `claude`.
 
 GitHub pauses scheduled workflows in public repos after 60 days without repository activity. The
 bot's commits count as activity, but a long break with no new meetings (like summer) can pause

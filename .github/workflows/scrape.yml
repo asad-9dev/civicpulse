@@ -40,11 +40,14 @@ jobs:
         run: python -m playwright install --with-deps chromium
 
       - name: Scrape, summarize and update meetings.json
-        # Uses the free built-in summarizer (no API key): it lists each agenda's first three
-        # substantive items and guesses category, towns and urgency from keywords.
+        env:
+          # Google Gemini, free tier. If the secret is missing or Gemini is unavailable, each
+          # meeting falls back to the built-in summarizer (with a warning on this run) and is
+          # upgraded on a later run.
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         # --write-public upserts into public/data/meetings.json, skipping agendas that are
         # already published; --limit 10 keeps a busy week from pushing a new agenda out of the window.
-        run: python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer dummy --write-public
+        run: python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer gemini --write-public
 
       - name: Commit and push updated meetings
         run: |
