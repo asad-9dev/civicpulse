@@ -7,6 +7,11 @@ on:
     # The digest email (Vercel Cron, 14:00 UTC) runs three hours later, after the redeploy.
     - cron: "0 11 * * *"
   workflow_dispatch:
+    inputs:
+      refresh:
+        description: "Re-summarize meetings that are already on the site (uses Gemini quota)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # push the updated meetings.json back to the repo
@@ -39,15 +44,39 @@ jobs:
         # --with-deps also installs the Linux system libraries headless Chromium needs.
         run: python -m playwright install --with-deps chromium
 
+      - name: Check Gemini key
+        # Asks Google whether the key is valid (reading model info uses no summarizing quota).
+        # A missing or rejected key turns this step red with a warning, but the run carries on:
+        # the scrape below falls back to the built-in summarizer.
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::warning title=Gemini key::The GEMINI_API_KEY secret is not set; meetings will get the built-in summary."
+            exit 1
+          fi
+          status=$(curl -s -o /dev/null -w '%{http_code}' -H "x-goog-api-key: $GEMINI_API_KEY" \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash")
+          if [ "$status" != "200" ]; then
+            echo "::warning title=Gemini key::Google rejected the GEMINI_API_KEY secret (HTTP $status); meetings will get the built-in summary."
+            exit 1
+          fi
+          echo "Gemini key OK (HTTP $status)"
+
       - name: Scrape, summarize and update meetings.json
         env:
           # Google Gemini, free tier. If the secret is missing or Gemini is unavailable, each
           # meeting falls back to the built-in summarizer (with a warning on this run) and is
           # upgraded on a later run.
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          REFRESH: ${{ inputs.refresh }}
         # --write-public upserts into public/data/meetings.json, skipping agendas that are
         # already published; --limit 10 keeps a busy week from pushing a new agenda out of the window.
-        run: python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer gemini --write-public
+        run: |
+          args="--months-back 1 --limit 10 --summarizer gemini --write-public"
+          if [ "$REFRESH" = "true" ]; then args="$args --refresh"; fi
+          python backend/scrape_ddsb.py $args
 
       - name: Commit and push updated meetings
         run: |

@@ -260,9 +260,11 @@ Python 3.11, the requirements and Chromium, then runs:
 python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer gemini --write-public
 ```
 
-It summarizes with Gemini using the `GEMINI_API_KEY` repository secret. If the secret is missing
-or Gemini is unavailable, meetings get the built-in summary, the run shows a "Gemini fallback"
-warning, and a later run upgrades them.
+It summarizes with Gemini using the `GEMINI_API_KEY` repository secret. A **Check Gemini key**
+step runs first. If the key is missing or rejected, that step turns red with a warning, but the
+run continues. Meetings then get the built-in summary, the run shows a "Gemini fallback" warning,
+and a later run upgrades them. When you start a run by hand, tick **refresh** to re-summarize
+meetings that are already on the site, for example after changing the prompt.
 
 If `public/data/meetings.json` changed, it commits the file as `github-actions[bot]` and pushes
 it. The downloaded PDFs are kept as a run artifact for 14 days.
