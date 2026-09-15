@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isEmailConfigured, sendWelcomeEmail } from "@/lib/email";
+import { siteUrl } from "@/lib/site";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { oneClickUnsubscribeUrl, unsubscribeToken, unsubscribeUrl } from "@/lib/unsubscribe";
 
@@ -12,11 +13,6 @@ const UNIQUE_VIOLATION = "23505"; // Postgres error code: email already in the t
 
 const NOT_OPEN = "Sign-ups aren't open on this site yet. Please check back soon.";
 const TRY_AGAIN = "We couldn't save your email just now. Please try again.";
-
-/** Links in emails point here: SITE_URL when set (e.g. https://ddsb-civicpulse.vercel.app), else this request's origin. */
-function siteUrl(request: Request): string {
-  return process.env.SITE_URL?.trim() || new URL(request.url).origin;
-}
 
 export async function POST(request: Request) {
   let body: unknown;

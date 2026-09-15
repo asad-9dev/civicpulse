@@ -15,3 +15,16 @@ create unique index if not exists subscribers_email_key on public.subscribers (e
 -- write this table, so the subscriber list can't be pulled from the browser. The Next.js API
 -- route uses the secret key on the server, which bypasses RLS.
 alter table public.subscribers enable row level security;
+
+-- Which meetings have already gone out in a digest email (app/api/digest/route.ts).
+-- A run claims a meeting by inserting its row before sending, so overlapping runs can't
+-- email the same meeting twice.
+create table if not exists public.digest_log (
+  meeting_id  text        primary key,            -- the id in public/data/meetings.json
+  claimed_at  timestamptz not null default now(),
+  sent_at     timestamptz,                        -- null while a run is still sending
+  recipients  integer,
+  failures    integer
+);
+
+alter table public.digest_log enable row level security;

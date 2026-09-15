@@ -62,6 +62,39 @@ unsubscribe. Links are signed per subscriber (id + HMAC of the email). They carr
 address, and they stop working if the Supabase secret key is rotated, unless `UNSUBSCRIBE_SECRET`
 is set. Unsubscribing deletes the row.
 
+### Meeting summary emails (digest)
+
+When new meetings reach the site, subscribers get one email that covers all of them, most urgent
+first: date, committee, title, urgency, towns, the three key points, and links to the full
+breakdown and the original agenda. Nothing is sent on days without new meetings.
+
+How it runs:
+
+1. The daily GitHub workflow (11:00 UTC) adds new meetings to `meetings.json`, and Vercel redeploys.
+2. Vercel Cron (`vercel.json`) calls `/api/digest` every day at 14:00 UTC with
+   `Authorization: Bearer $CRON_SECRET`.
+3. The route picks meetings from the last 45 days that aren't in the Supabase `digest_log` table.
+   It claims them there, emails each subscriber separately (with their own unsubscribe link),
+   then records how many went out. The claim means a meeting is never emailed twice. If every
+   send fails (for example, a bad SMTP password), the claim is released and the next run retries.
+
+Setup: run `backend/schema.sql` in Supabase (it creates `digest_log`), and set `CRON_SECRET` to a
+long random string in `.env.local` and in Vercel.
+
+Trigger or test it by hand with the same header:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" "https://ddsb-civicpulse.vercel.app/api/digest?dryRun=1"
+```
+
+`?dryRun=1` reports which meetings would go out and to how many subscribers, without sending.
+`?previewTo=you@example.com` sends the digest to that one address without marking anything as
+sent. A call with no query string sends the real digest.
+
+Gmail allows roughly 500 emails a day, and a run stops sending after about 50 seconds (Vercel's
+Hobby time limit is 60), which is enough for about a hundred subscribers. Past that, switch to a
+bulk email provider.
+
 | Script | What it does |
 | --- | --- |
 | `npm run dev` | Development server with hot reload on port 3000 |
@@ -206,9 +239,10 @@ in a browser, re-run with `--headed` to watch what the page does and update thos
 
 ### Automation (GitHub Actions)
 
-`.github/workflows/scrape.yml` runs the pipeline every Monday at 11:00 UTC (6:00 AM EST,
-7:00 AM during daylight time), and on demand from the repo's **Actions** tab (**Run workflow**).
-It installs Python 3.11, the requirements and Chromium, then runs:
+`.github/workflows/scrape.yml` runs the pipeline every day at 11:00 UTC (6:00 AM EST, 7:00 AM
+during daylight time), and on demand from the repo's **Actions** tab (**Run workflow**). A newly
+posted agenda is on the site within a day; on days without one, nothing changes. It installs
+Python 3.11, the requirements and Chromium, then runs:
 
 ```bash
 python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer dummy --write-public
@@ -232,6 +266,10 @@ To switch to Claude summaries later, add an `ANTHROPIC_API_KEY` repository secre
 the scrape step as an environment variable, and change `--summarizer dummy` to `claude`. Meetings
 already published by the built-in summarizer are kept as they are until you run once with `--refresh`.
 
+GitHub pauses scheduled workflows in public repos after 60 days without repository activity. The
+bot's commits count as activity, but a long break with no new meetings (like summer) can pause
+it. If that happens, re-enable it from the **Actions** tab.
+
 ## Project structure
 
 ```
@@ -241,6 +279,7 @@ app/
   globals.css             Tailwind layers, dialog and bottom-sheet styles, reduced-motion
   api/subscribe/route.ts  validates emails, inserts them into Supabase, sends the welcome email
   api/unsubscribe/route.ts  verifies a signed link and removes the subscriber (POST only)
+  api/digest/route.ts     daily cron: emails subscribers a digest of newly decoded meetings
   unsubscribe/page.tsx    unsubscribe confirmation page
 components/
   MeetingExplorer.tsx     search, town/category chips, results count, feed, empty state
@@ -263,7 +302,7 @@ design/                   Claude Design canvas source (.dc.html artboards)
 - **Subscriber privacy.** Emails are stored in Supabase behind Row Level Security, and only the
   server holds the secret key. The API gives the same response for new and existing emails, so
   it can't be used to check who has signed up.
-- **Not yet built:** the after-each-meeting digest emails (only the welcome email is sent today),
-  double opt-in confirmation, and rate limiting on the sign-up endpoint.
+- **Not yet built:** double opt-in confirmation, per-town email preferences, and rate limiting on
+  the sign-up endpoint.
 - **Accessibility.** WCAG AA contrast, visible focus rings, keyboard-operable filters and
   dialog, 44px touch targets on phones, and `prefers-reduced-motion` support.

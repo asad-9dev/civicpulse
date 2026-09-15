@@ -2,9 +2,10 @@ name: Scrape DDSB agendas
 
 on:
   schedule:
-    # 11:00 UTC every Monday = 6:00 AM EST. GitHub cron only runs in UTC, so while
-    # Eastern daylight time is in effect (March to November) this fires at 7:00 AM local.
-    - cron: "0 11 * * 1"
+    # Every day at 11:00 UTC (6:00 AM EST / 7:00 AM EDT), so a newly posted agenda is on the
+    # site within a day. Meetings already published are skipped, so quiet days change nothing.
+    # The digest email (Vercel Cron, 14:00 UTC) runs three hours later, after the redeploy.
+    - cron: "0 11 * * *"
   workflow_dispatch:
 
 permissions:

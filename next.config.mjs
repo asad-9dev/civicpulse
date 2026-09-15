@@ -6,6 +6,7 @@ const nextConfig = {
     // from the CDN and isn't bundled into server functions unless listed here.
     outputFileTracingIncludes: {
       "/": ["./public/data/meetings.json"],
+      "/api/digest": ["./public/data/meetings.json"],
     },
   },
 };

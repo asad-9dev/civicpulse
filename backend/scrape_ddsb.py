@@ -422,9 +422,10 @@ def summarize_dummy(agenda_text: str, source: AgendaSource) -> dict:
     if any(k in focus for k in ("vote", "motion", "approve", "recommend")):
         urgency += 1
 
+    # Only real items: a short agenda gets fewer bullets rather than repeated filler.
     bullets = [f"Agenda item: {title.rstrip('.')}." for title, _ in items[:3]]
-    while len(bullets) < 3:
-        bullets.append("See the original agenda for further items.")
+    if not bullets:
+        bullets = ["See the original agenda for this meeting's items."]
 
     return {
         "title": headline[:90],
@@ -465,9 +466,9 @@ def source_link(source: AgendaSource) -> str:
 def to_meeting_record(source: AgendaSource, summary: dict) -> dict:
     """Merge discovery metadata with a summary into the public/data/meetings.json shape."""
     meeting_date = source.meeting_date or datetime.now().strftime("%Y-%m-%d")
-    bullets = [str(b).strip() for b in summary["executiveSummary"] if str(b).strip()][:3]
-    if len(bullets) != 3:
-        raise PipelineError(f"Expected 3 summary bullets for {source.page_url}, got {len(bullets)}.")
+    bullets = list(dict.fromkeys(str(b).strip() for b in summary["executiveSummary"] if str(b).strip()))[:3]
+    if not bullets:
+        raise PipelineError(f"No summary bullets for {source.page_url}.")
     category = summary["category"] if summary["category"] in CATEGORIES else "Policy"
     return {
         "id": record_id(source),
