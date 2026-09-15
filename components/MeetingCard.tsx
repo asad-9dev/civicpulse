@@ -43,6 +43,11 @@ export function MeetingCard({ meeting, onOpen }: { meeting: Meeting; onOpen: (id
         <h3 className="text-pretty font-serif text-2xl font-semibold leading-[1.18] tracking-[-0.01em] sm:text-[25px]">
           {meeting.title}
         </h3>
+        {/* Two-line preview of "What this means for students & parents"; the full text is in the
+            breakdown. Built-in summaries only have placeholder text there, so they skip it. */}
+        {meeting.summarySource !== "built-in" && meeting.studentParentImpact && (
+          <p className="line-clamp-2 text-[15px] leading-relaxed text-ink-soft">{meeting.studentParentImpact}</p>
+        )}
       </div>
 
       <ul className="flex flex-wrap gap-1.5" aria-label="Towns affected">

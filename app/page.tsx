@@ -107,8 +107,7 @@ export default async function HomePage() {
           <Wordmark size="sm" />
           <p className="text-[15px] leading-relaxed text-ink-soft">
             CivicPulse is an independent civic project. It is not affiliated with or endorsed by the Durham District
-            School Board. Summaries are AI-assisted and can contain mistakes, so always confirm details in the
-            original agenda.
+            School Board.
           </p>
         </div>
         <a
