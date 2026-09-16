@@ -2,9 +2,19 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { ExternalLink, FileText, X } from "lucide-react";
+import { getBoard } from "@/lib/boards";
 import type { Meeting } from "@/lib/types";
-import { CategoryLabel, DateBadge, TownTag, UrgencyBadge } from "./Badges";
+import { BoardTag, CategoryLabel, DateBadge, TownTag, UrgencyBadge } from "./Badges";
 import { SummaryList } from "./MeetingCard";
+
+/** "calendar.ddsb.ca" from an agenda link, or "" if it somehow isn't a URL. */
+function linkHost(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return "";
+  }
+}
 
 /**
  * Full breakdown of one meeting. Uses the native <dialog> for focus trapping,
@@ -79,7 +89,10 @@ export function MeetingDialog({ meeting, onClose }: { meeting: Meeting | null; o
                 <X aria-hidden size={20} strokeWidth={2.25} />
               </button>
             </div>
-            <p className="font-mono text-xs uppercase tracking-[0.06em] text-ink-muted">{meeting.committeeName}</p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+              <BoardTag slug={meeting.boardSlug} />
+              <p className="font-mono text-xs uppercase tracking-[0.06em] text-ink-muted">{meeting.committeeName}</p>
+            </div>
             <h2
               id="breakdown-title"
               className="text-balance font-serif text-[27px] font-semibold leading-[1.14] tracking-[-0.015em] sm:text-4xl sm:leading-[1.12]"
@@ -125,7 +138,9 @@ export function MeetingDialog({ meeting, onClose }: { meeting: Meeting | null; o
           </div>
 
           <footer className="flex shrink-0 flex-col-reverse gap-2 border-t border-rule-soft bg-raised px-5 pb-6 pt-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-[18px]">
-            <span className="text-center text-sm text-ink-muted sm:text-left">Opens ddsb.ca in a new tab</span>
+            <span className="text-center text-sm text-ink-muted sm:text-left">
+              Opens {linkHost(meeting.originalPdfUrl) || "the board's site"} in a new tab
+            </span>
             <div className="flex gap-2.5">
               <button
                 type="button"
@@ -140,7 +155,7 @@ export function MeetingDialog({ meeting, onClose }: { meeting: Meeting | null; o
                 rel="noopener noreferrer"
                 className="inline-flex h-[52px] flex-1 items-center justify-center gap-[9px] rounded-[10px] bg-civic px-[22px] text-base font-bold text-white transition-colors hover:bg-ink sm:h-12 sm:flex-none sm:text-[15px]"
               >
-                View Original DDSB PDF Agenda
+                View original {getBoard(meeting.boardSlug)?.shortName ?? "board"} agenda
                 <ExternalLink aria-hidden size={17} strokeWidth={2.25} />
               </a>
             </div>

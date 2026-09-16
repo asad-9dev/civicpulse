@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarClock, Check, RotateCcw, Search, SearchX } from "lucide-react";
-import { CATEGORIES, TOWNS, type Meeting } from "@/lib/types";
+import { CalendarClock, Check, ExternalLink, PauseCircle, RotateCcw, Search, SearchX } from "lucide-react";
+import { getBoard, municipalitiesFor, type Board } from "@/lib/boards";
+import { CATEGORIES, type Meeting } from "@/lib/types";
 import { MeetingCard } from "./MeetingCard";
 import { MeetingDialog } from "./MeetingDialog";
 
@@ -56,12 +57,17 @@ function FilterGroup({
 
 function matchesQuery(meeting: Meeting, query: string): boolean {
   if (!query) return true;
+  const board = getBoard(meeting.boardSlug);
   const haystack = [
     meeting.title,
     meeting.committeeName,
     meeting.category,
     meeting.studentParentImpact,
     meeting.policyChanges,
+    // So "york" or "yrdsb" finds a board's meetings while every board is showing.
+    board?.name ?? "",
+    board?.shortName ?? "",
+    board?.region ?? "",
     ...meeting.townsAffected,
     ...meeting.executiveSummary,
   ]
@@ -73,11 +79,19 @@ function matchesQuery(meeting: Meeting, query: string): boolean {
     .every((term) => haystack.includes(term));
 }
 
-export function MeetingExplorer({ meetings }: { meetings: Meeting[] }) {
+export function MeetingExplorer({ meetings, board }: { meetings: Meeting[]; board: Board | null }) {
   const [query, setQuery] = useState("");
   const [town, setTown] = useState(ALL);
   const [category, setCategory] = useState(ALL);
   const [openId, setOpenId] = useState<string | null>(null);
+
+  const towns = useMemo(() => municipalitiesFor(board), [board]);
+
+  // Switching boards leaves a town selected that the new board doesn't serve, which would hide
+  // every meeting. Start each board with its towns unfiltered.
+  useEffect(() => {
+    setTown(ALL);
+  }, [board?.slug]);
 
   const visible = useMemo(() => {
     const q = query.trim();
@@ -92,10 +106,14 @@ export function MeetingExplorer({ meetings }: { meetings: Meeting[] }) {
   const openMeeting = meetings.find((m) => m.id === openId) ?? null;
   const isFiltered = query.trim() !== "" || town !== ALL || category !== ALL;
 
-  // Deep link: ?meeting=<id> opens that breakdown, so a decision can be shared.
+  // Deep link: ?meeting=<id> opens that breakdown, so a decision can be shared. Meeting ids
+  // gained a board prefix in the multi-board expansion, so links sent in earlier emails
+  // ("2026-09-10-seac") are matched against the prefixed id too.
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("meeting");
-    if (id && meetings.some((m) => m.id === id)) setOpenId(id);
+    if (!id) return;
+    const match = meetings.find((m) => m.id === id) ?? meetings.find((m) => m.id.endsWith(`-${id}`));
+    if (match) setOpenId(match.id);
   }, [meetings]);
 
   const setOpen = useCallback((id: string | null) => {
@@ -144,7 +162,7 @@ export function MeetingExplorer({ meetings }: { meetings: Meeting[] }) {
           <div className="h-px bg-rule-soft" />
 
           <div className="flex flex-col gap-4 sm:gap-3.5">
-            <FilterGroup legend="Town" options={TOWNS} value={town} onChange={setTown} />
+            <FilterGroup legend="Town" options={towns} value={town} onChange={setTown} />
             <FilterGroup legend="Category" options={CATEGORIES} value={category} onChange={setCategory} />
           </div>
         </div>
@@ -162,13 +180,31 @@ export function MeetingExplorer({ meetings }: { meetings: Meeting[] }) {
 
         {meetings.length === 0 ? (
           <div className="flex flex-col items-center gap-4 rounded-[14px] border border-dashed border-rule-strong bg-white px-6 py-14 text-center">
-            <CalendarClock aria-hidden size={32} strokeWidth={1.75} className="text-ink-muted" />
+            {board?.statusNote ? (
+              <PauseCircle aria-hidden size={32} strokeWidth={1.75} className="text-ink-muted" />
+            ) : (
+              <CalendarClock aria-hidden size={32} strokeWidth={1.75} className="text-ink-muted" />
+            )}
             <div className="flex flex-col gap-1.5">
-              <p className="font-serif text-2xl font-semibold">No meetings decoded yet</p>
-              <p className="max-w-md text-base text-ink-soft">
-                Summaries appear here after the board posts its next agenda. Subscribe below to get them by email.
+              <p className="font-serif text-2xl font-semibold">
+                {board?.statusNote ? `${board.shortName} trustee meetings are paused` : "No meetings decoded yet"}
+              </p>
+              <p className="max-w-lg text-base text-ink-soft">
+                {board?.statusNote ??
+                  "Summaries appear here after the board posts its next agenda. Subscribe below to get them by email."}
               </p>
             </div>
+            {board && (
+              <a
+                href={board.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center gap-2 text-[15px] font-bold text-civic hover:text-ink"
+              >
+                Check {board.shortName} directly
+                <ExternalLink aria-hidden size={16} strokeWidth={2.25} />
+              </a>
+            )}
           </div>
         ) : visible.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 sm:gap-6 lg:grid-cols-3">

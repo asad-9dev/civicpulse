@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { BOARDS, getBoard, type Board } from "@/lib/boards";
+import { setSubscriberBoards } from "@/lib/db/boards";
 import { isEmailConfigured, sendWelcomeEmail } from "@/lib/email";
 import { siteUrl } from "@/lib/site";
 import { getSupabaseAdmin } from "@/lib/supabase";
@@ -14,6 +16,15 @@ const UNIQUE_VIOLATION = "23505"; // Postgres error code: email already in the t
 const NOT_OPEN = "Sign-ups aren't open on this site yet. Please check back soon.";
 const TRY_AGAIN = "We couldn't save your email just now. Please try again.";
 
+/** The boards a sign-up asked for. Anything unrecognised is dropped; none given means all. */
+function requestedBoards(value: unknown): Board[] {
+  if (!Array.isArray(value)) return BOARDS;
+  const chosen = value
+    .map((slug) => (typeof slug === "string" ? getBoard(slug) : null))
+    .filter((board): board is Board => board !== null);
+  return chosen.length > 0 ? chosen : BOARDS;
+}
+
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -22,6 +33,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Send JSON like {"email": "you@example.com"}.' }, { status: 400 });
   }
 
+  const boards = requestedBoards((body as { boards?: unknown } | null)?.boards);
   const rawEmail = (body as { email?: unknown } | null)?.email;
   const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
   if (!email || email.length > MAX_EMAIL_LENGTH || !EMAIL_PATTERN.test(email)) {
@@ -50,16 +62,28 @@ export async function POST(request: Request) {
 
   // Only a brand-new sign-up gets the welcome email, so re-submitting an address can't be used
   // to flood someone's inbox. A failed email never fails the sign-up itself.
+  //
+  // Board choices are recorded for new sign-ups only, for the same reason: otherwise anyone who
+  // knows an address could re-post it and silently change which boards that person hears about.
   if (newSubscriberId !== null) {
+    const saved = await setSubscriberBoards(supabase.client, newSubscriberId, boards.map((board) => board.slug));
+    if (!saved.saved) {
+      // They still get every board's digest, which is the safe default, so this is not fatal.
+      console.error(`[subscribe] Board preference not saved: ${saved.reason}`);
+    }
+
     const token = unsubscribeToken(newSubscriberId, email);
     const site = siteUrl(request);
     if (token) {
-      const result = await sendWelcomeEmail({
-        to: email,
-        siteUrl: site,
-        unsubscribePageUrl: unsubscribeUrl(site, newSubscriberId, token),
-        oneClickUnsubscribeUrl: oneClickUnsubscribeUrl(site, newSubscriberId, token),
-      });
+      const result = await sendWelcomeEmail(
+        {
+          to: email,
+          siteUrl: site,
+          unsubscribePageUrl: unsubscribeUrl(site, newSubscriberId, token),
+          oneClickUnsubscribeUrl: oneClickUnsubscribeUrl(site, newSubscriberId, token),
+        },
+        boards,
+      );
       if (!result.sent) console.error(`[subscribe] Welcome email not sent: ${result.reason}`);
     }
   }

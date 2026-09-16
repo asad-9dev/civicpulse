@@ -1,13 +1,37 @@
-# DDSB CivicPulse
+# CivicPulse
 
-**DDSB trustee decisions, decoded.** CivicPulse turns 100+ page Durham District School Board
-trustee meeting agendas into three-point summaries that students and parents in Ajax,
-Pickering, Whitby, Oshawa and Uxbridge can read in a minute.
+**Ontario trustee decisions, decoded.** CivicPulse turns 100+ page school board trustee meeting
+agendas into three-point summaries that students and parents can read in a minute.
 
-> CivicPulse is an independent project, not affiliated with or endorsed by the DDSB.
-> `public/data/meetings.json` starts empty and is filled with real meetings by the pipeline
-> (see [Automation](#automation-github-actions)). Until the first run, the site shows a
-> "No meetings decoded yet" message.
+> CivicPulse is an independent project, not affiliated with or endorsed by any school board.
+> The per-board files in `public/data/boards/` start empty and are filled with real meetings by
+> the pipeline (see [Automation](#automation-github-actions)). Until the first run, the site
+> shows a "No meetings decoded yet" message.
+
+## Boards
+
+The boards CivicPulse covers are listed in `lib/boards.ts` (mirrored for the pipeline in
+`backend/boards.py`). Each one records the portal its agendas are published on, which decides
+whether the scraper can read it.
+
+| Board | Slug | Portal | Status |
+| --- | --- | --- | --- |
+| Durham District School Board | `ddsb` | eSCRIBE — calendar.ddsb.ca | Decoded daily |
+| York Region District School Board | `yrdsb` | CivicWeb — yrdsb.civicweb.net | Decoded daily |
+| Toronto District School Board | `tdsb` | — | Under provincial supervision: trustee meetings suspended, no agendas published |
+| Peel District School Board | `pdsb` | — | Under provincial supervision: "regular Board of Trustees meetings have been paused until further notice" |
+
+TDSB and PDSB are listed in the app so visitors can see the board and why it is empty, rather
+than finding nothing. When their trustee meetings resume, give each an `agendaPortal` and a
+`platform` in both registries and add the slug to the scrape workflow's matrix.
+
+### Adding a board
+
+1. Add an entry to `lib/boards.ts` and the matching one to `backend/boards.py`.
+2. Add a row to the `boards` seed at the bottom of `backend/schema.sql` and run it.
+3. If its portal is eSCRIBE or CivicWeb, add the slug to `.github/workflows/scrape.yml`
+   (both the matrix and the `board` input's options). Any other portal needs a new adapter
+   in `backend/scrape_agendas.py` alongside `discover_escribe` and `discover_civicweb`.
 
 ## View the app locally
 
@@ -18,8 +42,10 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>. The front end reads `public/data/meetings.json`, so no Python or
-API key is needed just to view the app.
+Open <http://localhost:3000>. The front end reads the per-board files in
+`public/data/boards/`, so no Python or API key is needed just to view the app. The board
+switcher in the header writes its choice to the URL (`/?board=yrdsb`, or no parameter for every
+board), so any view can be linked to.
 
 ### Newsletter sign-ups (Supabase)
 
@@ -27,7 +53,9 @@ Sign-ups are stored in a Supabase table. To enable them:
 
 1. In the Supabase dashboard, open **SQL Editor**, paste `backend/schema.sql` and run it. It
    creates `subscribers` (`id`, `email` unique, `created_at`) with Row Level Security on and no
-   policies, so the public key can't read the list.
+   policies, so the public key can't read the list, along with the board tables below. Every
+   statement is guarded, so running the whole file again is safe and is how you pick up later
+   schema changes.
 2. Copy `.env.example` to `.env.local` and set `SUPABASE_SERVICE_ROLE_KEY` to the project's
    **secret** key (Project Settings → API Keys). It's used only on the server. Never commit it,
    and never give it a `NEXT_PUBLIC_` prefix.
@@ -35,6 +63,27 @@ Sign-ups are stored in a Supabase table. To enable them:
    Environment Variables), then redeploy.
 
 Without these variables the form still works but replies that sign-ups aren't open yet.
+
+### The database, table by table
+
+`backend/schema.sql` is the whole schema. The secret key can read and write rows but cannot
+create tables, so this file has to be run once from the SQL Editor (or with `psql` against the
+project's connection string) — there is no way to apply it from the app.
+
+| Table | What it holds |
+| --- | --- |
+| `subscribers` | One row per email address |
+| `subscriber_boards` | Which boards a subscriber follows. **No rows means every board**, so anyone who signed up before boards existed keeps getting everything |
+| `boards` | One row per board, seeded from `lib/boards.ts`. The site reads board names from code, not from here, so a page render never waits on the database; the table exists to give each board an id the other tables reference |
+| `digest_log` | Which meetings have been emailed, and for which board. A meeting is claimed here before sending, so two overlapping runs can't email it twice |
+
+There is also one function, `subscribers_for_board(filter_board_id, after_id, page_size)`, which
+returns the subscribers who follow a board — those who chose it plus those who follow every
+board — so the filtering happens in the database rather than in the digest route. It is
+`security definer` and granted only to `service_role`, since it reads the subscriber list.
+
+Until the file has been run, the app degrades instead of failing: sign-ups still work, board
+choices simply aren't recorded, and every subscriber gets every board's digest.
 
 ### Welcome emails and unsubscribing
 
@@ -64,19 +113,26 @@ is set. Unsubscribing deletes the row.
 
 ### Meeting summary emails (digest)
 
-When new meetings reach the site, subscribers get one email that covers all of them, most urgent
-first: date, committee, title, urgency, towns, the three key points, and links to the full
-breakdown and the original agenda. Nothing is sent on days without new meetings.
+When new meetings reach the site, subscribers get one email covering the ones from boards they
+follow, most urgent first: board, date, committee, title, urgency, towns, the three key points,
+and links to the full breakdown and the original agenda. Nothing is sent on days without new
+meetings, and nobody is emailed about a board they don't follow.
+
+An email about one board is headed with that board's acronym and says it isn't affiliated with
+that board; an email spanning several is headed `ONTARIO` and names each board on its own item.
 
 How it runs:
 
-1. The daily GitHub workflow (11:00 UTC) adds new meetings to `meetings.json`, and Vercel redeploys.
+1. The daily GitHub workflow (11:00 UTC) adds new meetings to the per-board files, and Vercel
+   redeploys.
 2. Vercel Cron (`vercel.json`) calls `/api/digest` every day at 14:00 UTC with
    `Authorization: Bearer $CRON_SECRET`.
 3. The route picks meetings from the last 45 days that aren't in the Supabase `digest_log` table.
-   It claims them there, emails each subscriber separately (with their own unsubscribe link),
-   then records how many went out. The claim means a meeting is never emailed twice. If every
-   send fails (for example, a bad SMTP password), the claim is released and the next run retries.
+   It claims them there, then emails each subscriber separately, with their own unsubscribe link
+   and only the boards they follow, and records how many people received each meeting. The claim
+   means a meeting is never emailed twice. If every attempt fails (for example, a bad SMTP
+   password), the claim is released and the next run retries; a meeting that simply has no
+   followers yet stays recorded, the same way a new subscriber doesn't get older meetings.
 
 Setup: run `backend/schema.sql` in Supabase (it creates `digest_log`), and set `CRON_SECRET` to a
 long random string in `.env.local` and in Vercel.
@@ -87,9 +143,10 @@ Trigger or test it by hand with the same header:
 curl -H "Authorization: Bearer $CRON_SECRET" "https://ddsb-civicpulse.vercel.app/api/digest?dryRun=1"
 ```
 
-`?dryRun=1` reports which meetings would go out and to how many subscribers, without sending.
-`?previewTo=you@example.com` sends the digest to that one address without marking anything as
-sent. A call with no query string sends the real digest.
+`?dryRun=1` reports which boards and meetings would go out and to how many subscribers, without
+sending. `?previewTo=you@example.com` sends the digest to that one address without marking
+anything as sent. `?board=yrdsb` limits the run to one board, which is the quickest way to check
+a newly added one. A call with no query string sends the real digest.
 
 Gmail allows roughly 500 emails a day, and a run stops sending after about 50 seconds (Vercel's
 Hobby time limit is 60), which is enough for about a hundred subscribers. Past that, switch to a
@@ -116,15 +173,17 @@ bulk email provider.
 
 ```mermaid
 flowchart LR
-  subgraph pipeline ["Python pipeline: backend/scrape_ddsb.py"]
-    A[DDSB meeting calendar<br/>calendar.ddsb.ca] -->|Playwright, headless Chromium| B[Agenda PDFs<br/>backend/agendas/]
+  subgraph pipeline ["Python pipeline: backend/scrape_agendas.py --board <slug>"]
+    A[Board meeting calendar<br/>eSCRIBE or CivicWeb] -->|Playwright, headless Chromium| B[Agenda PDFs<br/>backend/agendas/board/]
     B -->|pdfplumber| C[Agenda text<br/>100+ pages]
-    C -->|Claude, structured JSON| D[Meeting record]
+    C -->|Gemini, structured JSON| D[Meeting record]
   end
-  D -->|--write-public| E[(public/data/meetings.json)]
+  D -->|--write-public| E[(public/data/boards/board.json)]
   E -->|read on every request| F[Next.js page<br/>server component]
-  F --> G[MeetingExplorer<br/>search, filters, modal]
-  H[Newsletter form] -->|POST /api/subscribe| I[(Supabase: subscribers)]
+  F --> G[BoardSelector<br/>?board=slug]
+  F --> H[MeetingExplorer<br/>search, filters, modal]
+  I[Newsletter form] -->|POST /api/subscribe| J[(Supabase: subscribers<br/>+ subscriber_boards)]
+  J --> K[Daily digest<br/>only the boards you follow]
 ```
 
 The JSON file is the contract between the two halves. The Python pipeline writes records in
@@ -132,7 +191,8 @@ exactly the shape the front end reads (`lib/types.ts` → `Meeting`). An illustr
 
 ```jsonc
 {
-  "id": "2026-09-08-committee-of-the-whole-standing",   // date + committee: one record per meeting
+  "id": "ddsb-2026-09-08-committee-of-the-whole-standing", // board + date + committee: one per meeting
+  "boardSlug": "ddsb",                     // which board held it; see lib/boards.ts
   "meetingDate": "2026-09-08",
   "committeeName": "Committee of the Whole - Standing",
   "title": "Draft boundaries set for the new Seaton elementary school",
@@ -146,21 +206,38 @@ exactly the shape the front end reads (`lib/types.ts` → `Meeting`). An illustr
 }
 ```
 
-Because `app/page.tsx` re-reads `meetings.json` on each request, a fresh pipeline run shows up on
-the next page load with no rebuild.
+Because `app/page.tsx` re-reads the board files on each request, a fresh pipeline run shows up
+on the next page load with no rebuild.
+
+The `id` carries the board slug because boards reuse committee names: DDSB and YRDSB both run a
+"Special Education Advisory Committee", and they meet on the same evenings often enough that an
+unprefixed id would collide in `digest_log` and stop one board's meeting from ever being
+emailed.
+
+There is one file per board rather than one shared file so that each board's scrape job writes
+its own file, and two jobs finishing at once can't overwrite each other.
 
 ## The Python backend
 
-`backend/scrape_ddsb.py` runs in five steps:
+`backend/scrape_agendas.py` scrapes one board per run (`--board <slug>`) in five steps:
 
-1. **Discover**: opens the DDSB meeting calendar (`calendar.ddsb.ca/meetings`) in headless
-   Chromium with Playwright and waits for the meeting table to render. For each row it reads the
-   date, the meeting name and the link in the **Agenda** column (found by its header text). That
-   link is the agenda PDF itself. `--months-back N` follows the calendar's "‹" link to include
-   earlier months.
-2. **Download**: saves each PDF to `backend/agendas/` through the same browser context, named like
-   `2026-09-09-committee-of-the-whole-standing-1b62b947.pdf`. Files already on disk are reused.
-   The suffix is the calendar's document id, so a reposted, revised agenda is fetched again.
+1. **Discover**: opens the board's calendar in headless Chromium with Playwright. There is one
+   adapter per portal type, picked from the board's `platform`:
+   - `discover_escribe` (eSCRIBE, e.g. `calendar.ddsb.ca/meetings`) waits for the meeting table,
+     then reads each row's date, meeting name and the link in the **Agenda** column, found by its
+     header text rather than its position. That link is the agenda PDF itself. `--months-back N`
+     follows the calendar's "‹" link to include earlier months.
+   - `discover_civicweb` (CivicWeb, e.g. `yrdsb.civicweb.net`) reads the schedule page, which
+     already covers several months, and drops private sessions. It then opens each meeting's own
+     page and waits for the **Agenda Package** link (or **Agenda**), which the page adds with its
+     own script a moment after load — reading any earlier finds nothing. A meeting whose agenda
+     isn't posted yet times out quickly and is skipped.
+
+   A board whose `platform` is `manual` has no adapter; the run says so and exits without
+   failing, since a board under provincial supervision holds no meetings to scrape.
+2. **Download**: saves each PDF to `backend/agendas/<board>/` through the same browser context,
+   named like `2026-09-09-committee-of-the-whole-standing-1b62b947.pdf`. Files already on disk are
+   reused. The suffix is the portal's document id, so a reposted, revised agenda is fetched again.
 3. **Extract**: pulls the text with `pdfplumber`, keeping `--- page N ---` markers.
    `simulate_pdfplumber_extraction()` is the dummy stand-in used by `--offline`.
 4. **Summarize**: one of three summarizers, all producing the same record shape:
@@ -169,8 +246,8 @@ the next page load with no rebuild.
    free and offline). The AI summarizers share one prompt: plain language, no facts beyond the
    agenda, and past tense for meetings that have already happened, since an agenda never says
    what was decided.
-5. **Publish**: writes `backend/output/meetings.generated.json`; with `--write-public` it
-   upserts the records (by `id`) into `public/data/meetings.json`.
+5. **Publish**: writes `backend/output/<board>.generated.json`; with `--write-public` it
+   upserts the records (by `id`) into `public/data/boards/<board>.json`.
 
 ### Set up
 
@@ -189,16 +266,16 @@ The last command is a one-time download of the headless Chromium build Playwrigh
 
 ```bash
 # No network, no browser, no API key: simulated agenda + dummy summarizer
-python backend/scrape_ddsb.py --offline
+python backend/scrape_agendas.py --board ddsb --offline
 
-# Live calendar: download the latest agendas to backend/agendas/ (dummy summaries)
-python backend/scrape_ddsb.py --limit 3
+# Live calendar: download the latest agendas to backend/agendas/<board>/ (dummy summaries)
+python backend/scrape_agendas.py --board yrdsb --limit 3
 
-# Go back three months, summarize with Claude, and publish to the app
-python backend/scrape_ddsb.py --months-back 3 --limit 10 --summarizer claude --write-public
+# Go back three months, summarize with Gemini, and publish to the app
+python backend/scrape_agendas.py --board ddsb --months-back 3 --limit 10 --summarizer gemini --write-public
 
 # Re-summarize a PDF that's already downloaded
-python backend/scrape_ddsb.py --pdf backend/agendas/<file>.pdf --summarizer claude
+python backend/scrape_agendas.py --board ddsb --pdf backend/agendas/ddsb/<file>.pdf --summarizer claude
 ```
 
 | Flag | Default | Meaning |
@@ -209,8 +286,9 @@ python backend/scrape_ddsb.py --pdf backend/agendas/<file>.pdf --summarizer clau
 | `--limit N` | `3` | Max agendas to process from the calendar, newest first |
 | `--months-back N` | `1` | Start the calendar listing N months before the current month |
 | `--headed` | off | Show the browser window (useful when the calendar's markup changes) |
-| `--out PATH` | `backend/output/meetings.generated.json` | Where results are written |
-| `--write-public` | off | Upsert results into `public/data/meetings.json`, skipping agendas already published |
+| `--out PATH` | `backend/output/<board>.generated.json` | Where results are written |
+| `--board <slug>` | `ddsb` | Which board to scrape: `ddsb`, `yrdsb`, `tdsb`, `pdsb` (see `backend/boards.py`) |
+| `--write-public` | off | Upsert results into `public/data/boards/<board>.json`, skipping agendas already published |
 | `--refresh` | off | With `--write-public`, re-summarize agendas even if they're already published |
 
 Each meeting has one record, keyed by date and committee. Re-running the pipeline updates that
@@ -257,7 +335,7 @@ posted agenda is on the site within a day; on days without one, nothing changes.
 Python 3.11, the requirements and Chromium, then runs:
 
 ```bash
-python backend/scrape_ddsb.py --months-back 1 --limit 10 --summarizer gemini --write-public
+python backend/scrape_agendas.py --board <slug> --months-back 1 --limit 10 --summarizer gemini --write-public
 ```
 
 It summarizes with Gemini using the `GEMINI_API_KEY` repository secret. A **Check Gemini key**
@@ -266,7 +344,8 @@ run continues. Meetings then get the built-in summary, the run shows a "Gemini f
 and a later run upgrades them. When you start a run by hand, tick **refresh** to re-summarize
 meetings that are already on the site, for example after changing the prompt.
 
-If `public/data/meetings.json` changed, it commits the file as `github-actions[bot]` and pushes
+The workflow runs one job per scrapable board, one board at a time so their pushes can't race.
+If `public/data/boards/<board>.json` changed, it commits the file as `github-actions[bot]` and pushes
 it. The downloaded PDFs are kept as a run artifact for 14 days.
 
 Before the first run:
@@ -302,11 +381,11 @@ components/
   Badges.tsx              date, urgency (color + icon + words), town and category labels
   HeroIllustration.tsx    agenda-page graphic
   NewsletterForm.tsx      email sign-up with loading, success and error states
-lib/                      types, date/urgency helpers, meetings.json loader,
+lib/                      board registry, types, date/urgency helpers, meeting loader,
                           Supabase admin client, welcome email (SMTP), signed unsubscribe links
 middleware.ts             returns 404 for the old /data/subscribers.json path
-public/data/              meetings.json (written by the pipeline)
-backend/                  scrape_ddsb.py, requirements.txt, .env.example
+public/data/boards/       one JSON file per board (written by the pipeline)
+backend/                  scrape_agendas.py, boards.py, requirements.txt, .env.example
   agendas/                downloaded agenda PDFs (git-ignored)
 design/                   Claude Design canvas source (.dc.html artboards)
 ```

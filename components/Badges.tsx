@@ -10,6 +10,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import { getBoard } from "@/lib/boards";
 import { formatMeetingDate, urgencyLevel, type UrgencyLevel } from "@/lib/format";
 import type { Category } from "@/lib/types";
 
@@ -49,6 +50,21 @@ export function UrgencyBadge({ score }: { score: number }) {
     >
       <Icon aria-hidden size={15} strokeWidth={2.25} />
       Urgency {score}/5 · {label}
+    </span>
+  );
+}
+
+/** Which board a meeting belongs to; the feed mixes boards unless one is selected. */
+export function BoardTag({ slug }: { slug: string }) {
+  const board = getBoard(slug);
+  if (!board) return null;
+  return (
+    <span
+      title={board.name}
+      className="inline-flex h-[22px] items-center rounded border-[1.5px] border-ink px-1.5 font-mono text-[10px] font-semibold uppercase leading-none tracking-[0.08em]"
+    >
+      {board.shortName}
+      <span className="sr-only">: {board.name}</span>
     </span>
   );
 }

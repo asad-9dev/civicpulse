@@ -1,26 +1,29 @@
 """
-DDSB CivicPulse: agenda scraper and summarizer (prototype scaffold).
+CivicPulse: Ontario school board agenda scraper and summarizer.
+
+One board per run, chosen with --board (see backend/boards.py for the registry).
 
 Pipeline
-    1. discover  - open the DDSB meeting calendar (calendar.ddsb.ca) in headless Chromium
-                   with Playwright, wait for the meeting table to render, and read each
-                   meeting's direct agenda PDF link.
-    2. download  - save those PDFs to backend/agendas/ through the same browser context.
+    1. discover  - open the board's meeting calendar in headless Chromium with Playwright and
+                   read each meeting's agenda PDF link. Two portal types are supported:
+                   eSCRIBE (calendar.ddsb.ca and most escribemeetings.com sites) and CivicWeb
+                   (yrdsb.civicweb.net and other *.civicweb.net sites).
+    2. download  - save those PDFs to backend/agendas/<board>/ through the same browser context.
     3. extract   - pull each PDF's text with pdfplumber (or simulate it with --offline).
-    4. summarize - turn 100+ pages of agenda text into the CivicPulse JSON shape,
-                   with Claude (--summarizer claude) or a keyword-based dummy.
+    4. summarize - turn 100+ pages of agenda text into the CivicPulse JSON shape, with Gemini
+                   (--summarizer gemini), Claude (--summarizer claude) or a keyword-based dummy.
     5. publish   - write the records; --write-public upserts them into
-                   public/data/meetings.json, which the Next.js app reads on every request.
+                   public/data/boards/<board>.json, which the Next.js app reads on every request.
 
 Setup (once)
     pip install -r backend/requirements.txt
     python -m playwright install chromium
 
 Examples
-    python backend/scrape_ddsb.py --offline                 # no network, dummy summaries
-    python backend/scrape_ddsb.py --limit 3                 # live calendar, dummy summaries
-    python backend/scrape_ddsb.py --months-back 3 --summarizer claude --write-public
-    python backend/scrape_ddsb.py --pdf backend/agendas/<file>.pdf --summarizer claude
+    python backend/scrape_agendas.py --board ddsb --offline          # no network, dummy summaries
+    python backend/scrape_agendas.py --board yrdsb --limit 3         # live calendar, dummy summaries
+    python backend/scrape_agendas.py --board ddsb --months-back 3 --summarizer gemini --write-public
+    python backend/scrape_agendas.py --board ddsb --pdf backend/agendas/ddsb/<file>.pdf --summarizer claude
 """
 
 from __future__ import annotations
@@ -34,7 +37,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -44,22 +47,27 @@ from playwright.sync_api import BrowserContext, Page, sync_playwright
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
-CALENDAR_URL = "https://calendar.ddsb.ca/meetings"
-# Public landing page; the source link for offline demo records.
-BOARD_MEETINGS_URL = "https://www.ddsb.ca/about-ddsb/board-of-trustees/board-meetings/"
+from boards import BOARDS, SCRAPABLE_SLUGS, SLUGS, Board, get_board
+
 BACKEND_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BACKEND_DIR.parent
-PUBLIC_MEETINGS_JSON = PROJECT_ROOT / "public" / "data" / "meetings.json"
+PUBLIC_BOARDS_DIR = PROJECT_ROOT / "public" / "data" / "boards"
 OUTPUT_DIR = BACKEND_DIR / "output"
 AGENDAS_DIR = BACKEND_DIR / "agendas"
 
-USER_AGENT = "CivicPulse/0.1 (independent civic prototype; summarizes public DDSB agendas)"
+USER_AGENT = "CivicPulse/0.2 (independent civic project; summarizes public Ontario school board agendas)"
 RENDER_TIMEOUT_MS = 30_000
+# How long to wait for a meeting page's document links. Short: a meeting with no agenda posted
+# yet never grows them, and a discovery run visits many such pages.
+DOCUMENT_TIMEOUT_MS = 10_000
 DOWNLOAD_TIMEOUT_MS = 120_000
 
-# The municipalities DDSB serves. The web app's filter chips cover the first five.
-DDSB_TOWNS = ["Ajax", "Pickering", "Whitby", "Oshawa", "Uxbridge", "Brock", "Scugog"]
 CATEGORIES = ["Boundary Review", "Transport", "Policy", "Budget"]
+
+
+def public_meetings_json(board: Board) -> Path:
+    """Where one board's decoded meetings live, e.g. public/data/boards/ddsb.json."""
+    return PUBLIC_BOARDS_DIR / f"{board.slug}.json"
 
 CLAUDE_MODEL = "claude-opus-5"
 
@@ -82,8 +90,9 @@ class PipelineError(Exception):
 
 @dataclass
 class AgendaSource:
-    """One meeting's agenda, as listed on the DDSB meeting calendar."""
+    """One meeting's agenda, as listed on a board's meeting calendar."""
 
+    board: Board
     page_url: str  # the meeting's page on the calendar (or the local PDF path)
     committee_name: str
     meeting_date: str | None  # ISO yyyy-mm-dd when we can parse it
@@ -94,12 +103,21 @@ class AgendaSource:
 # 1. Discover
 # --------------------------------------------------------------------------- #
 
-MONTHS = "january|february|march|april|may|june|july|august|september|october|november|december"
+# Full names and abbreviations alike: eSCRIBE writes "September 9, 2026", CivicWeb writes
+# "15 Sep 2026". Matching the first three letters and normalising with %b covers both.
+MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 DATE_PATTERNS = [
+    # 2026-09-15
     (re.compile(r"(20\d{2})-(\d{2})-(\d{2})"), lambda m: f"{m[1]}-{m[2]}-{m[3]}"),
+    # September 15, 2026 / Sep. 15 2026
     (
-        re.compile(rf"({MONTHS})\.?\s+(\d{{1,2}}),?\s+(20\d{{2}})", re.IGNORECASE),
-        lambda m: datetime.strptime(f"{m[1]} {m[2]} {m[3]}", "%B %d %Y").strftime("%Y-%m-%d"),
+        re.compile(rf"\b({MONTHS})[a-z]*\.?\s+(\d{{1,2}}),?\s+(20\d{{2}})", re.IGNORECASE),
+        lambda m: datetime.strptime(f"{m[1][:3]} {m[2]} {m[3]}", "%b %d %Y").strftime("%Y-%m-%d"),
+    ),
+    # 15 Sep 2026 / 15 September 2026
+    (
+        re.compile(rf"\b(\d{{1,2}})\s+({MONTHS})[a-z]*\.?,?\s+(20\d{{2}})", re.IGNORECASE),
+        lambda m: datetime.strptime(f"{m[1]} {m[2][:3]} {m[3]}", "%d %b %Y").strftime("%Y-%m-%d"),
     ),
 ]
 
@@ -186,11 +204,11 @@ def open_calendar(page: Page, url: str, attempts: int = 3) -> None:
             page.wait_for_timeout(10_000 * attempt)
 
 
-def discover_agendas(context: BrowserContext, months_back: int, limit: int) -> list[AgendaSource]:
-    """List meetings on the rendered calendar and return those with a published agenda, newest first."""
+def discover_escribe(context: BrowserContext, board: Board, months_back: int) -> list[AgendaSource]:
+    """Read an eSCRIBE meeting list (calendar.ddsb.ca and most escribemeetings.com sites)."""
     page = context.new_page()
     try:
-        open_calendar(page, CALENDAR_URL)
+        open_calendar(page, board.agenda_portal)
         # The listing runs from the start of the current month onward. Each "‹" link moves
         # the start back one month (its URL carries a StartDate and a per-page token).
         for _ in range(months_back):
@@ -202,8 +220,10 @@ def discover_agendas(context: BrowserContext, months_back: int, limit: int) -> l
     finally:
         page.close()
 
-    sources = [
+    log.info("%s calendar lists %d meeting(s)", board.short_name, len(rows))
+    return [
         AgendaSource(
+            board=board,
             page_url=row["meetingUrl"] or row["agendaUrl"],
             committee_name=guess_committee(row["title"], default=row["title"]),
             meeting_date=parse_meeting_date(row["when"]),
@@ -212,12 +232,148 @@ def discover_agendas(context: BrowserContext, months_back: int, limit: int) -> l
         for row in rows
         if row["agendaUrl"]
     ]
-    unique = {s.pdf_url: s for s in sources}
+
+
+# Runs inside a rendered CivicWeb schedule page. Every meeting on the calendar is a link to
+# MeetingInformation.aspx whose text ends with the date ("Board Meeting - Public Session -
+# 15 Sep 2026"); the same meeting is linked several times (calendar cell plus the side lists),
+# so the caller dedupes by meeting id.
+READ_CIVICWEB_MEETINGS_JS = """
+() => {
+  const links = [...document.querySelectorAll('a[href*="MeetingInformation.aspx"]')];
+  return links.map((link) => ({ title: link.innerText.trim(), meetingUrl: link.href }));
+}
+"""
+
+# On a CivicWeb meeting page the agenda is one or two links: "Agenda Package" is the full
+# document set (what DDSB's eSCRIBE Agenda link gives), "Agenda" is the order of business alone.
+# textContent rather than innerText, which is empty for a link the page hasn't laid out yet.
+# a.href (not the attribute) keeps the query string that makes the response a PDF.
+READ_CIVICWEB_AGENDA_JS = """
+() => {
+  const find = (label) =>
+    [...document.querySelectorAll('a[href*="/document/"]')]
+      .find((a) => (a.textContent || '').trim().toLowerCase() === label);
+  const link = find('agenda package') || find('agenda');
+  return link ? link.href : null;
+}
+"""
+
+# The meeting page ships with an unlabelled /document/ link and grows the labelled "Agenda" and
+# "Agenda Package" ones a moment later, so waiting for any /document/ link returns too early.
+# This waits for a labelled one, and times out on meetings whose agenda isn't posted yet.
+AWAIT_CIVICWEB_AGENDA_JS = """
+() => [...document.querySelectorAll('a[href*="/document/"]')]
+        .some((a) => ['agenda', 'agenda package'].includes((a.textContent || '').trim().toLowerCase()))
+"""
+
+# ".../MeetingInformation.aspx?Org=Cal&Id=2610" -> "2610"; the query key's case varies by link.
+CIVICWEB_MEETING_ID = re.compile(r"[?&]id=(\d+)", re.IGNORECASE)
+# "Board Meeting - Public Session - 15 Sep 2026" -> drop the trailing date.
+CIVICWEB_TRAILING_DATE = re.compile(r"\s*-\s*\d{1,2}\s+\w+\s+20\d{2}\s*$")
+
+
+def wait_for_civicweb(page: Page) -> None:
+    """Block until the CivicWeb schedule has rendered at least one meeting link."""
+    try:
+        page.wait_for_selector('a[href*="MeetingInformation.aspx"]', state="attached", timeout=RENDER_TIMEOUT_MS)
+    except PlaywrightTimeoutError as exc:
+        raise PipelineError(f"The meeting schedule did not render within {RENDER_TIMEOUT_MS // 1000}s ({page.url}).") from exc
+
+
+def open_civicweb_schedule(page: Page, url: str, attempts: int = 3) -> None:
+    """Load a CivicWeb schedule page and wait for its meeting links, retrying slow loads."""
+    for attempt in range(1, attempts + 1):
+        try:
+            page.goto(url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
+            wait_for_civicweb(page)
+            return
+        except (PipelineError, PlaywrightError) as exc:
+            reason = str(exc).strip().splitlines()[0]
+            if attempt == attempts:
+                try:
+                    seen = f'title "{page.title()}"'
+                except PlaywrightError:
+                    seen = "page content unavailable"
+                raise PipelineError(f"The meeting schedule didn't load after {attempts} tries ({url}): {reason}; {seen}") from exc
+            log.warning("Schedule didn't load (try %d of %d): %s; retrying", attempt, attempts, reason)
+            page.wait_for_timeout(10_000 * attempt)
+
+
+def discover_civicweb(context: BrowserContext, board: Board, limit: int) -> list[AgendaSource]:
+    """
+    Read a CivicWeb portal (yrdsb.civicweb.net and other *.civicweb.net sites).
+
+    The schedule page lists several months at once, so there's no month-by-month paging to do.
+    Each meeting's own page has to be opened to find its agenda document, which is the slow
+    part, so only the newest `limit` meetings are visited.
+    """
+    page = context.new_page()
+    try:
+        open_civicweb_schedule(page, board.agenda_portal)
+        rows = page.evaluate(READ_CIVICWEB_MEETINGS_JS)
+
+        listed: dict[str, AgendaSource] = {}
+        for row in rows:
+            title = (row["title"] or "").strip()
+            meeting_id = CIVICWEB_MEETING_ID.search(row["meetingUrl"] or "")
+            # Private sessions publish no agenda, so they're dropped before any page is opened.
+            if not title or not meeting_id or "private session" in title.lower():
+                continue
+            date = parse_meeting_date(title)
+            if not date:
+                continue
+            committee = CIVICWEB_TRAILING_DATE.sub("", title).strip()
+            listed.setdefault(
+                meeting_id[1],
+                AgendaSource(
+                    board=board,
+                    page_url=row["meetingUrl"],
+                    committee_name=guess_committee(committee, default=committee),
+                    meeting_date=date,
+                    pdf_url=None,
+                ),
+            )
+        log.info("%s schedule lists %d public meeting(s)", board.short_name, len(listed))
+
+        found: list[AgendaSource] = []
+        for source in sorted(listed.values(), key=lambda s: s.meeting_date or "", reverse=True):
+            if len(found) >= limit:
+                break
+            try:
+                page.goto(source.page_url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
+                page.wait_for_function(AWAIT_CIVICWEB_AGENDA_JS, timeout=DOCUMENT_TIMEOUT_MS)
+                agenda_url = page.evaluate(READ_CIVICWEB_AGENDA_JS)
+            except PlaywrightTimeoutError:
+                # Agendas are posted a few days before the meeting; older meetings keep only
+                # their minutes. Either way there's nothing here to summarize.
+                log.info("No agenda posted for %s (%s)", source.committee_name, source.meeting_date)
+                continue
+            except PlaywrightError as exc:
+                log.warning("Couldn't open %s (%s): %s", source.committee_name, source.meeting_date, exc)
+                continue
+            if agenda_url:
+                found.append(replace(source, pdf_url=agenda_url))
+        return found
+    finally:
+        page.close()
+
+
+def discover_agendas(context: BrowserContext, board: Board, months_back: int, limit: int) -> list[AgendaSource]:
+    """Meetings with a published agenda for one board, newest first."""
+    if board.platform == "escribe":
+        sources = discover_escribe(context, board, months_back)
+    elif board.platform == "civicweb":
+        sources = discover_civicweb(context, board, limit)
+    else:
+        raise PipelineError(
+            f"{board.short_name} has no agenda adapter (platform {board.platform!r}). "
+            + (board.status_note or "Add an adapter in backend/scrape_agendas.py to cover this board.")
+        )
+
+    unique = {s.pdf_url: s for s in sources if s.pdf_url}
     ordered = sorted(unique.values(), key=lambda s: s.meeting_date or "", reverse=True)
-    log.info(
-        "Calendar lists %d meeting(s), %d with a published agenda; keeping %d",
-        len(rows), len(ordered), min(limit, len(ordered)),
-    )
+    log.info("%d meeting(s) with a published agenda; keeping %d", len(ordered), min(limit, len(ordered)))
     return ordered[:limit]
 
 
@@ -236,9 +392,10 @@ def agenda_filename(source: AgendaSource) -> str:
 
 
 def download_agenda_pdf(context: BrowserContext, source: AgendaSource) -> Path:
-    """Save one agenda PDF to backend/agendas/, reusing the file if it's already there."""
-    AGENDAS_DIR.mkdir(parents=True, exist_ok=True)
-    destination = AGENDAS_DIR / agenda_filename(source)
+    """Save one agenda PDF to backend/agendas/<board>/, reusing the file if it's already there."""
+    board_dir = AGENDAS_DIR / source.board.slug
+    board_dir.mkdir(parents=True, exist_ok=True)
+    destination = board_dir / agenda_filename(source)
     if destination.exists() and destination.stat().st_size > 0:
         log.info("Using cached %s", destination.name)
         return destination
@@ -276,10 +433,11 @@ def simulate_pdfplumber_extraction(source: AgendaSource) -> str:
     the rest of the pipeline can run with --offline (no browser, no network).
     """
     date = source.meeting_date or "2026-09-08"
+    town = source.board.municipalities[0] if source.board.municipalities else "the region"
     return f"""--- page 1 ---
-DURHAM DISTRICT SCHOOL BOARD
+{source.board.name.upper()}
 {source.committee_name.upper()} - AGENDA
-{date} 7:00 p.m. Boardroom, Education Centre, Whitby
+{date} 7:00 p.m. Boardroom, Education Centre, {town}
 
 1. Call to Order
 2. Land Acknowledgement
@@ -287,16 +445,15 @@ DURHAM DISTRICT SCHOOL BOARD
 4. Approval of Agenda
 --- page 47 ---
 7. Staff Reports
-7.3 Draft Attendance Boundaries: Seaton Elementary School (opening September 2027)
-Staff recommend new elementary attendance boundaries for the Seaton community in north
-Pickering. Approximately 640 students currently attending three schools in Pickering and
-Ajax would be redirected. A public consultation survey is open until October 9, with a
-final vote expected at the October 20 Regular Board Meeting. Students currently in Grade 7
-may remain at their current school through Grade 8 (grandparenting).
+7.3 Draft Attendance Boundaries: a new elementary school (opening September 2027)
+Staff recommend new elementary attendance boundaries. Approximately 640 students currently
+attending three schools would be redirected. A public consultation survey is open until
+October 9, with a final vote expected at the October 20 Regular Board Meeting. Students
+currently in Grade 7 may remain at their current school through Grade 8 (grandparenting).
 --- page 63 ---
 7.4 2026-27 Student Transportation Update
-Route consolidation continues in Uxbridge; bell times at selected schools in Whitby and
-Oshawa are under review with the transportation consortium.
+Route consolidation continues; bell times at selected schools are under review with the
+transportation consortium.
 --- page 88 ---
 8. Policy and Procedure Review
 8.1 Procedure: Personal Mobile Devices, no changes proposed at this meeting.
@@ -309,12 +466,14 @@ Oshawa are under review with the transportation consortium.
 # 3. Summarize
 # --------------------------------------------------------------------------- #
 
-SUMMARY_SCHEMA = {
+def summary_schema(board: Board) -> dict:
+    """The JSON shape a summarizer must return. townsAffected is limited to the board's own towns."""
+    return {
     "type": "object",
     "properties": {
         "title": {"type": "string", "description": "Headline under 90 characters about the item that matters most to families."},
         "urgencyScore": {"type": "integer", "description": "1 = informational ... 5 = families must act soon."},
-        "townsAffected": {"type": "array", "items": {"type": "string", "enum": DDSB_TOWNS}},
+        "townsAffected": {"type": "array", "items": {"type": "string", "enum": board.municipalities}},
         "category": {"type": "string", "enum": CATEGORIES},
         "executiveSummary": {"type": "array", "items": {"type": "string"}, "description": "1 to 3 one-sentence bullets."},
         "studentParentImpact": {"type": "string"},
@@ -332,13 +491,20 @@ SUMMARY_SCHEMA = {
     "additionalProperties": False,
 }
 
-SYSTEM_PROMPT = """You turn Durham District School Board (DDSB) trustee meeting agendas into short, \
-plain-language briefings for students and parents in Durham Region, Ontario.
+
+def system_prompt(board: Board) -> str:
+    """The summarizer's standing instructions, naming the board whose agenda it is reading."""
+    return f"""You turn {board.name} ({board.short_name}) trustee meeting agendas into short, \
+plain-language briefings for students and parents in {board.region}, Ontario.
 
 Write for a busy parent or a Grade 9 student: short sentences, no board jargon, no acronyms \
 without explanation. Be concrete about dates, deadlines, grades and neighbourhoods when the \
 agenda states them, and never add facts that are not in the agenda. Focus on the single agenda \
 item with the biggest consequence for families; mention others only if they share a deadline.
+
+Every summary is read alongside summaries from other Ontario school boards, so make clear which \
+board it belongs to: name the {board.short_name} in the headline or the first sentence, and never \
+imply a decision applies beyond {board.region}.
 
 An agenda is published before the meeting: it says what trustees will discuss or vote on, not \
 what they decided. Never state an outcome the agenda doesn't contain. Procedural items (call to \
@@ -369,15 +535,16 @@ def summary_prompt(agenda_text: str, source: AgendaSource) -> str:
             f"This meeting is on {source.meeting_date} (today is {today}). Describe what's coming up "
             "(\"Trustees will vote on...\")."
         )
-    return f"""Committee: {source.committee_name}
+    return f"""Board: {source.board.name} ({source.board.short_name}), {source.board.region}
+Committee: {source.committee_name}
 Meeting date: {source.meeting_date or "unknown"}
 Source: {source.pdf_url or source.page_url}
 {timing}
 
 Summarize the agenda below into:
-- title: a headline under 90 characters about the item that matters most to families
+- title: a headline under 90 characters about the item that matters most to families, naming the {source.board.short_name}
 - urgencyScore: 1 (informational) to 5 (families must act soon, e.g. an open consultation or a vote on where students attend school)
-- townsAffected: which of {", ".join(DDSB_TOWNS)} are affected (list all of them for board-wide items)
+- townsAffected: which of {", ".join(source.board.municipalities)} are affected (list all of them for board-wide items)
 - category: the closest of {", ".join(CATEGORIES)}
 - executiveSummary: up to 3 bullets, one sentence each, under 25 words; fewer if the agenda has fewer substantive items
 - studentParentImpact: one paragraph of 60-120 words on what this could change for students and parents, and what they can do if the agenda gives a way (for example attend the public session, or respond to a consultation it mentions)
@@ -389,7 +556,7 @@ Summarize the agenda below into:
 
 
 def summarize_with_claude(agenda_text: str, source: AgendaSource) -> dict:
-    """Summarize one agenda with Claude, constrained to SUMMARY_SCHEMA via structured outputs."""
+    """Summarize one agenda with Claude, constrained to summary_schema() via structured outputs."""
     import anthropic
 
     # Anthropic() resolves credentials itself: ANTHROPIC_API_KEY (e.g. from backend/.env) or an `ant auth login` profile.
@@ -404,9 +571,9 @@ def summarize_with_claude(agenda_text: str, source: AgendaSource) -> dict:
             max_tokens=32000,
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
-            system=SYSTEM_PROMPT,
+            system=system_prompt(source.board),
             messages=[{"role": "user", "content": prompt}],
-            output_config={"format": {"type": "json_schema", "schema": SUMMARY_SCHEMA}},
+            output_config={"format": {"type": "json_schema", "schema": summary_schema(source.board)}},
         ) as stream:
             message = stream.get_final_message()
     except anthropic.AuthenticationError as exc:
@@ -466,7 +633,7 @@ def _gemini_text(response: dict) -> tuple[str | None, str]:
 
 def summarize_with_gemini(agenda_text: str, source: AgendaSource) -> dict:
     """
-    Summarize one agenda with Google's Gemini API (free tier works), as JSON matching SUMMARY_SCHEMA.
+    Summarize one agenda with Google's Gemini API (free tier works), as JSON matching summary_schema().
 
     Per-minute rate limits (HTTP 429 with a retry delay) are waited out and retried; a used-up
     daily quota moves on to the next model in GEMINI_MODELS. If every model fails, raises
@@ -477,12 +644,12 @@ def summarize_with_gemini(agenda_text: str, source: AgendaSource) -> dict:
         raise GeminiUnavailable("GEMINI_API_KEY is not set")
 
     payload = json.dumps({
-        "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "systemInstruction": {"parts": [{"text": system_prompt(source.board)}]},
         "contents": [{"role": "user", "parts": [{"text": summary_prompt(agenda_text, source)}]}],
         "generationConfig": {
             "temperature": 0.2,
             "responseMimeType": "application/json",
-            "responseJsonSchema": SUMMARY_SCHEMA,
+            "responseJsonSchema": summary_schema(source.board),
         },
     }).encode("utf-8")
 
@@ -586,8 +753,9 @@ def summarize_dummy(agenda_text: str, source: AgendaSource) -> dict:
 
     scores = {c: sum(focus.count(k) for k in KEYWORDS[c]) for c in CATEGORIES}
     category = max(scores, key=scores.get) if any(scores.values()) else "Policy"
+    board_towns = source.board.municipalities
     # "(?! island)": the land acknowledgement names the Mississaugas of Scugog Island First Nation.
-    towns = [t for t in DDSB_TOWNS if re.search(rf"\b{t.lower()}\b(?! island)", focus)] or DDSB_TOWNS[:5]
+    towns = [t for t in board_towns if re.search(rf"\b{re.escape(t.lower())}\b(?! island)", focus)] or board_towns[:5]
 
     urgency = 2
     if any(k in focus for k in ("consultation", "survey", "deadline", "public feedback")):
@@ -624,21 +792,25 @@ def slugify(text: str, max_length: int = 48) -> str:
 
 
 def record_id(source: AgendaSource) -> str:
-    """One record per meeting: date + committee, e.g. 2026-09-09-committee-of-the-whole-standing.
-
-    Deliberately not built from summary text, so re-running the pipeline updates a meeting's
-    record instead of adding a duplicate next to it.
     """
-    return f"{source.meeting_date or 'undated'}-{slugify(source.committee_name, 40)}"
+    One record per meeting: board + date + committee, e.g.
+    ddsb-2026-09-09-committee-of-the-whole-standing.
+
+    The board prefix keeps two boards apart: several run a "Special Education Advisory
+    Committee", and they meet on the same evenings often enough that an unprefixed id would
+    collide. Deliberately not built from summary text, so re-running the pipeline updates a
+    meeting's record instead of adding a duplicate next to it.
+    """
+    return f"{source.board.slug}-{source.meeting_date or 'undated'}-{slugify(source.committee_name, 40)}"
 
 
 def source_link(source: AgendaSource) -> str:
-    return source.pdf_url or source.page_url or BOARD_MEETINGS_URL
+    return source.pdf_url or source.page_url or source.board.website
 
 
 def to_meeting_record(source: AgendaSource, summary: dict, summary_source: str) -> dict:
     """
-    Merge discovery metadata with a summary into the public/data/meetings.json shape.
+    Merge discovery metadata with a summary into the public/data/boards/<board>.json shape.
 
     Validates the summary as it goes (an AI answer can be malformed): raises PipelineError on
     anything unusable so the caller can fall back to the built-in summarizer.
@@ -649,7 +821,8 @@ def to_meeting_record(source: AgendaSource, summary: dict, summary_source: str) 
         impact = str(summary["studentParentImpact"]).strip()
         policy = str(summary["policyChanges"]).strip()
         urgency = max(1, min(5, int(summary["urgencyScore"])))
-        towns = [t for t in dict.fromkeys(summary["townsAffected"]) if t in DDSB_TOWNS] or DDSB_TOWNS[:5]
+        board_towns = source.board.municipalities
+        towns = [t for t in dict.fromkeys(summary["townsAffected"]) if t in board_towns] or board_towns[:5]
     except (KeyError, TypeError, ValueError) as exc:
         raise PipelineError(f"Unusable summary for {source.page_url}: {exc!r}") from exc
     if not bullets or not title:
@@ -657,6 +830,8 @@ def to_meeting_record(source: AgendaSource, summary: dict, summary_source: str) 
 
     return {
         "id": record_id(source),
+        # Which board held the meeting; the site looks up its name and towns from this.
+        "boardSlug": source.board.slug,
         "meetingDate": source.meeting_date or datetime.now().strftime("%Y-%m-%d"),
         "committeeName": source.committee_name,
         "title": title,
@@ -678,19 +853,24 @@ def write_json(path: Path, records: list[dict]) -> None:
     path.write_text(json.dumps(records, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def read_public_meetings() -> dict[str, dict]:
-    """Published records by id."""
-    if not PUBLIC_MEETINGS_JSON.exists():
+def read_public_meetings(board: Board) -> dict[str, dict]:
+    """One board's published records, by id."""
+    path = public_meetings_json(board)
+    if not path.exists():
         return {}
-    return {m["id"]: m for m in json.loads(PUBLIC_MEETINGS_JSON.read_text(encoding="utf-8"))}
+    return {m["id"]: m for m in json.loads(path.read_text(encoding="utf-8"))}
 
 
-def upsert_public_meetings(records: list[dict]) -> int:
-    """Replace records with the same id, keep the rest, newest first."""
-    merged = read_public_meetings()
+def upsert_public_meetings(board: Board, records: list[dict]) -> int:
+    """Replace records with the same id, keep the rest, newest first.
+
+    Only this board's file is touched, so two boards' scrape jobs can run at the same time
+    without writing over each other.
+    """
+    merged = read_public_meetings(board)
     merged.update({r["id"]: r for r in records})
     ordered = sorted(merged.values(), key=lambda m: m["meetingDate"], reverse=True)
-    write_json(PUBLIC_MEETINGS_JSON, ordered)
+    write_json(public_meetings_json(board), ordered)
     return len(ordered)
 
 
@@ -699,7 +879,17 @@ def upsert_public_meetings(records: list[dict]) -> int:
 # --------------------------------------------------------------------------- #
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Scrape and summarize DDSB trustee meeting agendas.")
+    parser = argparse.ArgumentParser(
+        description="Scrape and summarize an Ontario school board's trustee meeting agendas.",
+        epilog=(
+            "Boards: " + ", ".join(f"{b.slug} ({b.short_name}, {b.platform})" for b in BOARDS)
+            + ". Ready to scrape: " + ", ".join(SCRAPABLE_SLUGS) + "."
+        ),
+    )
+    parser.add_argument(
+        "--board", choices=SLUGS, default="ddsb",
+        help="which school board to scrape (default ddsb); see backend/boards.py",
+    )
     parser.add_argument("--offline", action="store_true", help="skip the network and use a simulated agenda")
     parser.add_argument("--pdf", action="append", type=Path, default=[], help="summarize a local agenda PDF (repeatable)")
     parser.add_argument(
@@ -712,27 +902,30 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="start the calendar listing this many months before the current month (default 1)",
     )
     parser.add_argument("--headed", action="store_true", help="show the browser window (for debugging selectors)")
-    parser.add_argument("--out", type=Path, default=OUTPUT_DIR / "meetings.generated.json", help="where to write results")
-    parser.add_argument("--write-public", action="store_true", help="also upsert results into public/data/meetings.json")
+    parser.add_argument("--out", type=Path, default=None, help="where to write results (default backend/output/<board>.generated.json)")
+    parser.add_argument("--write-public", action="store_true", help="also upsert results into public/data/boards/<board>.json")
     parser.add_argument(
         "--refresh", action="store_true",
         help="with --write-public, re-summarize agendas that are already published unchanged",
     )
     parser.add_argument("-v", "--verbose", action="store_true")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.out is None:
+        args.out = OUTPUT_DIR / f"{args.board}.generated.json"
+    return args
 
 
-def collect_agendas(args: argparse.Namespace) -> list[tuple[AgendaSource, str]]:
+def collect_agendas(args: argparse.Namespace, board: Board) -> list[tuple[AgendaSource, str]]:
     """Return (source, agenda text) pairs from local PDFs, the simulator, or the live site."""
     if args.pdf:
         pairs = []
         for pdf_path in args.pdf:
-            source = AgendaSource(str(pdf_path), guess_committee(pdf_path.stem), parse_meeting_date(pdf_path.stem))
+            source = AgendaSource(board, str(pdf_path), guess_committee(pdf_path.stem), parse_meeting_date(pdf_path.stem))
             pairs.append((source, extract_text_with_pdfplumber(pdf_path)))
         return pairs
 
     if args.offline:
-        source = AgendaSource(BOARD_MEETINGS_URL, "Committee of the Whole - Standing", "2026-09-08")
+        source = AgendaSource(board, board.website, "Committee of the Whole - Standing", "2026-09-08")
         return [(source, simulate_pdfplumber_extraction(source))]
 
     pairs = []
@@ -744,7 +937,7 @@ def collect_agendas(args: argparse.Namespace) -> list[tuple[AgendaSource, str]]:
             raise PipelineError(f"Could not start Chromium ({reason}). Run `python -m playwright install chromium` once.") from exc
         try:
             context = browser.new_context(user_agent=USER_AGENT)
-            for source in discover_agendas(context, args.months_back, args.limit):
+            for source in discover_agendas(context, board, args.months_back, args.limit):
                 try:
                     pdf_path = download_agenda_pdf(context, source)
                 except (PipelineError, PlaywrightError) as exc:
@@ -755,7 +948,10 @@ def collect_agendas(args: argparse.Namespace) -> list[tuple[AgendaSource, str]]:
             browser.close()
 
     if not pairs:
-        log.warning("No agenda PDFs found. Agendas are posted a few days before each meeting; try --months-back 2.")
+        log.warning(
+            "No %s agenda PDFs found. Agendas are posted a few days before each meeting; try --months-back 2.",
+            board.short_name,
+        )
     return pairs
 
 
@@ -764,15 +960,29 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(levelname)s %(message)s")
     load_dotenv(BACKEND_DIR / ".env")
 
+    board = get_board(args.board)
+    log.info("Board: %s (%s), portal %s", board.name, board.platform, board.agenda_portal or "none")
+    if not board.scrapable and not args.offline and not args.pdf:
+        message = (
+            f"{board.short_name} has no agenda adapter. "
+            + (board.status_note or f"Its portal type is {board.platform!r}.")
+        )
+        log.error("%s", message)
+        if os.environ.get("GITHUB_ACTIONS"):
+            # A board with no trustee meetings is expected, not a broken run, so warn rather
+            # than fail: a red X every morning would train everyone to ignore this workflow.
+            print(f"::warning title=No agendas for {board.short_name}::{message}")
+        return 0
+
     ai_summarizer = args.summarizer in ("gemini", "claude")
     # Scheduled runs overlap (--months-back 1, daily): don't re-summarize an agenda that is
     # already published. Exceptions: a revised agenda (new document link) is redone, and when an
     # AI summarizer is running, a record written by the built-in summarizer is upgraded.
-    published = read_public_meetings() if args.write_public and not args.refresh else {}
+    published = read_public_meetings(board) if args.write_public and not args.refresh else {}
     gemini_calls = 0
     try:
         records = []
-        for source, text in collect_agendas(args):
+        for source, text in collect_agendas(args, board):
             prior = published.get(record_id(source))
             if prior and prior.get("originalPdfUrl") == source_link(source):
                 upgradable = ai_summarizer and prior.get("summarySource", "built-in") == "built-in"
@@ -810,8 +1020,11 @@ def main(argv: list[str] | None = None) -> int:
     write_json(args.out, records)
     log.info("Wrote %d record(s) to %s", len(records), args.out)
     if args.write_public and records:
-        total = upsert_public_meetings(records)
-        log.info("Updated %s (%d meetings total)", PUBLIC_MEETINGS_JSON.relative_to(PROJECT_ROOT), total)
+        total = upsert_public_meetings(board, records)
+        log.info(
+            "Updated %s (%d %s meetings total)",
+            public_meetings_json(board).relative_to(PROJECT_ROOT), total, board.short_name,
+        )
     return 0
 
 

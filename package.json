@@ -2,7 +2,7 @@
   "name": "ddsb-civicpulse",
   "version": "0.1.0",
   "private": true,
-  "description": "DDSB trustee meeting agendas, decoded into bite-sized summaries for students and parents.",
+  "description": "Ontario school board trustee meeting agendas, decoded into bite-sized summaries for students and parents.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

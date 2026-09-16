@@ -1,0 +1,89 @@
+[
+  {
+    "id": "yrdsb-2026-09-15-committee-of-the-whole-standing",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-15",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "YRDSB reviews rules for school boundaries, student transfers, and overflow",
+    "urgencyScore": 3,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Boundary Review",
+    "executiveSummary": [
+      "Trustees will review updated YRDSB rules governing school boundaries, student transfers, holding schools, and French Immersion programs.",
+      "The board recommends sending the updated boundary and student transfer policy out for six months of public feedback.",
+      "Trustees will vote on revising the board's operational bylaws to align with new provincial education legislation."
+    ],
+    "studentParentImpact": "The updated YRDSB policy clarifies how school boundaries are set, how primary French Immersion dual track programs are introduced, and how students directed to overflow or holding schools get recalled to their home schools. It also details the rules and limits for student transfer requests. Families can share feedback on these changes during a six-month public consultation period by submitting comments online or through their local school council, or by emailing policy.committee@yrdsb.ca.",
+    "policyChanges": "YRDSB is updating Policy #108.0 on student accommodation and transfers, Policy #422.0 on facility partnerships, and Policy #445.0 on school naming. Trustees will also vote on revising the board's Operational By-Law to comply with provincial legislation.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195841",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-09-15-board-meeting-public-session",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-15",
+    "committeeName": "Board Meeting - Public Session",
+    "title": "YRDSB Trustees Review Child Protection Policy and Launch Family Support Office",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Trustees will consider final approval for YRDSB Policy 610.0 on reporting children and youth in need of protection.",
+      "YRDSB has launched a new Student and Family Support Office to help parents resolve school issues.",
+      "Fall early reading screening for primary students across York Region will begin in late September."
+    ],
+    "studentParentImpact": "York Region District School Board families have a new avenue to address concerns through the recently launched Student and Family Support Office. If parents cannot resolve an issue with their child's teacher or principal, they can contact this office via phone, email, or an online form. Parents of students in Kindergarten Year 2, Grade 1, and Grade 2 should also expect early reading screenings starting later this month through mid-November. Families wishing to speak to the board on future agenda topics can submit a written delegation request online or in person to Trustee Services.",
+    "policyChanges": "Trustees are scheduled to consider final approval for Policy #610.0, Reporting Children and Youth in Need of Protection. Additionally, Policy #237.0 on appointing community members to board committees has been moved forward for public review.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195838",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-09-10-special-education-advisory-committee",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-10",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "YRDSB committee scheduled to review speech therapy and special education reports",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "A presentation on YRDSB speech-language pathology supports was scheduled for the advisory committee.",
+      "Members were set to vote on approving the 2025-2026 Special Education Advisory Committee annual report.",
+      "The agenda included a showcase on summer programs for students with developmental disabilities and complex needs."
+    ],
+    "studentParentImpact": "A presentation on speech-language pathology supports was listed on the agenda for York Region District School Board families. The committee was also set to review summer learning programs designed for students with developmental disabilities and multiple special needs. In addition, trustees and committee members were scheduled to vote on approving their annual report detailing special education accomplishments from the previous school year. While this meeting was informational, families can track how YRDSB delivers speech services, specialized summer programming, and ongoing special education supports across York Region schools.",
+    "policyChanges": "The agenda included routine updates on policies and procedures open for public comment, but no specific policy revisions were scheduled for a vote.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195622",
+    "summarySource": "gemini"
+  }
+]

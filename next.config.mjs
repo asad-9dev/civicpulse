@@ -2,11 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    // The home page reads meetings.json from disk at request time. On Vercel, public/ is served
-    // from the CDN and isn't bundled into server functions unless listed here.
+    // The home page reads the per-board meeting files from disk at request time. On Vercel,
+    // public/ is served from the CDN and isn't bundled into server functions unless listed here.
     outputFileTracingIncludes: {
-      "/": ["./public/data/meetings.json"],
-      "/api/digest": ["./public/data/meetings.json"],
+      "/": ["./public/data/boards/*.json"],
+      "/api/digest": ["./public/data/boards/*.json"],
     },
   },
 };

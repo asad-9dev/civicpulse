@@ -1,15 +1,15 @@
 import { Activity, ExternalLink, Mail } from "lucide-react";
+import { BoardMark, BoardSelector } from "@/components/BoardSelector";
 import { HeroIllustration } from "@/components/HeroIllustration";
 import { MeetingExplorer } from "@/components/MeetingExplorer";
 import { NewsletterForm } from "@/components/NewsletterForm";
-import { getMeetings } from "@/lib/meetings";
+import { BOARDS, resolveBoardParam, type Board } from "@/lib/boards";
+import { countMeetingsByBoard, getMeetings } from "@/lib/meetings";
 
-// Re-read public/data/meetings.json on each request so new pipeline output shows up immediately.
+// Re-read the per-board meeting files on each request so new pipeline output shows up immediately.
 export const dynamic = "force-dynamic";
 
-const DDSB_MEETINGS_URL = "https://www.ddsb.ca/about-ddsb/board-of-trustees/board-meetings/";
-
-function Wordmark({ size = "lg" }: { size?: "lg" | "sm" }) {
+function Wordmark({ size = "lg", children }: { size?: "lg" | "sm"; children?: React.ReactNode }) {
   return (
     <span className="flex items-center gap-2.5">
       {size === "lg" && (
@@ -22,15 +22,35 @@ function Wordmark({ size = "lg" }: { size?: "lg" | "sm" }) {
       >
         CivicPulse
       </span>
-      <span className="rounded border-[1.5px] border-ink px-1.5 py-0.5 font-mono text-[10px] font-semibold leading-tight tracking-[0.1em] sm:text-[11px]">
-        DDSB
-      </span>
+      {children}
     </span>
   );
 }
 
-export default async function HomePage() {
-  const meetings = await getMeetings();
+/** The headline and the line above it, which name whichever board is being shown. */
+function heroCopy(board: Board | null) {
+  if (board) {
+    return {
+      eyebrowShort: `${board.shortName} · Trustee meetings`,
+      eyebrowLong: `${board.name} · Trustee meetings`,
+      headline: `${board.shortName} Trustee Decisions,`,
+    };
+  }
+  return {
+    eyebrowShort: "Ontario · Trustee meetings",
+    eyebrowLong: `${BOARDS.length} Ontario school boards · Trustee meetings`,
+    headline: "Ontario Trustee Decisions,",
+  };
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { board?: string | string[] };
+}) {
+  const board = resolveBoardParam(searchParams.board);
+  const [meetings, counts] = await Promise.all([getMeetings(board), countMeetingsByBoard()]);
+  const copy = heroCopy(board);
 
   return (
     <>
@@ -42,10 +62,13 @@ export default async function HomePage() {
       </a>
 
       <header className="border-b border-rule">
-        <div className="page-container flex h-16 items-center justify-between sm:h-[76px]">
-          <a href="/" aria-label="CivicPulse home" className="rounded-lg">
-            <Wordmark />
-          </a>
+        <div className="page-container flex h-16 items-center justify-between gap-3 sm:h-[76px]">
+          <div className="flex items-center gap-2.5">
+            <a href={board ? `/?board=${board.slug}` : "/"} aria-label="CivicPulse home" className="rounded-lg">
+              <Wordmark />
+            </a>
+            <BoardSelector boards={BOARDS} active={board} counts={counts} />
+          </div>
           <div className="flex items-center gap-6">
             <a
               href="#subscribe"
@@ -63,11 +86,11 @@ export default async function HomePage() {
           <div className="flex flex-col gap-[18px] sm:gap-7">
             <p className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-soft sm:text-[13px]">
               <span aria-hidden className="size-2 rounded-full bg-civic" />
-              <span className="sm:hidden">DDSB · Trustee meetings</span>
-              <span className="hidden sm:inline">Durham District School Board · Trustee meetings</span>
+              <span className="sm:hidden">{copy.eyebrowShort}</span>
+              <span className="hidden sm:inline">{copy.eyebrowLong}</span>
             </p>
             <h1 className="text-balance font-serif text-[46px] font-semibold leading-[1.02] tracking-[-0.025em] sm:text-[64px] lg:text-[80px] lg:leading-none">
-              DDSB Trustee Decisions, <em className="marker px-1 font-medium sm:px-1.5">Decoded</em>
+              {copy.headline} <em className="marker px-1 font-medium sm:px-1.5">Decoded</em>
             </h1>
             <p className="max-w-[610px] text-pretty text-[17px] leading-[1.55] text-ink-soft sm:text-[21px]">
               Every board agenda runs past 100 pages. CivicPulse reads each one and boils it down to three
@@ -78,7 +101,7 @@ export default async function HomePage() {
           <HeroIllustration />
         </section>
 
-        <MeetingExplorer meetings={meetings} />
+        <MeetingExplorer meetings={meetings} board={board} />
 
         <section id="subscribe" aria-labelledby="subscribe-heading" className="mt-14 scroll-mt-6 bg-ink text-white sm:mt-24">
           <div className="page-container grid items-center gap-8 py-11 sm:py-[72px] lg:grid-cols-2 lg:gap-[72px]">
@@ -94,29 +117,31 @@ export default async function HomePage() {
               </h2>
               <p className="text-base leading-[1.55] text-night-text sm:text-lg">
                 One short email after each trustee meeting: the three things that changed, which towns they affect,
-                and any deadline to have your say.
+                and any deadline to have your say. Pick the boards you care about.
               </p>
             </div>
-            <NewsletterForm />
+            <NewsletterForm boards={BOARDS} defaultBoard={board} />
           </div>
         </section>
       </main>
 
       <footer className="page-container flex flex-col gap-6 pb-12 pt-8 sm:flex-row sm:items-start sm:justify-between sm:gap-12 sm:pb-14 sm:pt-10">
         <div className="flex max-w-[720px] flex-col gap-3">
-          <Wordmark size="sm" />
+          <Wordmark size="sm">
+            <BoardMark board={board} />
+          </Wordmark>
           <p className="text-[15px] leading-relaxed text-ink-soft">
-            CivicPulse is an independent civic project. It is not affiliated with or endorsed by the Durham District
-            School Board.
+            CivicPulse is an independent civic project. It is not affiliated with or endorsed by{" "}
+            {board ? `the ${board.name}` : "any Ontario school board"}.
           </p>
         </div>
         <a
-          href={DDSB_MEETINGS_URL}
+          href={board ? board.website : BOARDS[0].website}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap text-[15px] font-bold text-civic hover:text-ink"
         >
-          Official DDSB board meetings
+          {board ? `Official ${board.shortName} board meetings` : `Official ${BOARDS[0].shortName} board meetings`}
           <ExternalLink aria-hidden size={16} strokeWidth={2.25} />
         </a>
       </footer>

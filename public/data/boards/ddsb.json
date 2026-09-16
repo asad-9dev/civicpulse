@@ -1,6 +1,7 @@
 [
   {
-    "id": "2026-09-10-special-education-advisory-committee",
+    "id": "ddsb-2026-09-10-special-education-advisory-committee",
+    "boardSlug": "ddsb",
     "meetingDate": "2026-09-10",
     "committeeName": "Special Education Advisory Committee",
     "title": "DDSB Agenda Scheduled Updates on Special Education Plan and Student Transition Guide",
@@ -26,7 +27,8 @@
     "summarySource": "gemini"
   },
   {
-    "id": "2026-09-09-committee-of-the-whole-standing",
+    "id": "ddsb-2026-09-09-committee-of-the-whole-standing",
+    "boardSlug": "ddsb",
     "meetingDate": "2026-09-09",
     "committeeName": "Committee of the Whole - Standing",
     "title": "Police governance presentation was scheduled for school board committee meeting",
@@ -52,7 +54,8 @@
     "summarySource": "gemini"
   },
   {
-    "id": "2026-08-26-special-board-meeting",
+    "id": "ddsb-2026-08-26-special-board-meeting",
+    "boardSlug": "ddsb",
     "meetingDate": "2026-08-26",
     "committeeName": "Special Board Meeting",
     "title": "Resignation of Trustee Mark Jacula was on the special board meeting agenda",

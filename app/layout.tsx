@@ -28,9 +28,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DDSB CivicPulse · Trustee decisions, decoded",
+  title: "CivicPulse · Ontario trustee decisions, decoded",
   description:
-    "Durham District School Board trustee meeting agendas, turned into three-point summaries for students and parents in Ajax, Pickering, Whitby, Oshawa and Uxbridge.",
+    "Ontario school board trustee meeting agendas, turned into three-point summaries for students and parents. Covering the Durham, York Region, Toronto and Peel district school boards.",
   // app/icon.png (512x512, transparent corners); also used for iOS home-screen shortcuts.
   icons: {
     icon: "/icon.png",

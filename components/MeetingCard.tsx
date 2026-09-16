@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import type { Meeting } from "@/lib/types";
-import { CategoryLabel, DateBadge, TownTag, UrgencyBadge } from "./Badges";
+import { BoardTag, CategoryLabel, DateBadge, TownTag, UrgencyBadge } from "./Badges";
 
 export function SummaryList({ items, size = "card" }: { items: string[]; size?: "card" | "dialog" }) {
   const text = size === "dialog" ? "text-[17px] leading-[1.55]" : "text-base leading-normal";
@@ -39,7 +39,10 @@ export function MeetingCard({ meeting, onOpen }: { meeting: Meeting; onOpen: (id
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="font-mono text-xs uppercase tracking-[0.06em] text-ink-muted">{meeting.committeeName}</p>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <BoardTag slug={meeting.boardSlug} />
+          <p className="font-mono text-xs uppercase tracking-[0.06em] text-ink-muted">{meeting.committeeName}</p>
+        </div>
         <h3 className="text-pretty font-serif text-2xl font-semibold leading-[1.18] tracking-[-0.01em] sm:text-[25px]">
           {meeting.title}
         </h3>

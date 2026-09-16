@@ -35,6 +35,8 @@ export async function POST(request: Request) {
   };
 
   if (!/^\d+$/.test(id) || !/^[A-Za-z0-9_-]{32}$/.test(token)) return respond("invalid");
+  // The token is signed over the id as it appears in the link; the column is a bigint.
+  const subscriberId = Number(id);
 
   const supabase = getSupabaseAdmin();
   if ("problem" in supabase) {
@@ -43,13 +45,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { data, error } = await supabase.client.from("subscribers").select("email").eq("id", id).maybeSingle();
+    const { data, error } = await supabase.client.from("subscribers").select("email").eq("id", subscriberId).maybeSingle();
     if (error) throw error;
     // Already removed (e.g. the link was used twice): the end state is what they asked for.
     if (!data) return respond("done");
     if (!isValidUnsubscribeToken(id, data.email, token)) return respond("invalid");
 
-    const { error: deleteError } = await supabase.client.from("subscribers").delete().eq("id", id);
+    const { error: deleteError } = await supabase.client.from("subscribers").delete().eq("id", subscriberId);
     if (deleteError) throw deleteError;
     return respond("done");
   } catch (error) {
