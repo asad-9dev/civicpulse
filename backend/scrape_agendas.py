@@ -666,6 +666,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="which school board to scrape (default ddsb); --list shows them all",
     )
     parser.add_argument("--list", action="store_true", help="print the registered boards and exit")
+    parser.add_argument(
+        "--embed", action="store_true",
+        help="also store each agenda's full text and embeddings in Supabase for semantic search",
+    )
     parser.add_argument("--offline", action="store_true", help="skip the network and use a simulated agenda")
     parser.add_argument("--pdf", action="append", type=Path, default=[], help="summarize a local agenda PDF (repeatable)")
     parser.add_argument(
@@ -689,6 +693,31 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     if args.out is None:
         args.out = OUTPUT_DIR / f"{args.board}.generated.json"
     return args
+
+
+def embed_agendas(board: Board, items: list[tuple[AgendaSource, dict, str]]) -> None:
+    """
+    Store each agenda's text and embeddings for semantic search.
+
+    Best effort by design: search is a bonus on top of the summaries, so anything that goes
+    wrong here is logged and the run still succeeds.
+    """
+    from embeddings import EmbeddingUnavailable, board_row_id, store_document
+
+    try:
+        board_id = board_row_id(board)
+    except EmbeddingUnavailable as exc:
+        log.warning("Not embedding %s: %s", board.short_name, exc)
+        return
+
+    stored = 0
+    for _source, record, text in items:
+        try:
+            stored += store_document(board, board_id, record, text)
+        except EmbeddingUnavailable as exc:
+            log.warning("Not embedding %s: %s", record["id"], exc)
+    if stored:
+        log.info("Stored %d searchable passage(s) for %s", stored, board.short_name)
 
 
 def collect_agendas(args: argparse.Namespace, board: Board) -> list[tuple[AgendaSource, str]]:
@@ -772,6 +801,8 @@ def main(argv: list[str] | None = None) -> int:
     gemini_calls = 0
     try:
         records = []
+        # (source, record, agenda text) for --embed, which runs after the summaries are written.
+        embeddable: list[tuple[AgendaSource, dict, str]] = []
         for source, text in collect_agendas(args, board):
             prior = published.get(record_id(source))
             if prior and prior.get("originalPdfUrl") == source_link(source):
@@ -781,14 +812,19 @@ def main(argv: list[str] | None = None) -> int:
                     continue
             log.info("Summarizing %s (%s, %s chars) with %s", source.committee_name, source.meeting_date, f"{len(text):,}", args.summarizer)
 
+            def keep(record: dict) -> dict:
+                records.append(record)
+                embeddable.append((source, record, text))
+                return record
+
             if args.summarizer == "claude":
-                records.append(to_meeting_record(source, summarize_with_claude(text, source), "claude"))
+                keep(to_meeting_record(source, summarize_with_claude(text, source), "claude"))
             elif args.summarizer == "gemini":
                 if gemini_calls:
                     time.sleep(GEMINI_PAUSE_SECONDS)
                 gemini_calls += 1
                 try:
-                    records.append(to_meeting_record(source, summarize_with_gemini(text, source), "gemini"))
+                    keep(to_meeting_record(source, summarize_with_gemini(text, source), "gemini"))
                 except (GeminiUnavailable, PipelineError) as exc:
                     # Never let Gemini trouble take the site down: publish the built-in summary
                     # now; tomorrow's run upgrades it once Gemini is available again.
@@ -796,9 +832,9 @@ def main(argv: list[str] | None = None) -> int:
                     log.warning(warning)
                     if os.environ.get("GITHUB_ACTIONS"):
                         print(f"::warning title=Gemini fallback::{warning}")
-                    records.append(to_meeting_record(source, summarize_dummy(text, source), "built-in"))
+                    keep(to_meeting_record(source, summarize_dummy(text, source), "built-in"))
             else:
-                records.append(to_meeting_record(source, summarize_dummy(text, source), "built-in"))
+                keep(to_meeting_record(source, summarize_dummy(text, source), "built-in"))
     except (PipelineError, PlaywrightError) as exc:
         log.error("%s", exc)
         if os.environ.get("GITHUB_ACTIONS"):
@@ -809,6 +845,9 @@ def main(argv: list[str] | None = None) -> int:
 
     write_json(args.out, records)
     log.info("Wrote %d record(s) to %s", len(records), args.out)
+    if args.embed and embeddable:
+        embed_agendas(board, embeddable)
+
     if args.write_public and records:
         total = upsert_public_meetings(board, records)
         log.info(

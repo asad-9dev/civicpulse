@@ -131,6 +131,40 @@ board — so the filtering happens in the database rather than in the digest rou
 Until the file has been run, the app degrades instead of failing: sign-ups still work, board
 choices simply aren't recorded, and every subscriber gets every board's digest.
 
+### Semantic search over agendas (pgvector)
+
+The cards on the home page are filtered in the browser by matching words, which only finds the
+wording a summary happens to use. `/api/search` searches the agendas themselves by meaning.
+
+Setup, once:
+
+1. Paste `backend/migrations/enable_pgvector.sql` into the Supabase SQL Editor and run it, or
+   run `python backend/migrations/enable_pgvector.py` with `SUPABASE_DB_URL` set. It enables the
+   `vector` extension and creates `documents`, `document_chunks` and `match_document_chunks`.
+   Check it with `python backend/migrations/enable_pgvector.py --check`.
+2. Set `GEMINI_API_KEY` for the web app as well as the pipeline — in `.env.local`, and in Vercel
+   for the deployed site. The key stays on the server; the browser never sees it.
+3. Run the pipeline with `--embed` to fill the index:
+   `python backend/run_all.py --all --write-public --embed`
+
+How it works: the pipeline already extracts an agenda's full text on the way to a three-point
+summary, and `--embed` keeps it. The text is split into overlapping ~500-token passages
+(`backend/embeddings.py`) and each is embedded with `gemini-embedding-001` at 768 dimensions,
+matching the `vector(768)` columns. A search embeds the phrase the same way — as a query rather
+than a document — and Postgres returns the nearest passages by cosine distance.
+
+```bash
+curl "http://localhost:3000/api/search?q=school+closures&board=ddsb&limit=5"
+```
+
+`board` narrows the search inside the database rather than filtering afterwards. `threshold`
+(0-1, default 0.35) sets how close a passage has to be.
+
+Two things worth knowing. `filter_board_id` is a **bigint**, not a UUID: `boards.id` is a bigint
+identity column and the filter compares against it. And embedding is best-effort — if the key,
+the tables or the network are missing, the run logs it and the summaries still publish, because
+search is a bonus on top of them.
+
 ### Welcome emails and unsubscribing
 
 Each new subscriber gets a welcome email: what CivicPulse will send (one short email after each

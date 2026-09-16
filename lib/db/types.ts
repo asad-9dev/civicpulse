@@ -39,6 +39,39 @@ export type SubscriberBoardRow = {
   created_at: string;
 };
 
+/** One decoded agenda, kept searchable alongside the JSON the site renders. */
+export type DocumentRow = {
+  id: string;
+  board_id: number;
+  title: string;
+  meeting_date: string;
+  url: string | null;
+  created_at: string;
+};
+
+/** A passage of an agenda with its embedding; the embedding isn't read by the app. */
+export type DocumentChunkRow = {
+  id: number;
+  document_id: string;
+  board_id: number;
+  chunk_index: number;
+  content: string;
+  created_at: string;
+};
+
+/** A row from match_document_chunks: a passage plus how close it was and where it came from. */
+export type ChunkMatch = {
+  id: number;
+  document_id: string;
+  board_id: number;
+  chunk_index: number;
+  content: string;
+  similarity: number;
+  title: string;
+  meeting_date: string;
+  url: string | null;
+};
+
 export type DigestLogRow = {
   meeting_id: string;
   board_id: number | null;
@@ -75,6 +108,18 @@ export type Database = {
         Update: Partial<DigestLogRow>;
         Relationships: [];
       };
+      documents: {
+        Row: DocumentRow;
+        Insert: Omit<DocumentRow, "created_at"> & Partial<Pick<DocumentRow, "created_at">>;
+        Update: Partial<DocumentRow>;
+        Relationships: [];
+      };
+      document_chunks: {
+        Row: DocumentChunkRow;
+        Insert: Omit<DocumentChunkRow, "id" | "created_at"> & { embedding?: number[] };
+        Update: Partial<DocumentChunkRow>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -82,6 +127,20 @@ export type Database = {
       subscribers_for_board: {
         Args: { filter_board_id?: number | null; after_id?: number; page_size?: number };
         Returns: Pick<SubscriberRow, "id" | "email">[];
+      };
+      /**
+       * Passages closest in meaning to a query embedding, optionally within one board.
+       *
+       * filter_board_id is a number, not a UUID: boards.id is a bigint identity column.
+       */
+      match_document_chunks: {
+        Args: {
+          query_embedding: number[];
+          match_threshold?: number;
+          match_count?: number;
+          filter_board_id?: number | null;
+        };
+        Returns: ChunkMatch[];
       };
     };
   };

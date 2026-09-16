@@ -71,6 +71,8 @@ def scrape_one(board: Board, args: argparse.Namespace) -> dict:
         command.append("--write-public")
     if args.refresh:
         command.append("--refresh")
+    if args.embed:
+        command.append("--embed")
 
     started = time.monotonic()
     log.info("-> %s (%s)", board.short_name, board.platform)
@@ -117,6 +119,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--months-back", type=int, default=1)
     parser.add_argument("--write-public", action="store_true", help="publish into public/data/boards/<board>.json")
     parser.add_argument("--refresh", action="store_true", help="re-summarize agendas already published")
+    parser.add_argument("--embed", action="store_true", help="also store agenda text and embeddings for semantic search")
     parser.add_argument("-v", "--verbose", action="store_true")
     return parser.parse_args(argv)
 
