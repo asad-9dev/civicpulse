@@ -5,17 +5,17 @@
       "short_name": "DDSB",
       "platform": "escribe",
       "ok": true,
-      "last_run": "2026-09-16T05:38:09+00:00",
-      "seconds": 3.8,
-      "detail": "INFO Using cached 2026-09-10-special-education-advisory-committee-be0fbe2d.pdf | INFO Summarizing Special Education Advisory Committee (2026-09-10, 1,712 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\ddsb.generated.json"
+      "last_run": "2026-09-16T11:05:02+00:00",
+      "seconds": 12.1,
+      "detail": "INFO Embedded 6 passage(s) of ddsb-2026-09-09-committee-of-the-whole-standing | INFO Embedded 1 passage(s) of ddsb-2026-08-26-special-board-meeting | INFO Stored 8 searchable passage(s) for DDSB"
     },
     "gecdsb": {
       "slug": "gecdsb",
       "short_name": "GECDSB",
       "platform": "escribe",
       "ok": true,
-      "last_run": "2026-09-16T05:38:08+00:00",
-      "seconds": 2.6,
+      "last_run": "2026-09-16T11:04:56+00:00",
+      "seconds": 6.4,
       "detail": "INFO 0 meeting(s) with a published agenda; keeping 0 | WARNING No GECDSB agenda PDFs found. Agendas are posted a few days before each meeting; try --months-back 2. | INFO Wrote 0 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\gecdsb.generated.json"
     },
     "kprdsb": {
@@ -23,9 +23,9 @@
       "short_name": "KPRDSB",
       "platform": "escribe",
       "ok": true,
-      "last_run": "2026-09-16T05:38:19+00:00",
-      "seconds": 11.5,
-      "detail": "INFO Using cached 2026-09-16-chairpersons-committee-c658727e.pdf | INFO Summarizing Chairpersons' Committee (2026-09-16, 49,989 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\kprdsb.generated.json"
+      "last_run": "2026-09-16T11:06:02+00:00",
+      "seconds": 65.9,
+      "detail": "INFO Embedded 40 passage(s) of kprdsb-2026-09-14-audit-committee | INFO Embedded 5 passage(s) of kprdsb-2026-09-09-resource-committee | INFO Stored 75 searchable passage(s) for KPRDSB"
     },
     "smcdsb": {
       "slug": "smcdsb",
@@ -50,19 +50,19 @@
       "short_name": "UCDSB",
       "platform": "boarddocs",
       "ok": true,
-      "last_run": "2026-09-16T05:38:12+00:00",
-      "seconds": 3.0,
-      "detail": "INFO 1 meeting(s) with a published agenda; keeping 1 | INFO Summarizing Special Board Meeting (2025-08-13, 1,021 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\ucdsb.generated.json"
+      "last_run": "2026-09-16T11:07:42+00:00",
+      "seconds": 160.9,
+      "detail": "INFO Embedded 1 passage(s) of ucdsb-2025-03-20-special-board-meeting | INFO Stored 9 searchable passage(s) for UCDSB | INFO Updated public\\data\\boards\\ucdsb.json (10 UCDSB meetings total)"
     },
     "yrdsb": {
       "slug": "yrdsb",
       "short_name": "YRDSB",
       "platform": "civicweb",
       "ok": true,
-      "last_run": "2026-09-16T05:38:24+00:00",
-      "seconds": 12.2,
-      "detail": "INFO Using cached 2026-09-15-committee-of-the-whole-standing-195841.pdf | INFO Summarizing Committee of the Whole - Standing (2026-09-15, 123,609 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\yrdsb.generated.json"
+      "last_run": "2026-09-16T11:14:29+00:00",
+      "seconds": 507.0,
+      "detail": "INFO Embedded 40 passage(s) of yrdsb-2026-06-08-governance-and-board-organization-commit | INFO Stored 254 searchable passage(s) for YRDSB | INFO Updated public\\data\\boards\\yrdsb.json (10 YRDSB meetings total)"
     }
   },
-  "last_batch": "2026-09-16T05:38:24+00:00"
+  "last_batch": "2026-09-16T11:14:29+00:00"
 }

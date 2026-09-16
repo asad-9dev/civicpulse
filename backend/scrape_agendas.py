@@ -695,23 +695,31 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return args
 
 
-def embed_agendas(board: Board, items: list[tuple[AgendaSource, dict, str]]) -> None:
+def embed_agendas(board: Board, items: list[tuple[AgendaSource, dict, str]], refresh: bool = False) -> None:
     """
     Store each agenda's text and embeddings for semantic search.
+
+    Meetings that already have passages are left alone unless --refresh, so the daily run embeds
+    what's new rather than re-embedding every meeting on the site each morning.
 
     Best effort by design: search is a bonus on top of the summaries, so anything that goes
     wrong here is logged and the run still succeeds.
     """
-    from embeddings import EmbeddingUnavailable, board_row_id, store_document
+    from embeddings import EmbeddingUnavailable, board_row_id, embedded_document_ids, store_document
 
     try:
         board_id = board_row_id(board)
+        already = set() if refresh else embedded_document_ids(board_id)
     except EmbeddingUnavailable as exc:
         log.warning("Not embedding %s: %s", board.short_name, exc)
         return
 
+    todo = [item for item in items if item[1]["id"] not in already]
+    if len(todo) < len(items):
+        log.info("%d meeting(s) already searchable; embedding %d", len(items) - len(todo), len(todo))
+
     stored = 0
-    for _source, record, text in items:
+    for _source, record, text in todo:
         try:
             stored += store_document(board, board_id, record, text)
         except EmbeddingUnavailable as exc:
@@ -809,6 +817,8 @@ def main(argv: list[str] | None = None) -> int:
                 upgradable = ai_summarizer and prior.get("summarySource", "built-in") == "built-in"
                 if not upgradable:
                     log.info("Already published, skipping %s (%s)", source.committee_name, source.meeting_date)
+                    if args.embed:
+                        embeddable.append((source, prior, text))
                     continue
             log.info("Summarizing %s (%s, %s chars) with %s", source.committee_name, source.meeting_date, f"{len(text):,}", args.summarizer)
 
@@ -845,15 +855,17 @@ def main(argv: list[str] | None = None) -> int:
 
     write_json(args.out, records)
     log.info("Wrote %d record(s) to %s", len(records), args.out)
-    if args.embed and embeddable:
-        embed_agendas(board, embeddable)
-
     if args.write_public and records:
         total = upsert_public_meetings(board, records)
         log.info(
             "Updated %s (%d %s meetings total)",
             public_meetings_json(board).relative_to(PROJECT_ROOT), total, board.short_name,
         )
+
+    # After publishing, never before: embedding is the optional step, so nothing that goes wrong
+    # in it may cost a board the summaries it just produced.
+    if args.embed and embeddable:
+        embed_agendas(board, embeddable, refresh=args.refresh)
     return 0
 
 

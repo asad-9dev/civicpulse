@@ -135,7 +135,12 @@ def _supabase() -> tuple[str, str]:
     # Imported here so the scraper doesn't need Supabase settings unless embeddings are on.
     from seed_boards import credentials
 
-    return credentials()
+    # credentials() exits the process when the settings are missing, which suits a command-line
+    # tool but not a best-effort step inside a scrape: turn it into the error callers catch.
+    try:
+        return credentials()
+    except SystemExit as exc:
+        raise EmbeddingUnavailable(str(exc)) from None
 
 
 def _post(url: str, key: str, path: str, rows: list[dict], prefer: str) -> None:
@@ -193,6 +198,24 @@ def board_row_id(board: Board) -> int:
     if not rows:
         raise EmbeddingUnavailable(f"{board.slug} has no row in the boards table; run backend/seed_boards.py")
     return int(rows[0]["id"])
+
+
+def embedded_document_ids(board_id: int) -> set[str]:
+    """
+    Meetings of this board that already have passages stored.
+
+    Asking for chunk 0 only returns one row per embedded document instead of forty.
+    """
+    url, key = _supabase()
+    request = urllib.request.Request(
+        f"{url}/rest/v1/document_chunks?select=document_id&chunk_index=eq.0&board_id=eq.{board_id}",
+        headers={"apikey": key, "Authorization": f"Bearer {key}"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return {row["document_id"] for row in json.loads(response.read())}
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
+        raise EmbeddingUnavailable(f"could not check what is already embedded: {exc}") from exc
 
 
 def store_document(board: Board, board_id: int, record: dict, agenda_text: str) -> int:

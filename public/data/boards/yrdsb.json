@@ -114,5 +114,179 @@
     "policyChanges": "Policy updates were listed on the agenda for review, but specific policy titles or proposed changes were not detailed in the document.",
     "originalPdfUrl": "https://yrdsb.civicweb.net/document/195617",
     "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-09-03-governance-and-board-organization-commit",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-03",
+    "committeeName": "Governance and Board Organization Committee Meeting - Public Session",
+    "title": "YRDSB Agenda: Public Delegation on Bayview Secondary Music Funding",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "A public delegation request on funding for Bayview Secondary School's music department was on the YRDSB agenda.",
+      "Trustees were set to vote on forming a joint election compliance audit committee with the Catholic board for 2026.",
+      "An update report on provincial school board association elections was also on the meeting agenda."
+    ],
+    "studentParentImpact": "The York Region District School Board agenda included a delegate request regarding music department funding at Bayview Secondary School. Community members sought to present concerns about how education funding changes impact music classes, enrolment, and International Baccalaureate students. Trustees were scheduled to decide whether to refer this public presentation to a future committee meeting. The agenda also outlined plans for a joint election audit committee with the Catholic board to review campaign finances for the 2026 school trustee elections. The agenda did not include details on how additional community members could sign up to speak at this specific meeting.",
+    "policyChanges": "No specific board policies or procedures were scheduled for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195611",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-06-16-board-meeting-public-session",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-06-16",
+    "committeeName": "Board Meeting - Public Session",
+    "title": "YRDSB agenda set vote on 2026-2027 budget and severe weather policy",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "The York Region District School Board scheduled a vote on its 2026-2027 operating budget.",
+      "Trustees were set to consider final approval for updated severe weather and communications policies.",
+      "The agenda included recommended boundary changes for schools in Richmond Hill, King, and Vaughan."
+    ],
+    "studentParentImpact": "The scheduled vote on the York Region District School Board 2026-2027 operating budget affects funding across all local public schools. Revised severe weather procedures officially split student transportation into two service areas: Georgina and the South Service Area. This means bus cancellations due to extreme weather can happen in one area without affecting the other. The agenda also included school boundary updates creating a new boundary for Dr. Bette Stephenson Secondary School starting in 2027, alongside elementary boundary adjustments for Dr. Roberta Bondar and Forest Run public schools for September 2026.",
+    "policyChanges": "Policy #105.0 Communications and Policy #152.0 Severe Weather were scheduled for final approval. Staff were also directed to draft revisions for the Operational By-Law and board policies to align with the provincial Putting Student Achievement First Act, 2026.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195168",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-06-16-committee-of-the-whole-standing",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-06-16",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "YRDSB scheduled review of updated child protection policy",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Trustees at YRDSB were scheduled to review an updated child protection policy expanding definitions of abuse.",
+      "A proposal was on the agenda to open public feedback on how community members join YRDSB committees.",
+      "Staff were set to present the upcoming draft schedule for future board policy reviews."
+    ],
+    "studentParentImpact": "An updated YRDSB child protection policy was scheduled for review, expanding safety rules to cover intimate partner violence and sex trafficking. These changes guide how school staff and volunteers report protection concerns for students under 18 years old. Trustees were also set to consider sending a policy on appointing community members to board committees out for six school months of public feedback. Parents and guardians can share feedback on board policies through their school council or by submitting comments to the YRDSB policy officer.",
+    "policyChanges": "YRDSB Policy #610.0 on reporting children in need of protection was up for second review, and Policy #237.0 on appointing community members to board committees was scheduled for first review.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195157",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-06-11-equity-and-inclusivity-advisory-committe",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-06-11",
+    "committeeName": "Equity and Inclusivity Advisory Committee Meeting",
+    "title": "YRDSB Equity Committee Schedules Budget and Inclusion Updates",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "A presentation on affirming 2SLGBTQIA+ students was on the York Region District School Board equity committee agenda.",
+      "Committee members were also scheduled to receive a budget review update and a report from the York Children's Aid Society.",
+      "Board staff were set to share general policy updates and community announcements during the meeting."
+    ],
+    "studentParentImpact": "The York Region District School Board equity committee agenda listed presentations focused on supporting 2SLGBTQIA+ students, reviewing board budget priorities, and connecting with community child welfare services for African Canadian youth. While advisory committee meetings help shape staff perspectives and board culture, the agenda did not include specific votes, public consultation deadlines, or direct actions required from parents and students. Families across York Region can review equity initiatives to understand how board staff plan to support diverse student groups and allocate school resources. No public feedback forms or participation deadlines were specified in this agenda document.",
+    "policyChanges": "Policy updates were listed on the agenda for committee review, but no specific policies were named for creation, revision, or repeal.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/194971",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-06-08-committee-of-the-whole-standing",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-06-08",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "YRDSB set to vote on balanced $1.7B budget amid declining enrolment",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "Trustees were set to vote on a balanced $1.7 billion operating budget for the 2026-2027 school year.",
+      "The proposed YRDSB budget addresses funding drops driven by declining student enrolment and fewer international students.",
+      "An update was also on the agenda for new school construction and classroom additions across York Region."
+    ],
+    "studentParentImpact": "The York Region District School Board draft budget plans for an estimated drop of over 6,600 students for the 2026-2027 school year, leading to a $54 million decrease in overall operating revenue. To maintain balance, the board planned staffing adjustments alongside targeted investments. Proposed spending includes $2 million more for special education equipment, $3.6 million for consistent curriculum resources, and $1.6 million for elementary classroom supplies. The draft budget also maintains funding for primary literacy teachers and math facilitators. Capital updates scheduled for review showed funded school additions in Markham and Aurora alongside new school builds across York Region.",
+    "policyChanges": "No policy or procedure changes were scheduled for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195019",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-06-08-governance-and-board-organization-commit",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-06-08",
+    "committeeName": "Governance and Board Organization Committee Meeting - Public Session",
+    "title": "YRDSB Agenda Examines PA Day Topics, Exam Rules, and Math Textbook Spending",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "The York Region District School Board agenda scheduled a decision on a parent request to reallocate Chromebook funds toward math textbooks.",
+      "Trustees were set to review provincial updates detailing mandatory professional activity day topics and new secondary school exam requirements.",
+      "The agenda included a recommendation to approve committee meeting dates for the 2027 calendar year."
+    ],
+    "studentParentImpact": "Ontario Ministry of Education directives on the York Region District School Board agenda outline key changes for high school students, including mandatory final written exams and grades tied to attendance and participation. Families will also see four required teacher training topics for the 2026-27 school year, covering artificial intelligence, special education, school safety, and updated curriculum. Additionally, trustees were scheduled to address a parent delegation proposing to shift board funding from student Chromebooks to physical math textbooks. The agenda did not outline a public consultation process or specific instructions for parents to participate in these governance items.",
+    "policyChanges": "The agenda noted upcoming revisions to the board's operational by-laws and policies to comply with Bill 101, the Putting Student Achievement First Act. No local board policy was up for final vote or repeal during this committee meeting.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195034",
+    "summarySource": "gemini"
   }
 ]

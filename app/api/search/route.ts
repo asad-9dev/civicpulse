@@ -26,14 +26,26 @@ export const maxDuration = 30;
 const MAX_QUERY_LENGTH = 400;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 25;
-/** Cosine similarity below this is noise rather than a weak match. */
-const DEFAULT_THRESHOLD = 0.35;
+/**
+ * Cosine similarity below this is noise rather than a weak match.
+ *
+ * Measured on the live index, not guessed: six on-topic queries ("board budget", "child
+ * protection policy", ...) scored 0.654-0.743 for their best passage, while five off-topic ones
+ * ("chocolate cake recipe", "football match results", ...) still scored 0.481-0.573, since every
+ * embedding is somewhat near every other. 0.60 sits above all of the noise and below all of the
+ * real matches. Re-measure if the embedding model or dimension changes.
+ */
+const DEFAULT_THRESHOLD = 0.6;
 
 function badRequest(error: string) {
   return NextResponse.json({ error }, { status: 400 });
 }
 
 function number(value: string | null, fallback: number, min: number, max: number): number {
+  // A missing parameter must mean "use the default". Number(null) and Number("") are both 0,
+  // which is finite, so without this check an omitted threshold silently became 0 and an
+  // omitted limit became 1.
+  if (value === null || value.trim() === "") return fallback;
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.min(Math.max(parsed, min), max);

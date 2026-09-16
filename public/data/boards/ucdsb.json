@@ -54,5 +54,138 @@
     "policyChanges": "Draft Policy 314 regarding electronic trustee meetings was on the agenda, along with proposed updates to Policy 4002 on facility collaboration and Policy 414 on asset disposal. Trustees were also set to review Procedure 311.1 covering the board member code of conduct.",
     "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=DFEJ2T4B1DF5",
     "summarySource": "gemini"
+  },
+  {
+    "id": "ucdsb-2025-06-03-special-education-advisory-committee",
+    "boardSlug": "ucdsb",
+    "meetingDate": "2025-06-03",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "UCDSB Advisory Committee Scheduled to Review Proposed 2025-2026 Budget",
+    "urgencyScore": 1,
+    "townsAffected": [],
+    "category": "Budget",
+    "executiveSummary": [
+      "A presentation on the proposed 2025-2026 budget was scheduled for the UCDSB special education committee.",
+      "Proposed meeting dates for the 2025-2026 school year were also on the committee agenda."
+    ],
+    "studentParentImpact": "The Upper Canada District School Board Special Education Advisory Committee had a presentation scheduled regarding the proposed 2025-2026 budget. School board budgets set funding levels for classroom resources, staffing, and specialized support programs across all board schools. The committee was also set to review proposed meeting dates for the upcoming 2025-2026 school year. These agenda items were listed for information and planning purposes. The agenda did not list any public consultation sessions or specific actions required from local students and parents at this meeting.",
+    "policyChanges": "No policy or procedure creations, revisions, or rescissions were listed on this agenda.",
+    "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=D92R4V6B5697",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ucdsb-2025-05-14-regular-board-meeting",
+    "boardSlug": "ucdsb",
+    "meetingDate": "2025-05-14",
+    "committeeName": "Regular Board Meeting",
+    "title": "UCDSB agenda targets AI, student vaping, and academic progress",
+    "urgencyScore": 1,
+    "townsAffected": [],
+    "category": "Policy",
+    "executiveSummary": [
+      "A parent education campaign on vaping and technology use was listed on the UCDSB agenda.",
+      "Updates were scheduled on how artificial intelligence, reading, writing, and math are taught in board schools.",
+      "Trustees were set to review school climate survey results measuring student culture across the board."
+    ],
+    "studentParentImpact": "The Upper Canada District School Board scheduled updates on several initiatives affecting local students and families in the region. Plans included a campaign to help parents address student vaping and technology use, as well as reports on artificial intelligence and core subjects like reading, writing, and math. Trustees were also set to examine student culture through recent school climate surveys. These discussions aim to guide how schools manage technology and student well-being, though the agenda offered no direct public consultation steps during this session.",
+    "policyChanges": "Trustees were scheduled to review Policy 450 regarding corporate credit cards. No other board policies were up for creation or revision on this agenda.",
+    "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=DF6QJP6990D2",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ucdsb-2025-05-13-audit-committee-meeting-no-68",
+    "boardSlug": "ucdsb",
+    "meetingDate": "2025-05-13",
+    "committeeName": "Audit Committee Meeting No. 68",
+    "title": "UCDSB Audit Committee Schedules 2024-25 External Audit Plan Discussion",
+    "urgencyScore": 1,
+    "townsAffected": [],
+    "category": "Budget",
+    "executiveSummary": [
+      "An external audit plan summary for the 2024-25 school year was on the UCDSB committee agenda.",
+      "The committee was scheduled to review a regional internal audit update and board risk management processes.",
+      "Setting audit committee meeting dates for the 2025-26 school year was also listed on the agenda."
+    ],
+    "studentParentImpact": "The Upper Canada District School Board audit committee meeting focused on internal oversight, financial audits, and organizational risk management processes. These administrative updates do not directly alter classroom instruction, school boundaries, busing routes, or daily schedules for students in Brockville and surrounding communities. Instead, the planned discussions were scheduled to help ensure board finances and operational risks are reviewed responsibly by oversight officials. The agenda did not include any public consultations, policy votes, or action items requiring response or participation from parents and students.",
+    "policyChanges": "No policies or procedures were listed for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=DEMLE356232C",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ucdsb-2025-05-06-special-education-advisory-committee",
+    "boardSlug": "ucdsb",
+    "meetingDate": "2025-05-06",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "UCDSB scheduled presentations on student transition planning beyond high school",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "North Grenville",
+      "Perth"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "A presentation on transition planning and supports beyond UCDSB was on the meeting agenda.",
+      "A discussion involving students and families from North Grenville DHS and Perth DCI was scheduled.",
+      "A presentation regarding the St. Lawrence College CICE Program was set to be shared."
+    ],
+    "studentParentImpact": "Upper Canada District School Board scheduled presentations focused on helping students with special education needs transition out of high school. The committee agenda included a presentation about transition planning and supports available beyond high school. It also listed a presentation regarding the St. Lawrence College Community Integration through Co-operative Education program. In addition, students and families from North Grenville District High School and Perth and District Collegiate Institute were on the agenda to participate. These sessions were scheduled to provide information about post-secondary options and community resources for graduating students.",
+    "policyChanges": "No policy or procedure creations, revisions, or rescissions were listed on this agenda.",
+    "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=D92RA36B7363",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ucdsb-2025-04-09-regular-board-meeting",
+    "boardSlug": "ucdsb",
+    "meetingDate": "2025-04-09",
+    "committeeName": "Regular Board Meeting",
+    "title": "UCDSB set to consider student transportation options and budget",
+    "urgencyScore": 2,
+    "townsAffected": [],
+    "category": "Transport",
+    "executiveSummary": [
+      "A motion to review options for student transportation was placed on the UCDSB agenda.",
+      "Trustees were scheduled to review the board preliminary budget outlook for the 2025-26 school year.",
+      "A report on student culture and sports programs was also scheduled for discussion."
+    ],
+    "studentParentImpact": "Upper Canada District School Board trustees were scheduled to consider a motion regarding options for student transportation. Any future changes to busing rules or routes could affect how students across the board get to school. Trustees were also set to review the board's preliminary budget outlook for the 2025-26 school year and receive an update on student culture focusing on sports programs. The agenda did not include specific details or immediate changes to bus routes or school schedules. The meeting agenda provided no direct consultation or action required from parents or students at this time.",
+    "policyChanges": "No specific policy or procedure creations, revisions, or rescissions were listed on this agenda.",
+    "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=DDJLGZ569276",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ucdsb-2025-04-01-special-education-advisory-committee",
+    "boardSlug": "ucdsb",
+    "meetingDate": "2025-04-01",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "UCDSB scheduled updates on bell times and entry to school for April 2025",
+    "urgencyScore": 2,
+    "townsAffected": [],
+    "category": "Transport",
+    "executiveSummary": [
+      "An update on the school board bell time review was scheduled for the Upper Canada District School Board advisory committee meeting.",
+      "A presentation on school entry transitions for young students with special needs was on the meeting agenda.",
+      "The committee was also set to review an updated draft of its special education guide."
+    ],
+    "studentParentImpact": "The Upper Canada District School Board scheduled an update on its bell time review, which could eventually change daily school start and end times for students. A presentation was also planned on how young children with special needs transition into school, alongside a draft review of the special education guide. These items were set to give families an idea of upcoming support services and schedules. The agenda did not list any public consultation steps or ways for parents to participate during this session.",
+    "policyChanges": "No policy revisions or creations were scheduled for a vote on this agenda, though a draft special education guide was set for review.",
+    "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=D92R8W6B7218",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ucdsb-2025-03-20-special-board-meeting",
+    "boardSlug": "ucdsb",
+    "meetingDate": "2025-03-20",
+    "committeeName": "Special Board Meeting",
+    "title": "UCDSB set private session report on March 20, 2025 meeting agenda",
+    "urgencyScore": 1,
+    "townsAffected": [],
+    "category": "Policy",
+    "executiveSummary": [
+      "Upper Canada District School Board trustees were scheduled to meet in a private session on March 20, 2025."
+    ],
+    "studentParentImpact": "This Upper Canada District School Board agenda contained only procedural steps and a closed private session. The public agenda provided no specific details on topics discussed, local school decisions, boundary changes, or budget items affecting students or parents in Brockville. Because no public consultations or feedback opportunities were listed, there are no immediate actions required or available for families from this scheduled meeting.",
+    "policyChanges": "No policy creations, revisions, or rescinding were listed on this agenda.",
+    "originalPdfUrl": "https://go.boarddocs.com/can/ucdsb/Board.nsf/goto?open&id=DEBKBD510E86",
+    "summarySource": "gemini"
   }
 ]

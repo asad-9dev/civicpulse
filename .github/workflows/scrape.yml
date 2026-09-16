@@ -74,13 +74,17 @@ jobs:
           # meeting falls back to the built-in summarizer (with a warning on this run) and is
           # upgraded on a later run.
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # For --embed, which stores each agenda's text and embeddings for /api/search. Without
+          # these secrets embedding logs a warning and skips; the summaries still publish.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           BOARD: ${{ inputs.board }}
           REFRESH: ${{ inputs.refresh }}
         # run_all.py reads data/boards_config.json and scrapes whichever boards are marked live,
         # two at a time to stay inside Gemini's per-minute free-tier limit. Adding a board is a
         # registry edit; this workflow needs no change.
         run: |
-          args="--summarizer gemini --write-public --limit 10 --months-back 1 --concurrency 2"
+          args="--summarizer gemini --write-public --embed --limit 10 --months-back 1 --concurrency 2"
           if [ -n "$BOARD" ]; then args="--board $BOARD $args"; else args="--all $args"; fi
           if [ "$REFRESH" = "true" ]; then args="$args --refresh"; fi
           python backend/run_all.py $args
