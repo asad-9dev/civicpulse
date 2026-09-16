@@ -34,3 +34,6 @@ npm-debug.log*
 .vercel
 .env*
 !.env.example
+
+# Batch runner state: rewritten on every run, so committing it conflicts with any other change.
+data/ingest_status.json

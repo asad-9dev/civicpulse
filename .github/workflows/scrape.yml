@@ -90,21 +90,33 @@ jobs:
           python backend/run_all.py $args
 
       - name: Commit and push updated meetings
+        # A scrape takes minutes, and main can move in the meantime. `git pull --rebase` then
+        # conflicts on any board file both sides touched, and retrying can't resolve a conflict
+        # (it failed all three tries on 2026-09-16). So each attempt starts from the latest main
+        # and re-applies only what this run produced, merged by meeting id: two writers touching
+        # the same board file combine instead of colliding. backend/output/ is untracked, so the
+        # reset leaves this run's results in place to merge.
         run: |
-          if git diff --quiet -- public/data/boards/ data/ingest_status.json; then
-            echo "No new or revised agendas; nothing to commit."
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data/boards/ data/ingest_status.json
-          git commit -m "Update decoded board meetings ($(date -u +%Y-%m-%d))"
-          for attempt in 1 2 3; do
-            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME" && exit 0
-            echo "Push attempt $attempt failed; retrying."
-            sleep $((attempt * 5))
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin "$GITHUB_REF_NAME"
+            git reset --quiet --hard "origin/$GITHUB_REF_NAME"
+            python backend/publish_generated.py
+            if git diff --quiet -- public/data/boards/; then
+              echo "No new or revised agendas; nothing to commit."
+              exit 0
+            fi
+            git add public/data/boards/
+            git commit --quiet -m "Update decoded board meetings ($(date -u +%Y-%m-%d))"
+            if git push --quiet origin "HEAD:$GITHUB_REF_NAME"; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push attempt $attempt was rejected (main moved); rebuilding on the new main."
+            sleep $((attempt * 3))
           done
-          echo "::error title=Push failed::Could not push the updated meetings after 3 tries."
+          echo "::error title=Push failed::Could not push the updated meetings after 5 tries."
           exit 1
 
       - name: Report which boards failed
@@ -132,8 +144,12 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: agendas-${{ github.run_id }}
+          # ingest_status.json is this run's record, not site content: it rides along here
+          # rather than being committed, since a file rewritten on every run conflicts with
+          # every other change to main.
           path: |
             backend/agendas/
             backend/output/
+            data/ingest_status.json
           if-no-files-found: ignore
           retention-days: 14
