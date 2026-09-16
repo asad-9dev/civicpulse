@@ -5,17 +5,17 @@
       "short_name": "DDSB",
       "platform": "escribe",
       "ok": true,
-      "last_run": "2026-09-16T05:05:01+00:00",
-      "seconds": 5.4,
-      "detail": "INFO Already published, skipping Committee of the Whole - Standing (2026-09-09) | INFO Already published, skipping Special Board Meeting (2026-08-26) | INFO Wrote 0 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\ddsb.generated.json"
+      "last_run": "2026-09-16T05:38:09+00:00",
+      "seconds": 3.8,
+      "detail": "INFO Using cached 2026-09-10-special-education-advisory-committee-be0fbe2d.pdf | INFO Summarizing Special Education Advisory Committee (2026-09-10, 1,712 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\ddsb.generated.json"
     },
     "gecdsb": {
       "slug": "gecdsb",
       "short_name": "GECDSB",
       "platform": "escribe",
       "ok": true,
-      "last_run": "2026-09-16T05:04:58+00:00",
-      "seconds": 3.2,
+      "last_run": "2026-09-16T05:38:08+00:00",
+      "seconds": 2.6,
       "detail": "INFO 0 meeting(s) with a published agenda; keeping 0 | WARNING No GECDSB agenda PDFs found. Agendas are posted a few days before each meeting; try --months-back 2. | INFO Wrote 0 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\gecdsb.generated.json"
     },
     "kprdsb": {
@@ -23,9 +23,9 @@
       "short_name": "KPRDSB",
       "platform": "escribe",
       "ok": true,
-      "last_run": "2026-09-16T05:07:06+00:00",
-      "seconds": 127.3,
-      "detail": "INFO Summarized with gemini-3.6-flash | INFO Wrote 4 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\kprdsb.generated.json | INFO Updated public\\data\\boards\\kprdsb.json (4 KPRDSB meetings total)"
+      "last_run": "2026-09-16T05:38:19+00:00",
+      "seconds": 11.5,
+      "detail": "INFO Using cached 2026-09-16-chairpersons-committee-c658727e.pdf | INFO Summarizing Chairpersons' Committee (2026-09-16, 49,989 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\kprdsb.generated.json"
     },
     "smcdsb": {
       "slug": "smcdsb",
@@ -49,20 +49,20 @@
       "slug": "ucdsb",
       "short_name": "UCDSB",
       "platform": "boarddocs",
-      "ok": false,
-      "last_run": "2026-09-16T04:48:45+00:00",
-      "seconds": 1.7,
-      "detail": "INFO Board: Upper Canada District School Board (boarddocs), portal https://go.boarddocs.com/can/ucdsb/Board.nsf | ERROR BoardDocs meeting list failed (https://go.boarddocs.com/can/ucdsb/Board.nsf/BD-GETMeetingsListForSEO?open): HTTP Error 403: Forbidden"
+      "ok": true,
+      "last_run": "2026-09-16T05:38:12+00:00",
+      "seconds": 3.0,
+      "detail": "INFO 1 meeting(s) with a published agenda; keeping 1 | INFO Summarizing Special Board Meeting (2025-08-13, 1,021 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\ucdsb.generated.json"
     },
     "yrdsb": {
       "slug": "yrdsb",
       "short_name": "YRDSB",
       "platform": "civicweb",
       "ok": true,
-      "last_run": "2026-09-16T05:05:47+00:00",
-      "seconds": 46.0,
-      "detail": "INFO Summarized with gemini-3.6-flash | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\yrdsb.generated.json | INFO Updated public\\data\\boards\\yrdsb.json (4 YRDSB meetings total)"
+      "last_run": "2026-09-16T05:38:24+00:00",
+      "seconds": 12.2,
+      "detail": "INFO Using cached 2026-09-15-committee-of-the-whole-standing-195841.pdf | INFO Summarizing Committee of the Whole - Standing (2026-09-15, 123,609 chars) with dummy | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\yrdsb.generated.json"
     }
   },
-  "last_batch": "2026-09-16T05:07:06+00:00"
+  "last_batch": "2026-09-16T05:38:24+00:00"
 }

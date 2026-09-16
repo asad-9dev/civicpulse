@@ -1,14 +1,22 @@
 """
-eSCRIBE meeting portals.
+eSCRIBE meeting portals, in both the layouts eSCRIBE ships.
 
-Used by boards on escribemeetings.com and by boards that put eSCRIBE on their own
-domain (DDSB publishes at calendar.ddsb.ca). The meeting list is a table whose Agenda
-column links straight to the agenda PDF.
+**Classic** (calendar.ddsb.ca, events.kprschools.ca, calendar.publicboard.ca): the server sends
+a table of meetings, and the Agenda column links straight to the agenda PDF.
+
+**Modern** (pub-*.escribemeetings.com): a client-rendered app. Its /meetings page is a shell
+whose lists start empty, so the meetings live at MeetingsCalendarView.aspx and arrive as
+`.calendar-item` nodes after the scripts run — nothing is in the initial HTML. Each item links
+to a Meeting.aspx page carrying that meeting's agenda.
+
+Which layout a board uses is detected rather than configured, so a board that gets upgraded
+keeps working without its registry entry changing.
 """
 
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 from urllib.parse import urljoin
 
 from playwright.sync_api import BrowserContext, Page
@@ -80,11 +88,21 @@ def open_calendar(page: Page, url: str, attempts: int = 3) -> None:
             page.wait_for_timeout(10_000 * attempt)
 
 
-def discover_escribe(context: BrowserContext, board: Board, months_back: int) -> list[AgendaSource]:
-    """Read an eSCRIBE meeting list (calendar.ddsb.ca and most escribemeetings.com sites)."""
+def discover_escribe(context: BrowserContext, board: Board, months_back: int, limit: int = 10) -> list[AgendaSource]:
+    """
+    Read an eSCRIBE meeting list, whichever layout the board is on.
+
+    The classic layout is tried first because its table is in the server's HTML and costs one
+    request; when that table never appears, the portal is the client-rendered kind.
+    """
     page = context.new_page()
     try:
-        open_calendar(page, board.agenda_portal)
+        try:
+            open_calendar(page, board.agenda_portal)
+        except PipelineError:
+            page.close()
+            log.info("%s has no server-rendered meeting table; reading it as a client-rendered portal", board.short_name)
+            return discover_escribe_modern(context, board, limit)
         # The listing runs from the start of the current month onward. Each "‹" link moves
         # the start back one month (its URL carries a StartDate and a per-page token).
         for _ in range(months_back):
@@ -118,3 +136,114 @@ def discover_escribe(context: BrowserContext, board: Board, months_back: int) ->
         for row in rows
         if row["agendaUrl"]
     ]
+
+
+# --------------------------------------------------------------------------------------------
+# Modern eSCRIBE: client-rendered
+# --------------------------------------------------------------------------------------------
+
+# The modern portal keeps its meeting list at MeetingsCalendarView.aspx; /meetings is a shell.
+CALENDAR_VIEW = "MeetingsCalendarView.aspx"
+# One meeting on the rendered calendar.
+MODERN_ITEM = ".calendar-item"
+# The agenda document on a meeting's own page. eSCRIBE serves documents through FileStream.ashx.
+MODERN_AGENDA_LINK = 'a[href*="FileStream"]'
+
+READ_MODERN_ITEMS_JS = """
+() => [...document.querySelectorAll('.calendar-item')].map((item) => {
+  const link = item.querySelector('a[href*="Meeting.aspx?Id="]');
+  const title = item.querySelector('.meeting-title, .meeting-title-heading');
+  return {
+    title: (title ? title.innerText : '').trim(),
+    // The date sits in the item's text, e.g. "Wednesday, September 23, 2026 @ 10:00 AM".
+    when: (item.innerText || '').replace(/\\s+/g, ' ').trim(),
+    meetingUrl: link ? link.href : null,
+  };
+});
+"""
+
+# On a meeting page the agenda is either a FileStream document link or rendered agenda text.
+READ_MODERN_AGENDA_JS = """
+() => {
+  const doc = [...document.querySelectorAll('a[href*="FileStream"]')]
+    .find((a) => /agenda/i.test((a.textContent || '') + ' ' + (a.getAttribute('aria-label') || '')));
+  return doc ? doc.href : null;
+}
+"""
+
+
+def calendar_view_url(seed: str) -> str:
+    """The modern portal's meeting list, derived from whatever seed the registry holds."""
+    root = seed.split("?")[0].rstrip("/")
+    if root.lower().endswith(CALENDAR_VIEW.lower()):
+        return seed
+    # .../meetings -> .../MeetingsCalendarView.aspx
+    base = root.rsplit("/", 1)[0] if root.lower().endswith("/meetings") else root
+    return f"{base}/{CALENDAR_VIEW}"
+
+
+def looks_modern(page: Page) -> bool:
+    """A rendered calendar item means the client-side app, not the server-rendered table."""
+    return page.locator(MODERN_ITEM).count() > 0
+
+
+def discover_escribe_modern(context: BrowserContext, board: Board, limit: int) -> list[AgendaSource]:
+    """
+    Read a client-rendered eSCRIBE portal.
+
+    Nothing here exists in the initial HTML, so every read waits for the nodes the app creates
+    rather than parsing what the server sent.
+    """
+    page = context.new_page()
+    try:
+        url = calendar_view_url(board.agenda_portal)
+        page.goto(url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
+        try:
+            page.wait_for_selector(MODERN_ITEM, state="attached", timeout=RENDER_TIMEOUT_MS)
+        except PlaywrightTimeoutError:
+            # An empty calendar is a real answer: the board has published no meetings here.
+            log.info("%s calendar rendered no meetings (%s)", board.short_name, url)
+            return []
+        rows = page.evaluate(READ_MODERN_ITEMS_JS)
+        log.info("%s calendar lists %d meeting(s)", board.short_name, len(rows))
+
+        listed: list[AgendaSource] = []
+        for row in rows:
+            title = (row["title"] or "").strip()
+            if not title or not row["meetingUrl"]:
+                continue
+            date = parse_meeting_date(row["when"] or "")
+            if not date:
+                continue
+            listed.append(
+                AgendaSource(
+                    board=board,
+                    page_url=row["meetingUrl"],
+                    committee_name=guess_committee(title, default=title),
+                    meeting_date=date,
+                    pdf_url=None,
+                )
+            )
+        listed.sort(key=lambda s: s.meeting_date or "", reverse=True)
+
+        found: list[AgendaSource] = []
+        for source in listed:
+            if len(found) >= limit:
+                break
+            try:
+                page.goto(source.page_url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
+                try:
+                    page.wait_for_selector(MODERN_AGENDA_LINK, state="attached", timeout=DOCUMENT_TIMEOUT_MS)
+                except PlaywrightTimeoutError:
+                    # Agendas appear a few days before a meeting; upcoming ones often have none.
+                    log.info("No agenda posted yet for %s (%s)", source.committee_name, source.meeting_date)
+                    continue
+                agenda_url = page.evaluate(READ_MODERN_AGENDA_JS)
+            except PlaywrightError as exc:
+                log.warning("Couldn't open %s (%s): %s", source.committee_name, source.meeting_date, exc)
+                continue
+            if agenda_url:
+                found.append(replace(source, pdf_url=agenda_url))
+        return found
+    finally:
+        page.close()

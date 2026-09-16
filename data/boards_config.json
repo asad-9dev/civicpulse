@@ -841,7 +841,7 @@
       "portal_type": "escribe",
       "seed_url": "https://pub-smcdsb.escribemeetings.com/meetings",
       "status": "planned",
-      "status_note": "This board is on a newer eSCRIBE that renders its meeting list in the browser rather than serving it as HTML, which the eSCRIBE adapter does not read yet."
+      "status_note": "CivicPulse reads this board's calendar, but every meeting listed there is still upcoming and none has published its agenda yet. Summaries will appear once one does."
     },
     {
       "slug": "sccdsb",
@@ -917,7 +917,7 @@
       "portal_type": "escribe",
       "seed_url": "https://pub-tvdsb.escribemeetings.com/meetings",
       "status": "planned",
-      "status_note": "This board is on a newer eSCRIBE that renders its meeting list in the browser rather than serving it as HTML, which the eSCRIBE adapter does not read yet."
+      "status_note": "CivicPulse reads this board's calendar, but every meeting listed there is still upcoming and none has published its agenda yet. Summaries will appear once one does."
     },
     {
       "slug": "tbcdsb",
@@ -1002,8 +1002,7 @@
       "website": "http://www.ucdsb.on.ca",
       "portal_type": "boarddocs",
       "seed_url": "https://go.boarddocs.com/can/ucdsb/Board.nsf",
-      "status": "planned",
-      "status_note": "The BoardDocs adapter lists this board's meetings, but BoardDocs keeps the agenda in a pane the scraper cannot reach yet, so nothing can be summarized."
+      "status": "live"
     },
     {
       "slug": "ugdsb",

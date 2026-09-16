@@ -47,6 +47,7 @@ from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from adapters import discover_agendas
+from adapters.boarddocs import fetch_agenda as fetch_boarddocs_agenda
 from boards import BOARDS, SCRAPABLE_SLUGS, SLUGS, Board, get_board, summary as boards_summary
 from common import (
     AGENDAS_DIR,
@@ -133,23 +134,41 @@ def download_agenda_pdf(context: BrowserContext, source: AgendaSource) -> Path:
     return destination
 
 
-# BoardDocs renders the agenda into #agenda, but leaves that pane hidden behind the "Featured"
-# tab, and innerText is empty for anything not displayed. textContent reads it regardless.
+# BoardDocs is a single-page app: a meeting link lands on the "Featured" tab, and the agenda is
+# only fetched once the AGENDA tab is selected. So the page is clicked into that state first.
+# The pane is then read with textContent, not innerText, which returns nothing for a pane the
+# app is keeping hidden.
+BOARDDOCS_AGENDA_TAB = "#li-agenda, li#li-agenda a, a[href='#agenda']"
+BOARDDOCS_AGENDA_ITEMS = "#agenda li.item, #agenda dt.category"
+
 READ_BOARDDOCS_AGENDA_JS = """
 () => {
   const pane = document.querySelector('#agenda');
   if (!pane) return '';
   // One line per category and item, so the outline survives into the summary prompt.
   const lines = [...pane.querySelectorAll('dt.category, li.item')]
-    .map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
+    .map((el) => (el.textContent || '').replace(/\\s+/g, ' ').trim())
     .filter(Boolean);
-  return lines.length ? lines.join('\n') : (pane.textContent || '').trim();
+  return lines.length ? lines.join('\\n') : (pane.textContent || '').trim();
 }
 """
-# The agenda arrives from a second request after load, so wait for its items to exist.
-AWAIT_BOARDDOCS_AGENDA_JS = """
-() => document.querySelectorAll('#agenda li.item, #agenda dt.category').length > 0
-"""
+
+
+def open_boarddocs_agenda(page, source: AgendaSource) -> None:
+    """Put a BoardDocs meeting page into the state where its agenda has loaded."""
+    page.goto(source.page_url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
+    # The tab exists before the agenda does; clicking it is what asks for the content.
+    try:
+        tab = page.locator(BOARDDOCS_AGENDA_TAB).first
+        tab.wait_for(state="visible", timeout=DOCUMENT_TIMEOUT_MS)
+        tab.click(timeout=DOCUMENT_TIMEOUT_MS)
+    except PlaywrightTimeoutError:
+        # Some meetings open straight onto the agenda; let the wait below decide.
+        log.debug("No agenda tab to click at %s", source.page_url)
+    except PlaywrightError as exc:
+        log.debug("Could not click the agenda tab at %s: %s", source.page_url, exc)
+
+    page.wait_for_selector(BOARDDOCS_AGENDA_ITEMS, state="attached", timeout=RENDER_TIMEOUT_MS)
 
 
 def extract_text_from_page(context: BrowserContext, source: AgendaSource) -> str:
@@ -161,9 +180,8 @@ def extract_text_from_page(context: BrowserContext, source: AgendaSource) -> str
     """
     page = context.new_page()
     try:
-        page.goto(source.page_url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
         try:
-            page.wait_for_function(AWAIT_BOARDDOCS_AGENDA_JS, timeout=RENDER_TIMEOUT_MS)
+            open_boarddocs_agenda(page, source)
         except PlaywrightTimeoutError:
             raise PipelineError(f"agenda did not render at {source.page_url}") from None
         text = page.evaluate(READ_BOARDDOCS_AGENDA_JS)
@@ -697,7 +715,11 @@ def collect_agendas(args: argparse.Namespace, board: Board) -> list[tuple[Agenda
             context = browser.new_context(user_agent=USER_AGENT, extra_http_headers=CONTACT_HEADER)
             for source in discover_agendas(context, board, args.months_back, args.limit):
                 try:
-                    if source.content_type == "html":
+                    if source.content_type == "boarddocs":
+                        # BoardDocs serves a blank page to a headless browser but answers its
+                        # own HTTP endpoints, so its agendas are fetched without one.
+                        text = fetch_boarddocs_agenda(source)
+                    elif source.content_type == "html":
                         text = extract_text_from_page(context, source)
                     else:
                         text = extract_text_with_pdfplumber(download_agenda_pdf(context, source))

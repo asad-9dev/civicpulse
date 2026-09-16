@@ -35,7 +35,7 @@ __all__ = [
 def discover_agendas(context: BrowserContext, board: Board, months_back: int, limit: int) -> list[AgendaSource]:
     """Meetings with a published agenda for one board, newest first."""
     if board.platform == "escribe":
-        sources = discover_escribe(context, board, months_back)
+        sources = discover_escribe(context, board, months_back, limit)
     elif board.platform == "civicweb":
         sources = discover_civicweb(context, board, limit)
     elif board.platform == "boarddocs":
