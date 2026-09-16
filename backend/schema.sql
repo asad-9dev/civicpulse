@@ -115,32 +115,11 @@ $$;
 revoke all on function public.subscribers_for_board(bigint, bigint, integer) from public, anon, authenticated;
 grant execute on function public.subscribers_for_board(bigint, bigint, integer) to service_role;
 
--- Seed the boards CivicPulse covers. Keep in sync with lib/boards.ts (and backend/boards.py);
--- on conflict the row is refreshed, so re-running this file fixes any drift.
-insert into public.boards (slug, name, short_name, region, board_type, website, agenda_portal, platform, status)
-values
-  ('ddsb',  'Durham District School Board',      'DDSB',  'Durham Region', 'public',
-   'https://www.ddsb.ca/about-ddsb/board-of-trustees/board-meetings/',
-   'https://calendar.ddsb.ca/meetings',                    'escribe',  'live'),
-  ('yrdsb', 'York Region District School Board', 'YRDSB', 'York Region',   'public',
-   'https://www2.yrdsb.ca/about-us/board-trustees/committee-meeting-dates',
-   'https://yrdsb.civicweb.net/Portal/MeetingSchedule.aspx', 'civicweb', 'live'),
-  ('tdsb',  'Toronto District School Board',     'TDSB',  'Toronto',       'public',
-   'https://www.tdsb.on.ca/Leadership/Agendas-Minutes-Decisions',
-   null,                                                   'manual',   'supervised'),
-  ('pdsb',  'Peel District School Board',        'PDSB',  'Peel Region',   'public',
-   'https://www.peelschools.org/agenda-and-minutes',
-   null,                                                   'manual',   'supervised')
-on conflict (slug) do update set
-  name          = excluded.name,
-  short_name    = excluded.short_name,
-  region        = excluded.region,
-  board_type    = excluded.board_type,
-  website       = excluded.website,
-  agenda_portal = excluded.agenda_portal,
-  platform      = excluded.platform,
-  status        = excluded.status,
-  updated_at    = now();
+-- Board rows are not seeded here. All 72 Ontario district school boards live in
+-- data/boards_config.json, which the website and the pipeline both read, and
+-- `python backend/seed_boards.py` copies that file into this table. Run it after this file, and
+-- again whenever the registry changes. Seeding is an upsert on slug, so a board keeps the id
+-- that digest_log and subscriber_boards already reference.
 
 -- Every digest sent before the expansion covered a DDSB meeting.
 update public.digest_log

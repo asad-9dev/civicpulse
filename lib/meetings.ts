@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { BOARDS, type Board } from "./boards";
 import type { Meeting } from "./types";
@@ -37,14 +37,36 @@ async function readBoardFile(board: Board): Promise<Meeting[]> {
  * Decoded meetings, newest first: one board's when given a board, every board's when given null.
  */
 export async function getMeetings(board: Board | null = null): Promise<Meeting[]> {
-  const files = await Promise.all((board ? [board] : BOARDS).map(readBoardFile));
+  if (board) return (await readBoardFile(board)).sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
+
+  // Across all boards, only the boards that actually have a file are opened.
+  let present: Set<string>;
+  try {
+    present = new Set((await readdir(BOARDS_DIR)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5)));
+  } catch {
+    return [];
+  }
+  const files = await Promise.all(BOARDS.filter((b) => present.has(b.slug)).map(readBoardFile));
   return files.flat().sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
 }
 
-/** How many meetings each board has decoded, for the board switcher's counts. */
+/**
+ * How many meetings each board has decoded, for the board switcher's counts.
+ *
+ * Reads the directory first and only opens the files that exist: most of the 72 boards have no
+ * file yet, and this runs on every request.
+ */
 export async function countMeetingsByBoard(): Promise<Record<string, number>> {
+  let present: Set<string>;
+  try {
+    present = new Set((await readdir(BOARDS_DIR)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5)));
+  } catch {
+    return {};
+  }
   const counts = await Promise.all(
-    BOARDS.map(async (board) => [board.slug, (await readBoardFile(board)).length] as const),
+    BOARDS.filter((board) => present.has(board.slug)).map(
+      async (board) => [board.slug, (await readBoardFile(board)).length] as const,
+    ),
   );
   return Object.fromEntries(counts);
 }

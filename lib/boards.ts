@@ -1,22 +1,24 @@
+import config from "@/data/boards_config.json";
+
 /**
- * The Ontario school boards CivicPulse covers.
+ * The Ontario school boards CivicPulse knows about.
  *
- * This file is the source of truth. The Supabase `boards` table (backend/schema.sql) is seeded
- * from it so the database can reference boards by id, and backend/boards.py mirrors it for the
- * scraper — but nothing on the site has to reach the network to know a board's name or towns.
+ * The data itself lives in data/boards_config.json, which backend/boards.py reads too — one file
+ * rather than a TypeScript list and a Python list that drift apart across 72 boards. The names,
+ * regions, types and websites come from the Ontario Ministry of Education's board contact list;
+ * portal_type and seed_url were found by crawling each board's own site.
  *
- * Adding a board: add an entry here, mirror it in backend/boards.py, add the slug to the scrape
- * workflow's matrix, and re-run scripts/migrate-multi-board.ts to seed the row.
+ * Adding or correcting a board is an edit to that JSON file; nothing here needs to change.
  */
 
 /** Which meeting-portal software a board publishes agendas on; picks the scraper adapter. */
-export type BoardPlatform = "escribe" | "civicweb" | "manual";
+export type BoardPlatform = "escribe" | "civicweb" | "boarddocs" | "generic_pdf" | "unknown";
 
 /**
  * Whether CivicPulse can decode this board right now.
- *   live       - agendas are being scraped and summarized
+ *   live       - a portal was found and an adapter can read it
  *   supervised - the province appointed a supervisor, so trustee meetings aren't being held
- *   planned    - the board is listed, but its portal has no scraper adapter yet
+ *   planned    - registered, but no portal found yet or no adapter for the one it uses
  */
 export type BoardStatus = "live" | "supervised" | "planned";
 
@@ -27,88 +29,71 @@ export interface Board {
   shortName: string;
   region: string;
   boardType: "public" | "catholic";
+  language: "english" | "french";
   website: string;
-  /** Where agendas are published; null when the board has no public portal. */
+  /** Where agendas are published; null when no portal has been found. */
   agendaPortal: string | null;
   platform: BoardPlatform;
   status: BoardStatus;
   /** Shown to visitors when a board has no meetings, so an empty feed explains itself. */
   statusNote?: string;
-  /** Municipalities the board serves — the town filter chips for this board. */
+  /** Municipalities the board serves — the town filter chips. Empty when not yet mapped. */
   municipalities: string[];
 }
 
-export const BOARDS: Board[] = [
-  {
-    slug: "ddsb",
-    name: "Durham District School Board",
-    shortName: "DDSB",
-    region: "Durham Region",
-    boardType: "public",
-    website: "https://www.ddsb.ca/about-ddsb/board-of-trustees/board-meetings/",
-    agendaPortal: "https://calendar.ddsb.ca/meetings",
-    platform: "escribe",
-    status: "live",
-    municipalities: ["Ajax", "Pickering", "Whitby", "Oshawa", "Uxbridge", "Brock", "Scugog"],
-  },
-  {
-    slug: "yrdsb",
-    name: "York Region District School Board",
-    shortName: "YRDSB",
-    region: "York Region",
-    boardType: "public",
-    website: "https://www2.yrdsb.ca/about-us/board-trustees/committee-meeting-dates",
-    agendaPortal: "https://yrdsb.civicweb.net/Portal/MeetingSchedule.aspx",
-    platform: "civicweb",
-    status: "live",
-    municipalities: [
-      "Markham",
-      "Vaughan",
-      "Richmond Hill",
-      "Newmarket",
-      "Aurora",
-      "Whitchurch-Stouffville",
-      "King",
-      "East Gwillimbury",
-      "Georgina",
-    ],
-  },
-  {
-    slug: "tdsb",
-    name: "Toronto District School Board",
-    shortName: "TDSB",
-    region: "Toronto",
-    boardType: "public",
-    website: "https://www.tdsb.on.ca/Leadership/Agendas-Minutes-Decisions",
-    agendaPortal: null,
-    platform: "manual",
-    status: "supervised",
-    statusNote:
-      "The province appointed a supervisor to the TDSB in 2025. Trustee meetings are suspended, so there are no agendas to decode; the board publishes the supervisor's decisions instead.",
-    municipalities: ["Toronto", "Etobicoke", "North York", "Scarborough", "York", "East York"],
-  },
-  {
-    slug: "pdsb",
-    name: "Peel District School Board",
-    shortName: "PDSB",
-    region: "Peel Region",
-    boardType: "public",
-    website: "https://www.peelschools.org/agenda-and-minutes",
-    agendaPortal: null,
-    platform: "manual",
-    status: "supervised",
-    statusNote:
-      "Peel's own agenda page says regular Board of Trustees meetings are paused until further notice under direction from the Ministry of Education, so there are no agendas to decode.",
-    municipalities: ["Mississauga", "Brampton", "Caledon"],
-  },
-];
+interface RawBoard {
+  slug: string;
+  name: string;
+  short_name: string;
+  region: string;
+  board_type: string;
+  language: string;
+  website: string;
+  portal_type: string | null;
+  seed_url: string | null;
+  status: string;
+  status_note?: string;
+  municipalities?: string[];
+}
+
+const PLATFORMS = new Set<BoardPlatform>(["escribe", "civicweb", "boarddocs", "generic_pdf", "unknown"]);
+const STATUSES = new Set<BoardStatus>(["live", "supervised", "planned"]);
+
+function toBoard(raw: RawBoard): Board {
+  const platform = (raw.portal_type ?? "unknown") as BoardPlatform;
+  const status = raw.status as BoardStatus;
+  return {
+    slug: raw.slug,
+    name: raw.name,
+    shortName: raw.short_name,
+    region: raw.region,
+    boardType: raw.board_type === "catholic" ? "catholic" : "public",
+    language: raw.language === "french" ? "french" : "english",
+    website: raw.website,
+    agendaPortal: raw.seed_url,
+    platform: PLATFORMS.has(platform) ? platform : "unknown",
+    status: STATUSES.has(status) ? status : "planned",
+    statusNote: raw.status_note,
+    municipalities: raw.municipalities ?? [],
+  };
+}
+
+export const BOARDS: Board[] = (config.boards as RawBoard[]).map(toBoard);
+
+/** Where the registry came from, shown on the boards page so the list can be checked. */
+export const BOARDS_SOURCE: { source: string; generated: string } = {
+  source: config.source,
+  generated: config.generated,
+};
+
+const BY_SLUG = new Map(BOARDS.map((board) => [board.slug, board]));
 
 /** The "All Ontario boards" choice, in the URL as ?board=all (or no param at all). */
 export const ALL_BOARDS = "all";
 
 export function getBoard(slug: string | null | undefined): Board | null {
   if (!slug || slug === ALL_BOARDS) return null;
-  return BOARDS.find((board) => board.slug === slug) ?? null;
+  return BY_SLUG.get(slug) ?? null;
 }
 
 /**
@@ -119,12 +104,15 @@ export function resolveBoardParam(value: string | string[] | undefined): Board |
   return getBoard(Array.isArray(value) ? value[0] : value);
 }
 
-/** Boards with a scraper adapter, i.e. the ones that can produce meetings today. */
+/** Boards being decoded today, i.e. the ones that can produce meetings. */
 export function liveBoards(): Board[] {
   return BOARDS.filter((board) => board.status === "live");
 }
 
-/** Every municipality across the given boards, deduped, for the town filter. */
+/**
+ * Every municipality across the given boards, deduped, for the town filter. Empty when the
+ * boards in view have no municipalities mapped, and the filter hides itself.
+ */
 export function municipalitiesFor(board: Board | null): string[] {
   if (board) return board.municipalities;
   return [...new Set(BOARDS.flatMap((b) => b.municipalities))].sort((a, b) => a.localeCompare(b));

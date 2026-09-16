@@ -85,5 +85,34 @@
     "policyChanges": "The agenda included routine updates on policies and procedures open for public comment, but no specific policy revisions were scheduled for a vote.",
     "originalPdfUrl": "https://yrdsb.civicweb.net/document/195622",
     "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-09-09-equity-and-inclusivity-advisory-committe",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-09",
+    "committeeName": "Equity and Inclusivity Advisory Committee Meeting",
+    "title": "YRDSB agenda featured updates on equity, summer programs, and early learning",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Markham",
+      "Vaughan",
+      "Richmond Hill",
+      "Newmarket",
+      "Aurora",
+      "Whitchurch-Stouffville",
+      "King",
+      "East Gwillimbury",
+      "Georgina"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "The York Region District School Board equity committee agenda listed a presentation on the annual report for equity and inclusivity.",
+      "Staff were scheduled to present details on the Y2 LEGACY summer programs for students.",
+      "A presentation on early years programming connected to anti-racism initiatives was on the agenda."
+    ],
+    "studentParentImpact": "The York Region District School Board advisory committee agenda included presentations on summer legacy programs for students and early years programming linked to anti-racism strategies. Staff were also scheduled to provide policy updates to committee members. These discussions help shape how schools create inclusive learning spaces, support young children starting school, and offer summer learning opportunities for students across York Region. The agenda did not outline any actions or steps required from parents or students.",
+    "policyChanges": "Policy updates were listed on the agenda for review, but specific policy titles or proposed changes were not detailed in the document.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/195617",
+    "summarySource": "gemini"
   }
 ]

@@ -10,28 +10,74 @@ agendas into three-point summaries that students and parents can read in a minut
 
 ## Boards
 
-The boards CivicPulse covers are listed in `lib/boards.ts` (mirrored for the pipeline in
-`backend/boards.py`). Each one records the portal its agendas are published on, which decides
-whether the scraper can read it.
+All 72 Ontario district school boards are registered in **`data/boards_config.json`** — the
+single file the website (`lib/boards.ts`) and the pipeline (`backend/boards.py`) both read, so
+the two can't disagree about 72 boards.
 
-| Board | Slug | Portal | Status |
-| --- | --- | --- | --- |
-| Durham District School Board | `ddsb` | eSCRIBE — calendar.ddsb.ca | Decoded daily |
-| York Region District School Board | `yrdsb` | CivicWeb — yrdsb.civicweb.net | Decoded daily |
-| Toronto District School Board | `tdsb` | — | Under provincial supervision: trustee meetings suspended, no agendas published |
-| Peel District School Board | `pdsb` | — | Under provincial supervision: "regular Board of Trustees meetings have been paused until further notice" |
+Names, regions, types and websites come from the Ontario Ministry of Education's board contact
+list. `portal_type` and `seed_url` were found by crawling each board's own site: most publish
+agendas through meeting-portal software, and which one decides whether a scraper can read it.
 
-TDSB and PDSB are listed in the app so visitors can see the board and why it is empty, rather
-than finding nothing. When their trustee meetings resume, give each an `agendaPortal` and a
-`platform` in both registries and add the slug to the scrape workflow's matrix.
+Each board carries a `status`:
 
-### Adding a board
+| Status | Meaning |
+| --- | --- |
+| `live` | A portal was found and an adapter reads it — the board is scraped daily |
+| `supervised` | The province appointed a supervisor, so no trustee meetings are being held |
+| `planned` | Registered and listed on the site, but no portal found yet, or no adapter for the one it uses |
 
-1. Add an entry to `lib/boards.ts` and the matching one to `backend/boards.py`.
-2. Add a row to the `boards` seed at the bottom of `backend/schema.sql` and run it.
-3. If its portal is eSCRIBE or CivicWeb, add the slug to `.github/workflows/scrape.yml`
-   (both the matrix and the `board` input's options). Any other portal needs a new adapter
-   in `backend/scrape_agendas.py` alongside `discover_escribe` and `discover_civicweb`.
+Every board appears in the site's board switcher whatever its status, so someone looking for
+their board finds it and an explanation, rather than nothing.
+
+### Being decoded now
+
+| Board | Slug | Portal |
+| --- | --- | --- |
+| Durham District School Board | `ddsb` | eSCRIBE — calendar.ddsb.ca |
+| Greater Essex County District School Board | `gecdsb` | eSCRIBE — calendar.publicboard.ca |
+| Kawartha Pine Ridge District School Board | `kprdsb` | eSCRIBE — events.kprschools.ca |
+| York Region District School Board | `yrdsb` | CivicWeb — yrdsb.civicweb.net |
+
+Three boards are registered but have no meetings to decode: **TDSB**, **TCDSB** and **PDSB** are
+all under provincial supervision, with trustee meetings suspended. The remaining 65 are
+`planned` — see [Why a board isn't decoded yet](#why-a-board-isnt-decoded-yet).
+
+### Adapters
+
+Discovery lives in `backend/adapters/`, one module per portal family, all returning the same
+record so the rest of the pipeline treats every board identically:
+
+| Adapter | Portal | Notes |
+| --- | --- | --- |
+| `escribe.py` | eSCRIBE | Reads the meeting table; the Agenda column links straight to the PDF. Covers both escribemeetings.com and boards hosting eSCRIBE on their own domain |
+| `civicweb.py` | CivicWeb | Schedule page lists several months; each meeting's page carries the agenda, added by its own script after load |
+| `boarddocs.py` | BoardDocs | Lists meetings from a JSON endpoint. Agendas are HTML, not PDF |
+| `generic_pdf.py` | none | Fallback: crawl a board's meetings page for linked agenda PDFs |
+
+### Why a board isn't decoded yet
+
+The crawl that built the registry found a portal for 10 of 72 boards. The rest came back empty
+for ordinary reasons: most board sites render their navigation in JavaScript and bury the
+agenda link several pages deep, and some sites refuse automated requests entirely. A board being
+`planned` means **nobody has mapped its portal yet**, not that it publishes nothing.
+
+Two further boards are `planned` despite having a portal, because the adapters can't read them
+yet: **SMCDSB** and **TVDSB** are on a newer eSCRIBE that renders its meeting list in the browser
+instead of serving HTML, and **UCDSB**'s BoardDocs keeps the agenda in a pane the scraper can't
+reach. Their `status_note` says so, and the site shows that to visitors.
+
+### Adding or fixing a board
+
+1. Edit its entry in `data/boards_config.json`: set `portal_type`, `seed_url`, and `status` to
+   `live`. Nothing in `lib/boards.ts` or `backend/boards.py` needs to change.
+2. Check it: `python backend/scrape_agendas.py --board <slug> --limit 1 --summarizer dummy`
+3. Copy the registry into Postgres: `python backend/seed_boards.py`
+4. That's it — the daily workflow reads the registry and picks up every `live` board, so it
+   needs no edit.
+
+Adding `municipalities` to a board is optional but worth doing: with them, the town filter chips
+appear for that board and summaries are constrained to real place names. Without them, the
+summarizer names whatever towns the agenda mentions.
 
 ## View the app locally
 
@@ -219,6 +265,16 @@ its own file, and two jobs finishing at once can't overwrite each other.
 
 ## The Python backend
 
+Two entry points:
+
+- **`backend/run_all.py`** scrapes many boards in one batch — `--all`, `--portal escribe` or
+  `--board <slug>` — a couple at a time (`--concurrency`, default 2) to stay inside Gemini's
+  per-minute free-tier limit. Each board runs as its own process, so one board's crash or hung
+  browser can't touch the others. Every outcome is recorded in `data/ingest_status.json`:
+  `--status` prints the last run, `--retry-failed` re-runs just the boards that broke, and
+  `--resume` picks up a batch that was interrupted.
+- **`backend/scrape_agendas.py`** does one board, and is what the batch runner shells out to.
+
 `backend/scrape_agendas.py` scrapes one board per run (`--board <slug>`) in five steps:
 
 1. **Discover**: opens the board's calendar in headless Chromium with Playwright. There is one
@@ -344,7 +400,9 @@ run continues. Meetings then get the built-in summary, the run shows a "Gemini f
 and a later run upgrades them. When you start a run by hand, tick **refresh** to re-summarize
 meetings that are already on the site, for example after changing the prompt.
 
-The workflow runs one job per scrapable board, one board at a time so their pushes can't race.
+The workflow runs `backend/run_all.py --all`, which reads `data/boards_config.json` and scrapes
+whichever boards are marked `live`, two at a time. Adding a board is a registry edit; the
+workflow needs no change. Each run writes which boards succeeded to the run's summary page.
 If `public/data/boards/<board>.json` changed, it commits the file as `github-actions[bot]` and pushes
 it. The downloaded PDFs are kept as a run artifact for 14 days.
 

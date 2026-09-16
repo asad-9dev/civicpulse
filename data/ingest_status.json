@@ -1,0 +1,68 @@
+{
+  "boards": {
+    "ddsb": {
+      "slug": "ddsb",
+      "short_name": "DDSB",
+      "platform": "escribe",
+      "ok": true,
+      "last_run": "2026-09-16T05:05:01+00:00",
+      "seconds": 5.4,
+      "detail": "INFO Already published, skipping Committee of the Whole - Standing (2026-09-09) | INFO Already published, skipping Special Board Meeting (2026-08-26) | INFO Wrote 0 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\ddsb.generated.json"
+    },
+    "gecdsb": {
+      "slug": "gecdsb",
+      "short_name": "GECDSB",
+      "platform": "escribe",
+      "ok": true,
+      "last_run": "2026-09-16T05:04:58+00:00",
+      "seconds": 3.2,
+      "detail": "INFO 0 meeting(s) with a published agenda; keeping 0 | WARNING No GECDSB agenda PDFs found. Agendas are posted a few days before each meeting; try --months-back 2. | INFO Wrote 0 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\gecdsb.generated.json"
+    },
+    "kprdsb": {
+      "slug": "kprdsb",
+      "short_name": "KPRDSB",
+      "platform": "escribe",
+      "ok": true,
+      "last_run": "2026-09-16T05:07:06+00:00",
+      "seconds": 127.3,
+      "detail": "INFO Summarized with gemini-3.6-flash | INFO Wrote 4 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\kprdsb.generated.json | INFO Updated public\\data\\boards\\kprdsb.json (4 KPRDSB meetings total)"
+    },
+    "smcdsb": {
+      "slug": "smcdsb",
+      "short_name": "SMCDSB",
+      "platform": "escribe",
+      "ok": false,
+      "last_run": "2026-09-16T04:48:44+00:00",
+      "seconds": 124.4,
+      "detail": "WARNING Calendar didn't load (try 1 of 3): The meeting calendar did not render within 30s (https://pub-smcdsb.escribemeetings.com/meetings).; retrying | WARNING Calendar didn't load (try 2 of 3): The meeting calendar did not render within 30s (https://pub-smcdsb.escribemeetings.com/meetings).; retrying | ERROR The meeting calendar didn't load after 3 tries (https://pub-smcdsb.escribemeetings.com/meetings): The meeting calendar did not render within 30s (https://pub-smcdsb.escribemeetings.com/mee"
+    },
+    "tvdsb": {
+      "slug": "tvdsb",
+      "short_name": "TVDSB",
+      "platform": "escribe",
+      "ok": false,
+      "last_run": "2026-09-16T04:50:42+00:00",
+      "seconds": 124.5,
+      "detail": "WARNING Calendar didn't load (try 1 of 3): The meeting calendar did not render within 30s (https://pub-tvdsb.escribemeetings.com/meetings).; retrying | WARNING Calendar didn't load (try 2 of 3): The meeting calendar did not render within 30s (https://pub-tvdsb.escribemeetings.com/meetings).; retrying | ERROR The meeting calendar didn't load after 3 tries (https://pub-tvdsb.escribemeetings.com/meetings): The meeting calendar did not render within 30s (https://pub-tvdsb.escribemeetings.com/meeting"
+    },
+    "ucdsb": {
+      "slug": "ucdsb",
+      "short_name": "UCDSB",
+      "platform": "boarddocs",
+      "ok": false,
+      "last_run": "2026-09-16T04:48:45+00:00",
+      "seconds": 1.7,
+      "detail": "INFO Board: Upper Canada District School Board (boarddocs), portal https://go.boarddocs.com/can/ucdsb/Board.nsf | ERROR BoardDocs meeting list failed (https://go.boarddocs.com/can/ucdsb/Board.nsf/BD-GETMeetingsListForSEO?open): HTTP Error 403: Forbidden"
+    },
+    "yrdsb": {
+      "slug": "yrdsb",
+      "short_name": "YRDSB",
+      "platform": "civicweb",
+      "ok": true,
+      "last_run": "2026-09-16T05:05:47+00:00",
+      "seconds": 46.0,
+      "detail": "INFO Summarized with gemini-3.6-flash | INFO Wrote 1 record(s) to C:\\Users\\lexaf\\website\\backend\\output\\yrdsb.generated.json | INFO Updated public\\data\\boards\\yrdsb.json (4 YRDSB meetings total)"
+    }
+  },
+  "last_batch": "2026-09-16T05:07:06+00:00"
+}

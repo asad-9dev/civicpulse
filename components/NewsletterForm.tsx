@@ -16,31 +16,43 @@ function listBoards(names: string[]): string {
   return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 }
 
-export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defaultBoard: Board | null }) {
+export function NewsletterForm({
+  boards,
+  defaultBoard,
+  totalBoards,
+}: {
+  /** The boards worth offering: the ones being decoded, plus the ones whose meetings are paused. */
+  boards: Board[];
+  defaultBoard: Board | null;
+  /** How many Ontario boards are registered in all, for the "everything" wording. */
+  totalBoards: number;
+}) {
   const [email, setEmail] = useState("");
   // Whoever is reading one board's feed most likely wants that board's emails; everyone else
   // gets every board, which is what a subscriber got before boards existed.
-  const [chosen, setChosen] = useState<string[]>(defaultBoard ? [defaultBoard.slug] : boards.map((b) => b.slug));
+  // null means "every Ontario board, including ones added later", which is what the API stores
+  // when no specific board is named. A list means exactly those boards.
+  const [chosen, setChosen] = useState<string[] | null>(defaultBoard ? [defaultBoard.slug] : null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   // Switching boards in the header re-renders this form with a new default, but state set on the
   // first mount would survive and keep offering the old boards. Follow the header instead.
   const defaultSlug = defaultBoard?.slug;
   useEffect(() => {
-    setChosen(defaultSlug ? [defaultSlug] : boards.map((b) => b.slug));
-    // boards is a constant list from the server, so only the board choice re-runs this.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setChosen(defaultSlug ? [defaultSlug] : null);
   }, [defaultSlug]);
 
   function selectAllBoards() {
-    setChosen(boards.map((b) => b.slug));
+    setChosen(null);
     if (status.kind === "error") setStatus({ kind: "idle" });
   }
 
   function toggleBoard(slug: string) {
-    setChosen((current) =>
-      current.includes(slug) ? current.filter((s) => s !== slug) : [...current, slug],
-    );
+    setChosen((current) => {
+      // Coming from "everything", ticking one board means just that board.
+      if (current === null) return [slug];
+      return current.includes(slug) ? current.filter((s) => s !== slug) : [...current, slug];
+    });
     if (status.kind === "error") setStatus({ kind: "idle" });
   }
 
@@ -52,7 +64,7 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
       input.focus();
       return;
     }
-    if (chosen.length === 0) {
+    if (chosen !== null && chosen.length === 0) {
       setStatus({ kind: "error", message: "Pick at least one school board." });
       return;
     }
@@ -62,14 +74,14 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, boards: chosen }),
+        body: JSON.stringify({ email, boards: chosen ?? [] }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; emailsEnabled?: boolean };
       if (!res.ok) {
         setStatus({ kind: "error", message: data.error ?? "Something went wrong. Please try again." });
         return;
       }
-      const names = boards.filter((b) => chosen.includes(b.slug)).map((b) => b.shortName);
+      const names = chosen === null ? ["every Ontario board"] : boards.filter((b) => chosen.includes(b.slug)).map((b) => b.shortName);
       setStatus({ kind: "success", emailsEnabled: data.emailsEnabled === true, boards: names });
       setEmail("");
     } catch {
@@ -79,13 +91,15 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
 
   const submitting = status.kind === "submitting";
   const error = status.kind === "error" ? status.message : null;
-  const allChosen = chosen.length === boards.length;
+  const allChosen = chosen === null;
 
   // Says back what they picked, so the choice is legible before they hand over an address.
-  const chosenBoards = boards.filter((b) => chosen.includes(b.slug));
+  const chosenBoards = chosen === null ? [] : boards.filter((b) => chosen.includes(b.slug));
   const pausedChosen = chosenBoards.filter((b) => b.status !== "live");
   const chosenSummary =
-    chosenBoards.length === 0
+    chosen === null
+      ? `You'll get an email after every trustee meeting CivicPulse decodes, across all ${totalBoards} Ontario boards — including boards added later.`
+      : chosenBoards.length === 0
       ? "Pick at least one board to get meeting alerts."
       : `You'll get an email after each ${listBoards(chosenBoards.map((b) => b.shortName))} trustee meeting.` +
         (pausedChosen.length > 0
@@ -100,7 +114,7 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
         <legend className="mb-3 flex flex-wrap items-baseline gap-x-2 text-[15px] font-bold">
           Step 1 · Which boards do you want?
           <span className="font-normal text-night-muted">
-            {allChosen ? "all Ontario boards" : `${chosen.length} of ${boards.length} selected`}
+            {allChosen ? `all ${totalBoards} Ontario boards` : `${chosen?.length ?? 0} selected`}
           </span>
         </legend>
         <div className="flex flex-wrap gap-2">
@@ -116,7 +130,7 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
             All Ontario boards
           </button>
           {boards.map((board) => {
-            const checked = chosen.includes(board.slug);
+            const checked = chosen !== null && chosen.includes(board.slug);
             return (
               <label
                 key={board.slug}

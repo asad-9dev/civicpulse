@@ -37,37 +37,39 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
-from playwright.sync_api import BrowserContext, Page, sync_playwright
+from playwright.sync_api import BrowserContext, sync_playwright
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
-from boards import BOARDS, SCRAPABLE_SLUGS, SLUGS, Board, get_board
+from adapters import discover_agendas
+from boards import BOARDS, SCRAPABLE_SLUGS, SLUGS, Board, get_board, summary as boards_summary
+from common import (
+    AGENDAS_DIR,
+    BACKEND_DIR,
+    AgendaSource,
+    CATEGORIES,
+    DOCUMENT_TIMEOUT_MS,
+    DOWNLOAD_TIMEOUT_MS,
+    OUTPUT_DIR,
+    PROJECT_ROOT,
+    PipelineError,
+    RENDER_TIMEOUT_MS,
+    CONTACT_HEADER,
+    USER_AGENT,
+    guess_committee,
+    log,
+    parse_meeting_date,
+    public_meetings_json,
+    record_id,
+    slugify,
+    source_link,
+)
 
-BACKEND_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BACKEND_DIR.parent
-PUBLIC_BOARDS_DIR = PROJECT_ROOT / "public" / "data" / "boards"
-OUTPUT_DIR = BACKEND_DIR / "output"
-AGENDAS_DIR = BACKEND_DIR / "agendas"
-
-USER_AGENT = "CivicPulse/0.2 (independent civic project; summarizes public Ontario school board agendas)"
-RENDER_TIMEOUT_MS = 30_000
-# How long to wait for a meeting page's document links. Short: a meeting with no agenda posted
-# yet never grows them, and a discovery run visits many such pages.
-DOCUMENT_TIMEOUT_MS = 10_000
-DOWNLOAD_TIMEOUT_MS = 120_000
-
-CATEGORIES = ["Boundary Review", "Transport", "Policy", "Budget"]
-
-
-def public_meetings_json(board: Board) -> Path:
-    """Where one board's decoded meetings live, e.g. public/data/boards/ddsb.json."""
-    return PUBLIC_BOARDS_DIR / f"{board.slug}.json"
 
 CLAUDE_MODEL = "claude-opus-5"
 
@@ -81,302 +83,20 @@ GEMINI_MODELS = [
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 GEMINI_PAUSE_SECONDS = 5  # between agendas, to stay under free-tier requests-per-minute
 
-log = logging.getLogger("civicpulse")
 
-
-class PipelineError(Exception):
-    """A step failed in a way the operator should hear about."""
-
-
-@dataclass
-class AgendaSource:
-    """One meeting's agenda, as listed on a board's meeting calendar."""
-
-    board: Board
-    page_url: str  # the meeting's page on the calendar (or the local PDF path)
-    committee_name: str
-    meeting_date: str | None  # ISO yyyy-mm-dd when we can parse it
-    pdf_url: str | None = None  # direct link from the calendar's Agenda column
 
 
 # --------------------------------------------------------------------------- #
 # 1. Discover
 # --------------------------------------------------------------------------- #
 
-# Full names and abbreviations alike: eSCRIBE writes "September 9, 2026", CivicWeb writes
-# "15 Sep 2026". Matching the first three letters and normalising with %b covers both.
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
-DATE_PATTERNS = [
-    # 2026-09-15
-    (re.compile(r"(20\d{2})-(\d{2})-(\d{2})"), lambda m: f"{m[1]}-{m[2]}-{m[3]}"),
-    # September 15, 2026 / Sep. 15 2026
-    (
-        re.compile(rf"\b({MONTHS})[a-z]*\.?\s+(\d{{1,2}}),?\s+(20\d{{2}})", re.IGNORECASE),
-        lambda m: datetime.strptime(f"{m[1][:3]} {m[2]} {m[3]}", "%b %d %Y").strftime("%Y-%m-%d"),
-    ),
-    # 15 Sep 2026 / 15 September 2026
-    (
-        re.compile(rf"\b(\d{{1,2}})\s+({MONTHS})[a-z]*\.?,?\s+(20\d{{2}})", re.IGNORECASE),
-        lambda m: datetime.strptime(f"{m[1]} {m[2][:3]} {m[3]}", "%d %b %Y").strftime("%Y-%m-%d"),
-    ),
-]
 
 
-def parse_meeting_date(text: str) -> str | None:
-    for pattern, to_iso in DATE_PATTERNS:
-        match = pattern.search(text)
-        if match:
-            try:
-                return to_iso(match)
-            except ValueError:
-                continue
-    return None
-
-
-def guess_committee(text: str, default: str = "Board of Trustees Meeting") -> str:
-    """Normalize a calendar title ("Standing Committee Meeting") to the committee names the app shows."""
-    t = text.lower().replace("-", " ")
-    if "seac" in t or "special education advisory" in t:
-        return "Special Education Advisory Committee"
-    if "standing" in t or "committee of the whole" in t:
-        return "Committee of the Whole - Standing"
-    if "special board" in t:
-        return "Special Board Meeting"
-    if "regular" in t:
-        return "Regular Board Meeting"
-    return default.strip() or "Board of Trustees Meeting"
 
 
 # Runs inside the rendered calendar. Each meeting row has its date in td[headers="c1"] and
 # its page link in td[headers="c2"]; attachment columns (Agenda, Minutes, Live Stream) are
 # keyed to a <th> id, so the Agenda column is located by its header text, not its position.
-READ_MEETING_ROWS_JS = """
-() => {
-  const agendaHeader = [...document.querySelectorAll('th')]
-    .find((th) => th.innerText.trim().toLowerCase() === 'agenda');
-  return [...document.querySelectorAll('td[headers="c1"]')].map((dateCell) => {
-    const row = dateCell.closest('tr');
-    const meeting = row.querySelector('td[headers="c2"] a[href]');
-    const agenda =
-      (agendaHeader && row.querySelector(`td[headers="${agendaHeader.id}"] a[href]`)) ||
-      row.querySelector('a[aria-label^="View Agenda"]');
-    return {
-      when: dateCell.innerText.trim(),
-      title: meeting ? meeting.innerText.trim() : '',
-      meetingUrl: meeting ? meeting.href : null,
-      agendaUrl: agenda ? agenda.href : null,
-    };
-  });
-}
-"""
-
-
-def wait_for_calendar(page: Page) -> None:
-    """
-    Block until the meeting table has rendered: its "Meeting Date" header and at least one row.
-    (Waiting for network idle doesn't work here; the page keeps a connection open.)
-    """
-    try:
-        page.wait_for_selector("th#c1", state="attached", timeout=RENDER_TIMEOUT_MS)
-        page.wait_for_selector("td[headers='c1']", state="attached", timeout=RENDER_TIMEOUT_MS)
-    except PlaywrightTimeoutError as exc:
-        raise PipelineError(f"The meeting calendar did not render within {RENDER_TIMEOUT_MS // 1000}s ({page.url}).") from exc
-
-
-def open_calendar(page: Page, url: str, attempts: int = 3) -> None:
-    """Load a calendar page and wait for its meeting table, retrying slow or failed loads."""
-    for attempt in range(1, attempts + 1):
-        try:
-            page.goto(url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
-            wait_for_calendar(page)
-            return
-        except (PipelineError, PlaywrightError) as exc:
-            reason = str(exc).strip().splitlines()[0]
-            if attempt == attempts:
-                # Say what the page actually showed: a block or challenge page reads very
-                # differently from a slow one.
-                try:
-                    seen = f'title "{page.title()}", text "{" ".join(page.inner_text("body").split())[:160]}"'
-                except PlaywrightError:
-                    seen = "page content unavailable"
-                raise PipelineError(f"The meeting calendar didn't load after {attempts} tries ({url}): {reason}; {seen}") from exc
-            log.warning("Calendar didn't load (try %d of %d): %s; retrying", attempt, attempts, reason)
-            page.wait_for_timeout(10_000 * attempt)
-
-
-def discover_escribe(context: BrowserContext, board: Board, months_back: int) -> list[AgendaSource]:
-    """Read an eSCRIBE meeting list (calendar.ddsb.ca and most escribemeetings.com sites)."""
-    page = context.new_page()
-    try:
-        open_calendar(page, board.agenda_portal)
-        # The listing runs from the start of the current month onward. Each "‹" link moves
-        # the start back one month (its URL carries a StartDate and a per-page token).
-        for _ in range(months_back):
-            previous = page.locator("table a", has_text="‹").first.get_attribute("href")
-            if not previous:
-                break
-            open_calendar(page, urljoin(page.url, previous))
-        rows = page.evaluate(READ_MEETING_ROWS_JS)
-    finally:
-        page.close()
-
-    log.info("%s calendar lists %d meeting(s)", board.short_name, len(rows))
-    return [
-        AgendaSource(
-            board=board,
-            page_url=row["meetingUrl"] or row["agendaUrl"],
-            committee_name=guess_committee(row["title"], default=row["title"]),
-            meeting_date=parse_meeting_date(row["when"]),
-            pdf_url=row["agendaUrl"],
-        )
-        for row in rows
-        if row["agendaUrl"]
-    ]
-
-
-# Runs inside a rendered CivicWeb schedule page. Every meeting on the calendar is a link to
-# MeetingInformation.aspx whose text ends with the date ("Board Meeting - Public Session -
-# 15 Sep 2026"); the same meeting is linked several times (calendar cell plus the side lists),
-# so the caller dedupes by meeting id.
-READ_CIVICWEB_MEETINGS_JS = """
-() => {
-  const links = [...document.querySelectorAll('a[href*="MeetingInformation.aspx"]')];
-  return links.map((link) => ({ title: link.innerText.trim(), meetingUrl: link.href }));
-}
-"""
-
-# On a CivicWeb meeting page the agenda is one or two links: "Agenda Package" is the full
-# document set (what DDSB's eSCRIBE Agenda link gives), "Agenda" is the order of business alone.
-# textContent rather than innerText, which is empty for a link the page hasn't laid out yet.
-# a.href (not the attribute) keeps the query string that makes the response a PDF.
-READ_CIVICWEB_AGENDA_JS = """
-() => {
-  const find = (label) =>
-    [...document.querySelectorAll('a[href*="/document/"]')]
-      .find((a) => (a.textContent || '').trim().toLowerCase() === label);
-  const link = find('agenda package') || find('agenda');
-  return link ? link.href : null;
-}
-"""
-
-# The meeting page ships with an unlabelled /document/ link and grows the labelled "Agenda" and
-# "Agenda Package" ones a moment later, so waiting for any /document/ link returns too early.
-# This waits for a labelled one, and times out on meetings whose agenda isn't posted yet.
-AWAIT_CIVICWEB_AGENDA_JS = """
-() => [...document.querySelectorAll('a[href*="/document/"]')]
-        .some((a) => ['agenda', 'agenda package'].includes((a.textContent || '').trim().toLowerCase()))
-"""
-
-# ".../MeetingInformation.aspx?Org=Cal&Id=2610" -> "2610"; the query key's case varies by link.
-CIVICWEB_MEETING_ID = re.compile(r"[?&]id=(\d+)", re.IGNORECASE)
-# "Board Meeting - Public Session - 15 Sep 2026" -> drop the trailing date.
-CIVICWEB_TRAILING_DATE = re.compile(r"\s*-\s*\d{1,2}\s+\w+\s+20\d{2}\s*$")
-
-
-def wait_for_civicweb(page: Page) -> None:
-    """Block until the CivicWeb schedule has rendered at least one meeting link."""
-    try:
-        page.wait_for_selector('a[href*="MeetingInformation.aspx"]', state="attached", timeout=RENDER_TIMEOUT_MS)
-    except PlaywrightTimeoutError as exc:
-        raise PipelineError(f"The meeting schedule did not render within {RENDER_TIMEOUT_MS // 1000}s ({page.url}).") from exc
-
-
-def open_civicweb_schedule(page: Page, url: str, attempts: int = 3) -> None:
-    """Load a CivicWeb schedule page and wait for its meeting links, retrying slow loads."""
-    for attempt in range(1, attempts + 1):
-        try:
-            page.goto(url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
-            wait_for_civicweb(page)
-            return
-        except (PipelineError, PlaywrightError) as exc:
-            reason = str(exc).strip().splitlines()[0]
-            if attempt == attempts:
-                try:
-                    seen = f'title "{page.title()}"'
-                except PlaywrightError:
-                    seen = "page content unavailable"
-                raise PipelineError(f"The meeting schedule didn't load after {attempts} tries ({url}): {reason}; {seen}") from exc
-            log.warning("Schedule didn't load (try %d of %d): %s; retrying", attempt, attempts, reason)
-            page.wait_for_timeout(10_000 * attempt)
-
-
-def discover_civicweb(context: BrowserContext, board: Board, limit: int) -> list[AgendaSource]:
-    """
-    Read a CivicWeb portal (yrdsb.civicweb.net and other *.civicweb.net sites).
-
-    The schedule page lists several months at once, so there's no month-by-month paging to do.
-    Each meeting's own page has to be opened to find its agenda document, which is the slow
-    part, so only the newest `limit` meetings are visited.
-    """
-    page = context.new_page()
-    try:
-        open_civicweb_schedule(page, board.agenda_portal)
-        rows = page.evaluate(READ_CIVICWEB_MEETINGS_JS)
-
-        listed: dict[str, AgendaSource] = {}
-        for row in rows:
-            title = (row["title"] or "").strip()
-            meeting_id = CIVICWEB_MEETING_ID.search(row["meetingUrl"] or "")
-            # Private sessions publish no agenda, so they're dropped before any page is opened.
-            if not title or not meeting_id or "private session" in title.lower():
-                continue
-            date = parse_meeting_date(title)
-            if not date:
-                continue
-            committee = CIVICWEB_TRAILING_DATE.sub("", title).strip()
-            listed.setdefault(
-                meeting_id[1],
-                AgendaSource(
-                    board=board,
-                    page_url=row["meetingUrl"],
-                    committee_name=guess_committee(committee, default=committee),
-                    meeting_date=date,
-                    pdf_url=None,
-                ),
-            )
-        log.info("%s schedule lists %d public meeting(s)", board.short_name, len(listed))
-
-        found: list[AgendaSource] = []
-        for source in sorted(listed.values(), key=lambda s: s.meeting_date or "", reverse=True):
-            if len(found) >= limit:
-                break
-            try:
-                page.goto(source.page_url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
-                page.wait_for_function(AWAIT_CIVICWEB_AGENDA_JS, timeout=DOCUMENT_TIMEOUT_MS)
-                agenda_url = page.evaluate(READ_CIVICWEB_AGENDA_JS)
-            except PlaywrightTimeoutError:
-                # Agendas are posted a few days before the meeting; older meetings keep only
-                # their minutes. Either way there's nothing here to summarize.
-                log.info("No agenda posted for %s (%s)", source.committee_name, source.meeting_date)
-                continue
-            except PlaywrightError as exc:
-                log.warning("Couldn't open %s (%s): %s", source.committee_name, source.meeting_date, exc)
-                continue
-            if agenda_url:
-                found.append(replace(source, pdf_url=agenda_url))
-        return found
-    finally:
-        page.close()
-
-
-def discover_agendas(context: BrowserContext, board: Board, months_back: int, limit: int) -> list[AgendaSource]:
-    """Meetings with a published agenda for one board, newest first."""
-    if board.platform == "escribe":
-        sources = discover_escribe(context, board, months_back)
-    elif board.platform == "civicweb":
-        sources = discover_civicweb(context, board, limit)
-    else:
-        raise PipelineError(
-            f"{board.short_name} has no agenda adapter (platform {board.platform!r}). "
-            + (board.status_note or "Add an adapter in backend/scrape_agendas.py to cover this board.")
-        )
-
-    unique = {s.pdf_url: s for s in sources if s.pdf_url}
-    ordered = sorted(unique.values(), key=lambda s: s.meeting_date or "", reverse=True)
-    log.info("%d meeting(s) with a published agenda; keeping %d", len(ordered), min(limit, len(ordered)))
-    return ordered[:limit]
-
-
 # --------------------------------------------------------------------------- #
 # 2. Download and extract
 # --------------------------------------------------------------------------- #
@@ -411,6 +131,50 @@ def download_agenda_pdf(context: BrowserContext, source: AgendaSource) -> Path:
     destination.write_bytes(body)
     log.info("Downloaded %s (%.1f MB)", destination.name, len(body) / 1e6)
     return destination
+
+
+# BoardDocs renders the agenda into #agenda, but leaves that pane hidden behind the "Featured"
+# tab, and innerText is empty for anything not displayed. textContent reads it regardless.
+READ_BOARDDOCS_AGENDA_JS = """
+() => {
+  const pane = document.querySelector('#agenda');
+  if (!pane) return '';
+  // One line per category and item, so the outline survives into the summary prompt.
+  const lines = [...pane.querySelectorAll('dt.category, li.item')]
+    .map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+  return lines.length ? lines.join('\n') : (pane.textContent || '').trim();
+}
+"""
+# The agenda arrives from a second request after load, so wait for its items to exist.
+AWAIT_BOARDDOCS_AGENDA_JS = """
+() => document.querySelectorAll('#agenda li.item, #agenda dt.category').length > 0
+"""
+
+
+def extract_text_from_page(context: BrowserContext, source: AgendaSource) -> str:
+    """
+    Read an agenda that is published as a web page rather than a PDF (BoardDocs).
+
+    The text is what the summarizer sees, so it is taken from the rendered page: the agenda is
+    fetched by the page's own script after load, and the raw HTML holds none of it.
+    """
+    page = context.new_page()
+    try:
+        page.goto(source.page_url, wait_until="domcontentloaded", timeout=RENDER_TIMEOUT_MS)
+        try:
+            page.wait_for_function(AWAIT_BOARDDOCS_AGENDA_JS, timeout=RENDER_TIMEOUT_MS)
+        except PlaywrightTimeoutError:
+            raise PipelineError(f"agenda did not render at {source.page_url}") from None
+        text = page.evaluate(READ_BOARDDOCS_AGENDA_JS)
+    except PlaywrightError as exc:
+        raise PipelineError(f"could not read {source.page_url}: {str(exc).splitlines()[0]}") from exc
+    finally:
+        page.close()
+
+    if len(text.strip()) < 200:
+        raise PipelineError(f"agenda page at {source.page_url} had almost no text")
+    return text
 
 
 def extract_text_with_pdfplumber(pdf_path: Path) -> str:
@@ -473,7 +237,13 @@ def summary_schema(board: Board) -> dict:
     "properties": {
         "title": {"type": "string", "description": "Headline under 90 characters about the item that matters most to families."},
         "urgencyScore": {"type": "integer", "description": "1 = informational ... 5 = families must act soon."},
-        "townsAffected": {"type": "array", "items": {"type": "string", "enum": board.municipalities}},
+        # Boards whose municipalities are mapped constrain the model to that list; the rest let
+        # it name the places the agenda mentions, which beats returning nothing at all.
+        "townsAffected": (
+            {"type": "array", "items": {"type": "string", "enum": board.municipalities}}
+            if board.municipalities
+            else {"type": "array", "items": {"type": "string"}, "description": "Towns or cities the agenda names."}
+        ),
         "category": {"type": "string", "enum": CATEGORIES},
         "executiveSummary": {"type": "array", "items": {"type": "string"}, "description": "1 to 3 one-sentence bullets."},
         "studentParentImpact": {"type": "string"},
@@ -544,7 +314,7 @@ Source: {source.pdf_url or source.page_url}
 Summarize the agenda below into:
 - title: a headline under 90 characters about the item that matters most to families, naming the {source.board.short_name}
 - urgencyScore: 1 (informational) to 5 (families must act soon, e.g. an open consultation or a vote on where students attend school)
-- townsAffected: which of {", ".join(source.board.municipalities)} are affected (list all of them for board-wide items)
+- townsAffected: {"which of " + ", ".join(source.board.municipalities) + " are affected (list all of them for board-wide items)" if source.board.municipalities else "the towns or cities the agenda names; leave empty if it names none"}
 - category: the closest of {", ".join(CATEGORIES)}
 - executiveSummary: up to 3 bullets, one sentence each, under 25 words; fewer if the agenda has fewer substantive items
 - studentParentImpact: one paragraph of 60-120 words on what this could change for students and parents, and what they can do if the agenda gives a way (for example attend the public session, or respond to a consultation it mentions)
@@ -787,25 +557,10 @@ def summarize_dummy(agenda_text: str, source: AgendaSource) -> dict:
 # 4. Publish
 # --------------------------------------------------------------------------- #
 
-def slugify(text: str, max_length: int = 48) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:max_length].rstrip("-")
 
 
-def record_id(source: AgendaSource) -> str:
-    """
-    One record per meeting: board + date + committee, e.g.
-    ddsb-2026-09-09-committee-of-the-whole-standing.
-
-    The board prefix keeps two boards apart: several run a "Special Education Advisory
-    Committee", and they meet on the same evenings often enough that an unprefixed id would
-    collide. Deliberately not built from summary text, so re-running the pipeline updates a
-    meeting's record instead of adding a duplicate next to it.
-    """
-    return f"{source.board.slug}-{source.meeting_date or 'undated'}-{slugify(source.committee_name, 40)}"
 
 
-def source_link(source: AgendaSource) -> str:
-    return source.pdf_url or source.page_url or source.board.website
 
 
 def to_meeting_record(source: AgendaSource, summary: dict, summary_source: str) -> dict:
@@ -822,7 +577,12 @@ def to_meeting_record(source: AgendaSource, summary: dict, summary_source: str) 
         policy = str(summary["policyChanges"]).strip()
         urgency = max(1, min(5, int(summary["urgencyScore"])))
         board_towns = source.board.municipalities
-        towns = [t for t in dict.fromkeys(summary["townsAffected"]) if t in board_towns] or board_towns[:5]
+        offered = [str(t).strip() for t in dict.fromkeys(summary["townsAffected"]) if str(t).strip()]
+        if board_towns:
+            towns = [t for t in offered if t in board_towns] or board_towns[:5]
+        else:
+            # No mapped municipalities for this board: take what the summarizer named.
+            towns = offered[:8]
     except (KeyError, TypeError, ValueError) as exc:
         raise PipelineError(f"Unusable summary for {source.page_url}: {exc!r}") from exc
     if not bullets or not title:
@@ -881,15 +641,13 @@ def upsert_public_meetings(board: Board, records: list[dict]) -> int:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Scrape and summarize an Ontario school board's trustee meeting agendas.",
-        epilog=(
-            "Boards: " + ", ".join(f"{b.slug} ({b.short_name}, {b.platform})" for b in BOARDS)
-            + ". Ready to scrape: " + ", ".join(SCRAPABLE_SLUGS) + "."
-        ),
+        epilog=boards_summary() + ". Use --list to see them.",
     )
     parser.add_argument(
-        "--board", choices=SLUGS, default="ddsb",
-        help="which school board to scrape (default ddsb); see backend/boards.py",
+        "--board", choices=SLUGS, default="ddsb", metavar="SLUG",
+        help="which school board to scrape (default ddsb); --list shows them all",
     )
+    parser.add_argument("--list", action="store_true", help="print the registered boards and exit")
     parser.add_argument("--offline", action="store_true", help="skip the network and use a simulated agenda")
     parser.add_argument("--pdf", action="append", type=Path, default=[], help="summarize a local agenda PDF (repeatable)")
     parser.add_argument(
@@ -936,14 +694,17 @@ def collect_agendas(args: argparse.Namespace, board: Board) -> list[tuple[Agenda
             reason = str(exc).strip().splitlines()[0]
             raise PipelineError(f"Could not start Chromium ({reason}). Run `python -m playwright install chromium` once.") from exc
         try:
-            context = browser.new_context(user_agent=USER_AGENT)
+            context = browser.new_context(user_agent=USER_AGENT, extra_http_headers=CONTACT_HEADER)
             for source in discover_agendas(context, board, args.months_back, args.limit):
                 try:
-                    pdf_path = download_agenda_pdf(context, source)
+                    if source.content_type == "html":
+                        text = extract_text_from_page(context, source)
+                    else:
+                        text = extract_text_with_pdfplumber(download_agenda_pdf(context, source))
                 except (PipelineError, PlaywrightError) as exc:
                     log.warning("Skipping %s (%s): %s", source.committee_name, source.meeting_date, exc)
                     continue
-                pairs.append((source, extract_text_with_pdfplumber(pdf_path)))
+                pairs.append((source, text))
         finally:
             browser.close()
 
@@ -959,6 +720,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(levelname)s %(message)s")
     load_dotenv(BACKEND_DIR / ".env")
+
+    if args.list:
+        print(boards_summary())
+        for b in BOARDS:
+            portal = b.platform if b.scrapable else f"{b.platform} (not scrapable)"
+            print(f"  {b.slug:16} {b.short_name:8} {b.board_type:9} {b.status:11} {portal}")
+        return 0
 
     board = get_board(args.board)
     log.info("Board: %s (%s), portal %s", board.name, board.platform, board.agenda_portal or "none")

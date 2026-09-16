@@ -51,6 +51,10 @@ export default async function HomePage({
   const board = resolveBoardParam(searchParams.board);
   const [meetings, counts] = await Promise.all([getMeetings(board), countMeetingsByBoard()]);
   const copy = heroCopy(board);
+  // Boards that can actually send email: the ones being decoded, plus the ones whose meetings
+  // are paused, so someone from those regions can see why they aren't listed.
+  const subscribable = BOARDS.filter((b) => b.status !== "planned");
+  const decodedCount = BOARDS.filter((b) => b.status === "live").length;
 
   return (
     <>
@@ -120,7 +124,7 @@ export default async function HomePage({
                 and any deadline to have your say. Pick the boards you care about.
               </p>
             </div>
-            <NewsletterForm boards={BOARDS} defaultBoard={board} />
+            <NewsletterForm boards={subscribable} defaultBoard={board} totalBoards={BOARDS.length} />
           </div>
         </section>
       </main>
@@ -135,15 +139,21 @@ export default async function HomePage({
             {board ? `the ${board.name}` : "any Ontario school board"}.
           </p>
         </div>
-        <a
-          href={board ? board.website : BOARDS[0].website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap text-[15px] font-bold text-civic hover:text-ink"
-        >
-          {board ? `Official ${board.shortName} board meetings` : `Official ${BOARDS[0].shortName} board meetings`}
-          <ExternalLink aria-hidden size={16} strokeWidth={2.25} />
-        </a>
+        {board ? (
+          <a
+            href={board.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap text-[15px] font-bold text-civic hover:text-ink"
+          >
+            Official {board.shortName} board meetings
+            <ExternalLink aria-hidden size={16} strokeWidth={2.25} />
+          </a>
+        ) : (
+          <p className="whitespace-nowrap text-[15px] text-ink-soft">
+            <strong className="text-ink">{decodedCount}</strong> of {BOARDS.length} Ontario boards decoded
+          </p>
+        )}
       </footer>
     </>
   );
