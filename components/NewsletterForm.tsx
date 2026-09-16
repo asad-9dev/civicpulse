@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, CircleCheck, LoaderCircle } from "lucide-react";
+import { ArrowRight, Check, CircleCheck, LoaderCircle } from "lucide-react";
 import type { Board } from "@/lib/boards";
 
 type Status =
@@ -31,6 +31,11 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
     // boards is a constant list from the server, so only the board choice re-runs this.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultSlug]);
+
+  function selectAllBoards() {
+    setChosen(boards.map((b) => b.slug));
+    if (status.kind === "error") setStatus({ kind: "idle" });
+  }
 
   function toggleBoard(slug: string) {
     setChosen((current) =>
@@ -76,10 +81,81 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
   const error = status.kind === "error" ? status.message : null;
   const allChosen = chosen.length === boards.length;
 
+  // Says back what they picked, so the choice is legible before they hand over an address.
+  const chosenBoards = boards.filter((b) => chosen.includes(b.slug));
+  const pausedChosen = chosenBoards.filter((b) => b.status !== "live");
+  const chosenSummary =
+    chosenBoards.length === 0
+      ? "Pick at least one board to get meeting alerts."
+      : `You'll get an email after each ${listBoards(chosenBoards.map((b) => b.shortName))} trustee meeting.` +
+        (pausedChosen.length > 0
+          ? ` ${listBoards(pausedChosen.map((b) => b.shortName))} ${pausedChosen.length === 1 ? "has" : "have"} no meetings right now, so nothing will arrive until they resume.`
+          : "");
+
   return (
-    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-2.5">
+    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3">
+      {/* The boards come first: this is the choice that decides what the email contains, and
+          below the Subscribe button nobody would see it before committing to it. */}
+      <fieldset className="flex flex-col gap-3">
+        <legend className="mb-3 flex flex-wrap items-baseline gap-x-2 text-[15px] font-bold">
+          Step 1 · Which boards do you want?
+          <span className="font-normal text-night-muted">
+            {allChosen ? "all Ontario boards" : `${chosen.length} of ${boards.length} selected`}
+          </span>
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            aria-pressed={allChosen}
+            onClick={selectAllBoards}
+            className={`inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-4 text-[15px] transition-colors sm:h-10 ${
+              allChosen ? "border-marker bg-marker font-bold text-ink" : "border-white/35 text-white hover:border-white"
+            }`}
+          >
+            {allChosen && <Check aria-hidden size={15} strokeWidth={3} />}
+            All Ontario boards
+          </button>
+          {boards.map((board) => {
+            const checked = chosen.includes(board.slug);
+            return (
+              <label
+                key={board.slug}
+                title={board.name}
+                className={`inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-4 text-[15px] transition-colors sm:h-10 ${
+                  checked
+                    ? "border-marker bg-marker font-bold text-ink"
+                    : "border-white/35 text-white hover:border-white"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  name="boards"
+                  value={board.slug}
+                  checked={checked}
+                  onChange={() => toggleBoard(board.slug)}
+                  className="size-4 accent-ink focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-marker"
+                />
+                {board.shortName}
+                <span className="sr-only">
+                  : {board.name}
+                  {board.status !== "live" ? " (meetings currently paused)" : ""}
+                </span>
+                {board.status !== "live" && (
+                  <span aria-hidden className={`text-[13px] ${checked ? "text-ink/70" : "text-night-muted"}`}>
+                    paused
+                  </span>
+                )}
+              </label>
+            );
+          })}
+        </div>
+        <p className="text-sm text-night-muted">
+          {chosenSummary}
+        </p>
+      </fieldset>
+
       <label htmlFor="subscribe-email" className="text-[15px] font-bold">
-        Email address
+        Step 2 · Your email address
       </label>
       <div className="flex flex-col gap-2.5 sm:flex-row">
         <input
@@ -119,49 +195,6 @@ export function NewsletterForm({ boards, defaultBoard }: { boards: Board[]; defa
           )}
         </button>
       </div>
-
-      <fieldset className="mt-1.5 flex flex-col gap-2.5">
-        <legend className="mb-2.5 text-[15px] font-bold">
-          Boards to follow
-          <span className="ml-2 font-normal text-night-muted">
-            {allChosen ? "all Ontario boards" : `${chosen.length} of ${boards.length}`}
-          </span>
-        </legend>
-        <div className="flex flex-wrap gap-2">
-          {boards.map((board) => {
-            const checked = chosen.includes(board.slug);
-            return (
-              <label
-                key={board.slug}
-                className={`inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-4 text-[15px] transition-colors sm:h-10 ${
-                  checked
-                    ? "border-marker bg-marker font-bold text-ink"
-                    : "border-white/35 text-white hover:border-white"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  name="boards"
-                  value={board.slug}
-                  checked={checked}
-                  onChange={() => toggleBoard(board.slug)}
-                  className="size-4 accent-ink focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-marker"
-                />
-                {board.shortName}
-                <span className="sr-only">
-                  : {board.name}
-                  {board.status !== "live" ? " (meetings currently paused)" : ""}
-                </span>
-                {board.status !== "live" && (
-                  <span aria-hidden className={`text-[13px] ${checked ? "text-ink/70" : "text-night-muted"}`}>
-                    paused
-                  </span>
-                )}
-              </label>
-            );
-          })}
-        </div>
-      </fieldset>
 
       <div id="subscribe-status" role="status" aria-live="polite" className="min-h-6 text-[15px]">
         {status.kind === "success" && (
