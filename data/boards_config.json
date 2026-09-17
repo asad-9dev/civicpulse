@@ -330,7 +330,8 @@
       "website": "http://www.dpcdsb.org",
       "portal_type": null,
       "seed_url": null,
-      "status": "planned"
+      "status": "supervised",
+      "status_note": "On June 27, 2025, the Minister of Education placed the DPCDSB under supervision alongside TDSB, TCDSB, and OCDSB."
     },
     {
       "slug": "dcdsb",
@@ -714,7 +715,8 @@
       "website": "http://www.ocdsb.ca",
       "portal_type": null,
       "seed_url": null,
-      "status": "planned"
+      "status": "supervised",
+      "status_note": "On June 27, 2025, the Minister of Education placed the OCDSB under supervision. All decisions normally made by trustees are made by the appointed Supervisor, so there are no trustee agendas to decode."
     },
     {
       "slug": "pdsb",
@@ -823,9 +825,9 @@
       "language": "english",
       "board_number": "B66109",
       "website": "http://www.scdsb.on.ca",
-      "portal_type": null,
-      "seed_url": null,
-      "status": "planned"
+      "portal_type": "boarddocs",
+      "seed_url": "https://go.boarddocs.com/can/scdsb/Board.nsf/Public",
+      "status": "live"
     },
     {
       "slug": "smcdsb",
@@ -916,8 +918,7 @@
       "website": "http://www.tvdsb.on.ca",
       "portal_type": "escribe",
       "seed_url": "https://pub-tvdsb.escribemeetings.com/meetings",
-      "status": "planned",
-      "status_note": "CivicPulse reads this board's calendar, but every meeting listed there is still upcoming and none has published its agenda yet. Summaries will appear once one does."
+      "status": "live"
     },
     {
       "slug": "tbcdsb",
@@ -948,7 +949,10 @@
       "portal_type": "escribe",
       "seed_url": "https://tcdsbpublishing.escribemeetings.com/meetings",
       "status": "supervised",
-      "status_note": "The province appointed a supervisor to the TCDSB in 2025, alongside the TDSB. Trustee meetings are suspended, so there are no agendas to decode."
+      "status_note": "The province appointed a supervisor to the TCDSB in 2025, alongside the TDSB. Trustee meetings are suspended, so there are no agendas to decode.",
+      "municipalities": [
+        "Toronto"
+      ]
     },
     {
       "slug": "tdsb",
@@ -1098,7 +1102,7 @@
       "slug": "yrdsb",
       "name": "York Region District School Board",
       "short_name": "YRDSB",
-      "region": "York Region",
+      "region": "Aurora",
       "ministry_region": "Central",
       "city": "Aurora",
       "board_type": "public",
@@ -1106,19 +1110,8 @@
       "board_number": "B66095",
       "website": "http://www.yrdsb.ca",
       "portal_type": "civicweb",
-      "seed_url": "https://yrdsb.civicweb.net/Portal/MeetingSchedule.aspx",
-      "status": "live",
-      "municipalities": [
-        "Markham",
-        "Vaughan",
-        "Richmond Hill",
-        "Newmarket",
-        "Aurora",
-        "Whitchurch-Stouffville",
-        "King",
-        "East Gwillimbury",
-        "Georgina"
-      ]
+      "seed_url": "https://yrdsb.civicweb.net/Portal/",
+      "status": "live"
     }
   ]
 }
