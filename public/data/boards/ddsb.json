@@ -1,5 +1,32 @@
 [
   {
+    "id": "ddsb-2026-09-22-regular-board-meeting",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-09-22",
+    "committeeName": "Regular Board Meeting",
+    "title": "DDSB Reviews 2026–2030 Pupil Accommodation Plan",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Boundary Review",
+    "executiveSummary": [
+      "Durham District School Board trustees will review the 2026–2030 Pupil Accommodation Plan detailing enrolment trends and capital priorities.",
+      "The plan outlines portable usage, partner schools, and planned boundary reviews across all Durham Region municipalities.",
+      "Trustees will also vote on setting board member honoraria for the 2026–2030 term and cancelling a December meeting."
+    ],
+    "studentParentImpact": "The Durham District School Board's five-year accommodation plan highlights how rapid housing growth in Pickering, Whitby, and Oshawa will impact local schools. To manage enrolment pressures before new facilities are built, the board relies on portables and partner schools to house overflow students. Upcoming boundary reviews in growing communities may shift attendance areas for elementary and secondary students over the next few years. The agenda does not list a public participation window for this informational update, but families can monitor upcoming community boundary reviews noted in the plan.",
+    "policyChanges": "Trustees will vote on setting the board member honorarium policy for the 2026–2030 term in accordance with provincial regulations. No other board policies or procedures are up for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-22-1900-Regular-Board-Meeting/1da4650c-070a-4a40-8631-b4c8011c38a4",
+    "summarySource": "gemini"
+  },
+  {
     "id": "ddsb-2026-09-10-special-education-advisory-committee",
     "boardSlug": "ddsb",
     "meetingDate": "2026-09-10",
