@@ -1,5 +1,86 @@
 [
   {
+    "id": "ddsb-2027-03-31-audit-committee-meeting",
+    "boardSlug": "ddsb",
+    "meetingDate": "2027-03-31",
+    "committeeName": "Audit Committee Meeting",
+    "title": "DDSB reviews provincial rules on police in schools and committee record checks",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "DDSB is reviewing updated provincial rules requiring school boards to allow police access for School Resource Officer programs and career days.",
+      "Updated provincial regulations require statutory committee members and trustees to submit police record checks by November 1, 2026.",
+      "The committee will vote on sending its annual report to the Board of Trustees and the Ministry of Education."
+    ],
+    "studentParentImpact": "New provincial regulations require Durham District School Board to work with local police services to allow uniformed officers into schools for educational events and to run School Resource Officer programs. Parents and students may see police officers participating in school workshops, career days, and safety programs. In addition, volunteers on board committees and trustees must complete police record checks by November 1, 2026. The agenda does not outline a public consultation for this item, but families can review board updates as local procedures are aligned with provincial standards.",
+    "policyChanges": "School boards must update local procedures to align with the updated Provincial Model for a Local Police/School Board Protocol and enter into a Memorandum of Understanding for School Resource Officer programs.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2027-03-31-1800-Audit-Committee-Meeting/24f37150-7532-45b7-9b2e-b4c9010f3d8f",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ddsb-2026-11-05-audit-committee-meeting",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-11-05",
+    "committeeName": "Audit Committee Meeting",
+    "title": "DDSB reviews new provincial rules for school police partnerships and record checks",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "DDSB trustees will review new provincial rules requiring school boards to partner with local police and allow school resource officers.",
+      "The provincial updates also mandate police record checks for all school board committee members and trustees by November 1, 2026.",
+      "The audit committee will also vote to approve its annual reports to trustees and the Ontario Ministry of Education."
+    ],
+    "studentParentImpact": "New provincial directives will change how Durham District School Board schools interact with local police. Schools must allow police officers on premises for educational visits, community events, and school resource officer programs. The updated guidelines clarify when staff must contact police, create rules for parallel investigations, and require immediate parental involvement when incidents involve children under 12 years old. In addition, all committee members and trustees must submit police record checks by November 1, 2026. The agenda does not list a public consultation or invite feedback on these updates.",
+    "policyChanges": "Durham District School Board procedures will be updated to align with Ontario Regulation 176/26 regarding police partnerships and Regulation 521/01 requiring police record checks for statutory committee members and trustees.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-11-05-1800-Audit-Committee-Meeting/24f37150-7532-45b7-9b2e-b4c9010f3d8f",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ddsb-2026-09-23-audit-committee-meeting",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-09-23",
+    "committeeName": "Audit Committee Meeting",
+    "title": "DDSB to discuss new provincial rules for police in schools and parent volunteer checks",
+    "urgencyScore": 3,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Trustees will discuss new provincial rules requiring the Durham District School Board to allow police officers and school resource programs into schools.",
+      "The board must also collect police record checks from school council members and other committee volunteers by November 1, 2026.",
+      "New guidelines require schools to involve parents as soon as possible if police are called for students under age 12."
+    ],
+    "studentParentImpact": "At the September 23, 2026 meeting, the Durham District School Board audit committee will review major provincial updates regarding police in schools. Under new regulations, DDSB must allow local police to run School Resource Officer programs and attend events like career days. For parents, if you serve on a school council or board committee, you must now submit a police record check by November 1, 2026. Additionally, if police are called for any student under the age of 12, schools are now strictly directed to involve parents as quickly as possible. The agenda does not list a public consultation or a way for families to participate in this virtual meeting.",
+    "policyChanges": "The board must update its local procedures to align with the updated Provincial Model for a Local Police/School Board Protocol and implement new police check requirements under Ontario Regulation 521/01.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-23-1800-Audit-Committee-Meeting/24f37150-7532-45b7-9b2e-b4c9010f3d8f",
+    "summarySource": "gemini"
+  },
+  {
     "id": "ddsb-2026-09-22-regular-board-meeting",
     "boardSlug": "ddsb",
     "meetingDate": "2026-09-22",

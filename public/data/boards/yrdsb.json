@@ -1,5 +1,26 @@
 [
   {
+    "id": "yrdsb-2026-09-22-committee-of-the-whole-standing",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-22",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "YRDSB to review early reading screening for kindergarten and primary students",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "York Region District School Board trustees will review an update on mandatory early reading screening for young students.",
+      "Screenings in Year 2 Kindergarten, Grade 1, and Grade 2 help teachers identify and support struggling readers early.",
+      "Community delegates will also present proposals regarding math textbooks and high school music funding."
+    ],
+    "studentParentImpact": "YRDSB staff will present an update on early reading screening for Year 2 Kindergarten, Grade 1, and Grade 2 students. Teachers use these required screenings to check foundational skills like phonics and reading comprehension, identifying children who need extra help early in their education. Schools share individual screening results directly with parents to help support reading practice at home. At the same meeting, community delegates will speak to trustees about reallocating Chromebook funds toward math textbooks and addressing funding impacts on high school music programs. The agenda does not list any actions or decisions required from parents.",
+    "policyChanges": "The meeting covers the implementation of provincial reading instruction directions under Policy/Program Memorandum 168. No board policy or procedure is up for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196088",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-09-15-committee-of-the-whole-standing",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-09-15",
