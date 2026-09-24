@@ -54,6 +54,33 @@
     "summarySource": "gemini"
   },
   {
+    "id": "ddsb-2026-09-28-governance-and-policy-committee-meeting",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-09-28",
+    "committeeName": "Governance and Policy Committee Meeting",
+    "title": "DDSB considers new Teaching and Learning Policy for Durham schools",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Trustees will vote on recommending a new DDSB Teaching and Learning Policy to guide instruction, assessment, and family communication.",
+      "The framework combines existing guidelines and sets board-wide standards for fair grading, technology use, and inclusive teaching.",
+      "Trustees will also review proposed updates to board meeting schedules and policy revision rules."
+    ],
+    "studentParentImpact": "The proposed Teaching and Learning Policy creates a consistent framework across all Durham District School Board schools for how teachers instruct, assess, and communicate student progress to families. It emphasizes fair assessment practices, inclusive teaching, and clear communication between schools and parents. While dedicated consultations for this draft have ended, parents and students can observe the public committee meeting on September 28, 2026, at 6:00 p.m. Requests to make a formal community presentation to the committee must be emailed at least eight working days before a meeting.",
+    "policyChanges": "The board proposes creating a new Teaching and Learning Policy while rescinding older policies on learning material fees, alternative education, and continuing education. Trustees are also reviewing updates to the board bylaws and the Policy Development Process Policy.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-28-1800-Governance-and-Policy-Committee-Meeting/34f4193f-76c3-4d18-a0ec-b4ce0140f494",
+    "summarySource": "gemini"
+  },
+  {
     "id": "ddsb-2026-09-23-audit-committee-meeting",
     "boardSlug": "ddsb",
     "meetingDate": "2026-09-23",

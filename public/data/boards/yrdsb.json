@@ -1,5 +1,25 @@
 [
   {
+    "id": "yrdsb-2026-09-28-audit-committee-meeting-public-session",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-28",
+    "committeeName": "Audit Committee Meeting - Public Session",
+    "title": "YRDSB Audit Committee Reviews Internal Audit Reports and Annual Plan",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "Trustees will receive the Regional Internal Audit Team annual report and status update at the September 28, 2026 meeting.",
+      "The agenda outlines ongoing audit engagements and a schedule of key committee activities for the upcoming school year."
+    ],
+    "studentParentImpact": "At the upcoming York Region District School Board Audit Committee meeting on September 28, 2026, trustees will review informational reports regarding internal audit activities, status updates, and future audit plans. Because these items are for information and governance oversight, they will not directly alter classroom instruction, student attendance boundaries, or daily school routines for students and parents in Aurora. The agenda contains routine administrative updates and does not involve public consultations, votes on school closures, or policy changes requiring immediate family action.",
+    "policyChanges": "No policy or procedure is up for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196390",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-09-22-committee-of-the-whole-standing",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-09-22",
