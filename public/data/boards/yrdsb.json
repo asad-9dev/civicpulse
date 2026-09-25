@@ -1,5 +1,81 @@
 [
   {
+    "id": "yrdsb-2026-10-01-special-education-advisory-committee",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-10-01",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "YRDSB updates early intervention and special education plans for local students",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora",
+      "Georgina"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "YRDSB staff will present updates on early intervention strategies and psychological assessments for students with special education needs.",
+      "The committee will review revised sections of the board's Special Education Plan regarding early identification procedures.",
+      "Trustees and committee members will discuss board policies currently open for public comment."
+    ],
+    "studentParentImpact": "The York Region District School Board Special Education Advisory Committee will review revised early intervention procedures and psychological assessment steps for students in Aurora and York Region. These updates outline how classroom teachers and school teams identify student learning needs early, create growth plans, and connect families to special education supports. Parents can review the board's updated Special Education Plan to understand how classroom accommodations, speech-language supports, and formal assessment referrals work in YRDSB schools. Families can also submit feedback on active board policies, including rules on partisan activities and employee leaves, through the public consultation process listed on the YRDSB website.",
+    "policyChanges": "The board is seeking public feedback on Policy and Procedure #275.0 (Partisan Activities and Campaigning) and Policy and Procedure #570.0 (Pregnancy, Parental, Adoption, Infant, Child Care Leaves). The agenda also updates Section 2.3 of the YRDSB Special Education Plan regarding early intervention procedures.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196411",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-09-29-governance-and-board-organization-commit",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-29",
+    "committeeName": "Governance and Board Organization Committee Meeting - Public Session",
+    "title": "YRDSB to review parent proposal for new Sutton District High School sports field",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Georgina",
+      "Sutton",
+      "Pefferlaw",
+      "Aurora",
+      "Vaughan",
+      "Newmarket",
+      "East Gwillimbury",
+      "Whitchurch-Stouffville"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "School council chairs from five Georgina schools are asking the YRDSB to partner with the town to build a multi-use sports field.",
+      "Trustees will vote on appointing seven new parent and community representatives to the board's parent advisory committee.",
+      "The committee will also receive letters from another school board advocating for special education funding and lifting the school closure moratorium."
+    ],
+    "studentParentImpact": "Parents and students in Georgina could see a major upgrade to Sutton District High School if the board acts on a joint request from five local school councils. The parents want YRDSB and the Town of Georgina to build an accessible turf field, a six-lane track, bleachers, and a lit outdoor basketball court. They say this would keep local athletes in the community and support the school's new high-performance athlete program. Additionally, parents across York Region will have new representation on the board's Parent, Family and Community Engagement Advisory Committee if trustees approve the recommended appointments at the September 29, 2026 meeting.",
+    "policyChanges": "None are up for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196419",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-09-29-committee-of-the-whole-standing",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-09-29",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "YRDSB tracks progress on new schools and additions across York Region",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora",
+      "East Gwillimbury",
+      "Markham",
+      "Richmond Hill",
+      "Vaughan",
+      "Whitchurch-Stouffville"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "The YRDSB Finance and Property Standing Committee will review progress reports on several school construction projects.",
+      "Construction is underway for additions at Markville Secondary School and new schools in Richmond Hill and Holland Landing.",
+      "Staff report that site plan application delays in Markham and Vaughan will not change planned school opening dates."
+    ],
+    "studentParentImpact": "York Region District School Board staff are updating trustees on construction schedules for new schools and building additions across several communities, including Aurora, Markham, Richmond Hill, East Gwillimbury, and Vaughan. An addition at Dr. G.W. Williams Secondary School in Aurora is slated for a September 2029 opening, with site plan submissions planned for October 2026. While site plan approvals for new elementary schools in Angus Glen and Vaughan Metro Centre faced minor delays, staff expect no changes to their targeted opening dates. This report is for information only, so trustees will not vote on changes or request public feedback during this meeting.",
+    "policyChanges": "No policy or procedure creations, revisions, or rescissions are listed on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196394",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-09-28-audit-committee-meeting-public-session",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-09-28",

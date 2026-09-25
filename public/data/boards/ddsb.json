@@ -54,6 +54,32 @@
     "summarySource": "gemini"
   },
   {
+    "id": "ddsb-2026-10-01-special-education-advisory-committee",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-10-01",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "DDSB Special Education Committee to Review Updated Transition Guide",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Durham District School Board staff will share an impact update on Inclusive Student Services and present an updated transition guide.",
+      "Committee members will review student assessment data and discuss the board's Student Achievement Plan process."
+    ],
+    "studentParentImpact": "Durham District School Board families with students in special education programs will see updates to how staff support student transitions and inclusive learning services. On October 1, 2026, the committee will review a new transition guide and receive updates on special education programming and student achievement plans. While the agenda does not mention a public vote or feedback deadline, parents can review these special education updates to understand how support services and achievement tracking are changing across Durham Region schools.",
+    "policyChanges": "The agenda does not propose creating, revising, or rescinding any formal board policies or procedures during this meeting.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-10-01-1830-SEAC-Meeting/59152c7e-65fd-4749-b494-b4cf014a692c",
+    "summarySource": "gemini"
+  },
+  {
     "id": "ddsb-2026-09-28-governance-and-policy-committee-meeting",
     "boardSlug": "ddsb",
     "meetingDate": "2026-09-28",
