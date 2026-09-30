@@ -84,8 +84,8 @@
     "boardSlug": "ddsb",
     "meetingDate": "2026-09-28",
     "committeeName": "Governance and Policy Committee Meeting",
-    "title": "DDSB considers new Teaching and Learning Policy for Durham schools",
-    "urgencyScore": 2,
+    "title": "DDSB Bylaw Review Proposes Moving to Monthly Governance Meetings",
+    "urgencyScore": 3,
     "townsAffected": [
       "Ajax",
       "Pickering",
@@ -97,13 +97,13 @@
     ],
     "category": "Policy",
     "executiveSummary": [
-      "Trustees will vote on recommending a new DDSB Teaching and Learning Policy to guide instruction, assessment, and family communication.",
-      "The framework combines existing guidelines and sets board-wide standards for fair grading, technology use, and inclusive teaching.",
-      "Trustees will also review proposed updates to board meeting schedules and policy revision rules."
+      "Trustees were set to consider a comprehensive review of DDSB Bylaws and the Board Member Code of Conduct for the upcoming term.",
+      "A revised governance meeting cycle was scheduled to be voted on, reducing scheduled core evening meetings to once per month starting in January 2027.",
+      "The agenda also scheduled votes on a new Teaching and Learning Policy and revisions to the Policy Development Process Policy."
     ],
-    "studentParentImpact": "The proposed Teaching and Learning Policy creates a consistent framework across all Durham District School Board schools for how teachers instruct, assess, and communicate student progress to families. It emphasizes fair assessment practices, inclusive teaching, and clear communication between schools and parents. While dedicated consultations for this draft have ended, parents and students can observe the public committee meeting on September 28, 2026, at 6:00 p.m. Requests to make a formal community presentation to the committee must be emailed at least eight working days before a meeting.",
-    "policyChanges": "The board proposes creating a new Teaching and Learning Policy while rescinding older policies on learning material fees, alternative education, and continuing education. Trustees are also reviewing updates to the board bylaws and the Policy Development Process Policy.",
-    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-28-1800-Governance-and-Policy-Committee-Meeting/34f4193f-76c3-4d18-a0ec-b4ce0140f494",
+    "studentParentImpact": "At the September 28, 2026 Governance and Policy Committee meeting, trustees were scheduled to vote on a major update to the board's bylaws and governance structure. If approved, the changes will consolidate regular board and committee meetings into a single scheduled evening per month starting in January 2027, alternating between regular board meetings and an expanded Governance, Planning and Policy Committee. This change aims to give trustees more time for constituency work and professional learning while maintaining public question periods and delegation presentations. The agenda did not contain a way for the public to take part in this meeting, as it had already been scheduled and taken place.",
+    "policyChanges": "The agenda included proposed revisions to the DDSB Bylaws, a proposed Teaching and Learning Policy, a revision to the Policy Development Process Policy, and housekeeping edits to the School Boundaries Policy.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-09-28-1800-Governance-and-Policy-Committee-Meeting/0e236a71-0355-4d29-a63a-b4d400d1d64f",
     "summarySource": "gemini"
   },
   {
