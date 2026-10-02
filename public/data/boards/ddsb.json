@@ -54,6 +54,60 @@
     "summarySource": "gemini"
   },
   {
+    "id": "ddsb-2026-10-05-special-board-meeting",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-10-05",
+    "committeeName": "Special Board Meeting",
+    "title": "DDSB Trustees to Vote on Lowering Board Honoraria to $9,000",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Durham District School Board trustees will vote on updating board honoraria for the 2026-2030 term.",
+      "A new provincial regulation caps annual trustee honoraria at $9,000, down from the previously calculated $18,774.",
+      "Student trustee honoraria will remain unchanged at $2,500 per year."
+    ],
+    "studentParentImpact": "Lower trustee pay limits set by new provincial regulations will reduce administrative stipend amounts for elected officials at the Durham District School Board. Under Ontario Regulation 320/26, trustee annual honoraria will cap at $9,000 starting November 15, 2026, down from $18,774. Student trustee pay remains $2,500 annually. This administrative update does not impact classroom instruction, school boundaries, transportation services, or daily school routines for families in Durham Region. The meeting agenda does not provide options for public participation or community feedback.",
+    "policyChanges": "Trustees will vote to update the board's honorarium policy to align with Ontario Regulation 320/26 by the provincial October 15 deadline.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-10-05-1830-Special-Board-Meeting/bdd2323f-7c6b-4d02-a8f4-b4d60100f22d",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "ddsb-2026-10-05-committee-of-the-whole-standing",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-10-05",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "DDSB trustees to review school safety progress and latest EQAO test scores",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Ajax",
+      "Pickering",
+      "Whitby",
+      "Oshawa",
+      "Uxbridge",
+      "Brock",
+      "Scugog"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "DDSB staff will present an update on school safety initiatives, including bullying prevention and incident reporting tools.",
+      "Trustees will review 2025–2026 EQAO results showing steady reading and writing scores but room for improvement in mathematics.",
+      "Student trustees and community members will deliver presentations on screen time, student leadership, and overseas teacher mentorship."
+    ],
+    "studentParentImpact": "Families can see how the DDSB is addressing school violence prevention, including the fully launched Tell Us online reporting tool for bullying and upcoming updates to school climate policies. The meeting also highlights recent EQAO standardized test scores, where DDSB students showed progress in middle school reading and writing but continued challenges in math, especially for multi-language learners and students with individual education plans. Parents interested in these topics can attend the public standing committee meeting in person at the DDSB boardroom on October 5 at 7:00 p.m.",
+    "policyChanges": "Staff are currently reviewing and revising the Positive School Climate Policy and Procedures alongside the Code of Conduct, though no policy votes are taking place at this meeting.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-10-05-1900-Standing-Committee-Meeting/8c37bf4e-205f-4eec-8c1e-b4d601011ef8",
+    "summarySource": "gemini"
+  },
+  {
     "id": "ddsb-2026-10-01-special-education-advisory-committee",
     "boardSlug": "ddsb",
     "meetingDate": "2026-10-01",

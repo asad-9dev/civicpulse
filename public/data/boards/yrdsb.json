@@ -1,5 +1,29 @@
 [
   {
+    "id": "yrdsb-2026-10-08-parent-family-and-community-engagement-a",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-10-08",
+    "committeeName": "Parent, Family and Community Engagement Advisory Committee Meeting",
+    "title": "YRDSB Advisory Group to Review Parent Engagement Plans",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora",
+      "Georgina",
+      "Newmarket",
+      "Richmond Hill"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "The York Region District School Board advisory committee will review its annual report on parent engagement.",
+      "Staff will present updates on supporting school councils and digital literacy resources for families.",
+      "Committee members will also review board policies that are currently open for public comment."
+    ],
+    "studentParentImpact": "This meeting gives families insight into how the York Region District School Board supports parent involvement across local schools, including Aurora. Committee members will discuss school council initiatives, digital tools, and past regional forums that help students succeed. Parents can learn how committee recommendations shape school board decisions and parent resources. The agenda notes that board policies are available for public comment, giving parents an ongoing way to share feedback on board rules and procedures.",
+    "policyChanges": "The committee will review board policies currently out for public comment. The agenda does not list specific policy numbers or proposed edits.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196640",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-10-01-special-education-advisory-committee",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-10-01",
