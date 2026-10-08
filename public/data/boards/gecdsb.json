@@ -1,5 +1,30 @@
 [
   {
+    "id": "gecdsb-2026-10-13-finance-and-facility-services-committee",
+    "boardSlug": "gecdsb",
+    "meetingDate": "2026-10-13",
+    "committeeName": "Finance and Facility Services Committee",
+    "title": "GECDSB trustees to review $1M cut to textbooks and classroom supplies",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Windsor",
+      "Leamington",
+      "Harrow",
+      "Belle River",
+      "Tecumseh"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "The Greater Essex County District School Board is facing a $1 million funding cut because 120 fewer students enrolled than expected.",
+      "To offset the loss, board staff plan to save $1 million by reducing discretionary spending on textbooks and classroom supplies.",
+      "Trustees will also review millions of dollars in recently awarded school renovation contracts and a new student safety aide program."
+    ],
+    "studentParentImpact": "Because GECDSB enrolment is down by 120 students, the board is losing $1 million in provincial funding. To keep the projected year-end deficit at $3.6 million, the board is cutting $1 million from textbooks and classroom supplies. This means schools will have less money for discretionary learning materials this year. On the positive side, families will see upgrades at several local schools. Trustees will review completed contracts for a new field house at Riverside Secondary, daycare renovations at Dougall Public School, and accessibility upgrades at Belle River, Northwood, Ford City, and Southwood schools. The agenda does not list a way for the public to participate in this meeting.",
+    "policyChanges": "The board will review its annual report on Policy BA-02 (Borrowing and Investing of Funds), which shows no new investments or energy price hedging agreements were made last year.",
+    "originalPdfUrl": "https://calendar.publicboard.ca/meetings/Detail/2026-10-13-1700-Finance-and-Facility-Services-Committee/51ad1611-03cb-454e-84f5-b4dc00fe4a78",
+    "summarySource": "gemini"
+  },
+  {
     "id": "gecdsb-2026-10-06-learning-equity-and-well-being-committee",
     "boardSlug": "gecdsb",
     "meetingDate": "2026-10-06",
