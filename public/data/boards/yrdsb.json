@@ -1,5 +1,43 @@
 [
   {
+    "id": "yrdsb-2026-10-21-joint-board-consortium-public-session",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-10-21",
+    "committeeName": "Joint Board Consortium - Public Session",
+    "title": "YRDSB Transportation Updates: September Start-Up and Parent Portal",
+    "urgencyScore": 1,
+    "townsAffected": [],
+    "category": "Transport",
+    "executiveSummary": [
+      "The York Region District School Board will review reports on the September 2026 school bus start-up and the transportation parent portal.",
+      "The September start-up period showed stable operations, improved on-time performance, and reduced excessive delays compared to the prior year.",
+      "The student transportation parent portal launched in May 2026 allows families to view bus routes and register for delay alerts."
+    ],
+    "studentParentImpact": "Families using school bus services can review information about how student transportation performed during the first weeks of the school year. The reports highlight the ongoing use of the transportation parent portal, which lets parents check their children's bus routes, pick-up and drop-off times, and service providers in one place. Parents can also sign up for email notifications about bus delays and cancellations, or use an online form to opt out of transportation if they do not need it. This agenda item is informational, so no specific public vote or immediate action is required from parents at this meeting.",
+    "policyChanges": "No new policies or procedures are up for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196961",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-10-20-committee-of-the-whole-standing",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-10-20",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "Equity and Inclusivity Advisory Committee (EIAC) L. Agard",
+    "urgencyScore": 2,
+    "townsAffected": [],
+    "category": "Policy",
+    "executiveSummary": [
+      "Agenda item: Equity and Inclusivity Advisory Committee (EIAC) L. Agard.",
+      "Agenda item: Indigenous Education Advisory Council (IEAC) L. Agard.",
+      "Agenda item: Parent, Family and Community Engagement Advisory N. Gunathunge,."
+    ],
+    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
+    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/196963",
+    "summarySource": "built-in"
+  },
+  {
     "id": "yrdsb-2026-10-08-parent-family-and-community-engagement-a",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-10-08",

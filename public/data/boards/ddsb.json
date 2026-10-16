@@ -54,6 +54,26 @@
     "summarySource": "gemini"
   },
   {
+    "id": "ddsb-2026-10-19-regular-board-meeting",
+    "boardSlug": "ddsb",
+    "meetingDate": "2026-10-19",
+    "committeeName": "Regular Board Meeting",
+    "title": "DDSB Launches Boundary Review for New Oshawa Whitelaw Public School",
+    "urgencyScore": 5,
+    "townsAffected": [
+      "Oshawa"
+    ],
+    "category": "Boundary Review",
+    "executiveSummary": [
+      "Trustees will receive a boundary review information report to establish permanent attendance boundaries for the new Oshawa Whitelaw Public School opening in September 2027.",
+      "Community consultations will run from October 20, 2026, to January 8, 2027, featuring an in-person open house on October 29, 2026, and a webinar on November 24, 2026."
+    ],
+    "studentParentImpact": "Families in east Oshawa neighborhoods will be affected by proposed boundary scenarios that determine which elementary school students attend when the new Unnamed Oshawa Whitelaw Public School opens for the 2027-2028 school year. Parents and students can participate in the boundary review consultation by completing surveys on the Engage DDSB platform, emailing OWPSBoundaryReview@ddsb.ca, calling 905-666-6970, attending the in-person public open house on October 29, 2026, at Gordon B. Attersley Public School, or joining the online webinar on November 24, 2026. Feedback collected will inform a final recommendation report presented to the Board of Trustees in February 2027.",
+    "policyChanges": "The boundary review process follows the DDSB School Boundaries Policy and its associated School Boundaries Procedure.",
+    "originalPdfUrl": "https://calendar.ddsb.ca/meetings/Detail/2026-10-19-1900-Regular-Board-Meeting/e250298c-2dca-416e-a5d5-b4e4013e9bae",
+    "summarySource": "gemini"
+  },
+  {
     "id": "ddsb-2026-10-05-special-board-meeting",
     "boardSlug": "ddsb",
     "meetingDate": "2026-10-05",
