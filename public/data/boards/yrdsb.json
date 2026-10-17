@@ -23,19 +23,25 @@
     "boardSlug": "yrdsb",
     "meetingDate": "2026-10-20",
     "committeeName": "Committee of the Whole - Standing",
-    "title": "Equity and Inclusivity Advisory Committee (EIAC) L. Agard",
-    "urgencyScore": 2,
-    "townsAffected": [],
+    "title": "YRDSB updates math achievement plan and student support strategies for 2026-2027",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora",
+      "Georgina",
+      "Markham",
+      "Newmarket",
+      "Richmond Hill"
+    ],
     "category": "Policy",
     "executiveSummary": [
-      "Agenda item: Equity and Inclusivity Advisory Committee (EIAC) L. Agard.",
-      "Agenda item: Indigenous Education Advisory Council (IEAC) L. Agard.",
-      "Agenda item: Parent, Family and Community Engagement Advisory N. Gunathunge,."
+      "YRDSB trustees will review progress and baseline data for the board's Mathematics Achievement Action Plan.",
+      "The board will receive annual reports from advisory committees covering special education, parent engagement, and equity.",
+      "Trustees will also review updates on the Dismantling Anti-Black Racism Strategy and student award recognition."
     ],
-    "studentParentImpact": "This entry lists the agenda's main items; a plain-language explanation of what they mean for students and parents isn't available yet. Open the original agenda for the full details.",
-    "policyChanges": "Not reviewed yet. Check the original agenda for any policy or procedure changes.",
+    "studentParentImpact": "York Region District School Board is updating families on student achievement initiatives for the 2026-2027 school year. The board's math action plan focuses on improving classroom instruction, content knowledge, and support tools like digital math resources for students in Grades 3, 6, and 9. Annual reports from advisory committees highlight ongoing supports for special education, parent involvement grants, and equity initiatives across schools in Aurora and York Region. Parents and students can attend the public standing committee meeting in person at the Aurora Education Centre on October 20, 2026, at 7:00 p.m.",
+    "policyChanges": "No policy or procedure creation, revision, or rescinding is scheduled for a vote on this agenda.",
     "originalPdfUrl": "https://yrdsb.civicweb.net/document/196963",
-    "summarySource": "built-in"
+    "summarySource": "gemini"
   },
   {
     "id": "yrdsb-2026-10-08-parent-family-and-community-engagement-a",

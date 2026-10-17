@@ -1,5 +1,33 @@
 [
   {
+    "id": "gecdsb-2026-10-20-board-meeting",
+    "boardSlug": "gecdsb",
+    "meetingDate": "2026-10-20",
+    "committeeName": "Board Meeting",
+    "title": "GECDSB to review new provincial high school grading and attendance rules",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Windsor",
+      "Tecumseh",
+      "Leamington",
+      "Amherstburg",
+      "Lakeshore",
+      "Essex",
+      "LaSalle",
+      "Pelee Island"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "Trustees will review provincial rules counting secondary student attendance toward final grades and reintroducing written exams.",
+      "High school students entering Grade 9 in 2025 or later must pass a new financial literacy test to graduate.",
+      "The Greater Essex County District School Board will also vote on updated policies covering trustee expenses, school naming, and workplace safety."
+    ],
+    "studentParentImpact": "New provincial rules presented to Greater Essex County District School Board trustees will change how high school students in Windsor and Essex County are graded. Attendance and participation will now count for 15 percent of final marks in Grades 9 and 10, and 10 percent in Grades 11 and 12, while mandatory written exams return for most courses. Students who started Grade 9 in 2025 or later must also score at least 70 percent on a financial literacy test embedded in Grade 10 Career Studies to graduate. In elementary schools, teachers must perform rollcalls during all daily transitions.",
+    "policyChanges": "Trustees will vote to approve updated policies on workplace safety, trustee expenses, board member honoraria, school naming, budget control, and community partnerships. They will also vote to rescind policies on environmental education, video surveillance, and external student research to reclassify them as operational procedures.",
+    "originalPdfUrl": "https://calendar.publicboard.ca/meetings/Detail/2026-10-20-1800-Board-Meeting2/7fa809e4-39f8-4c83-8c11-b4e501001b7d",
+    "summarySource": "gemini"
+  },
+  {
     "id": "gecdsb-2026-10-13-finance-and-facility-services-committee",
     "boardSlug": "gecdsb",
     "meetingDate": "2026-10-13",
