@@ -1,5 +1,29 @@
 [
   {
+    "id": "yrdsb-2026-10-27-governance-and-board-organization-commit",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-10-27",
+    "committeeName": "Governance and Board Organization Committee Meeting - Public Session",
+    "title": "YRDSB Committee to Vote on Formal Recognition of Heritage Months and Days",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora",
+      "Georgina",
+      "Newmarket",
+      "Richmond Hill"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "York Region District School Board trustees will vote on formally recognizing specific heritage months at monthly board meetings.",
+      "Trustees will review appointments for four-year terms on the Special Education and Equity advisory committees.",
+      "The committee will also vote to approve the schedule for board and committee meeting dates through 2027."
+    ],
+    "studentParentImpact": "York Region District School Board trustees are considering formal board recognition for specific heritage months and days to help affirm diverse student identities across schools. If approved, designated heritage months will be formally acknowledged during regular public board meetings, while other notable dates will be shared through special trustee announcements. Trustees will also approve four-year committee appointments for community representatives on both the Special Education Advisory Committee and the Equity and Inclusivity Advisory Committee. These decisions impact how cultural observances and student support needs are represented at the board level. The agenda text does not specify a public participation process for this meeting.",
+    "policyChanges": "Trustees are reviewing updates to board meeting schedule procedures following recent provincial legislation, but no formal board policy creations or revisions are proposed on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/197075",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-10-21-joint-board-consortium-public-session",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-10-21",
