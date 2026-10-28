@@ -1,5 +1,23 @@
 [
   {
+    "id": "yrdsb-2026-11-05-special-education-advisory-committee",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-11-05",
+    "committeeName": "Special Education Advisory Committee",
+    "title": "YRDSB Special Education Advisory Committee Reviews Plan and Transitions",
+    "urgencyScore": 1,
+    "townsAffected": [],
+    "category": "Policy",
+    "executiveSummary": [
+      "Trustees will discuss updates to the Special Education Plan regarding provincial and demonstration schools.",
+      "The agenda features a presentation on transition strategy key performance indicators."
+    ],
+    "studentParentImpact": "Parents and students can learn more about specialized provincial placements, transition strategies, and support services available for exceptional learners in York Region District School Board. This meeting is primarily informational and reviews existing operational updates rather than setting new student boundaries or budgets.",
+    "policyChanges": "None is on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/197273",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-10-27-governance-and-board-organization-commit",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-10-27",
