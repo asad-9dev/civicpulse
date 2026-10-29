@@ -18,6 +18,34 @@
     "summarySource": "gemini"
   },
   {
+    "id": "yrdsb-2026-11-03-board-meeting-public-session-03-nov-2026",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-11-03",
+    "committeeName": "Board Meeting - Public Session - 03 Nov 2026 (Following Private Board)",
+    "title": "YRDSB trustees to vote on Indigenous education policy and review student fee rules",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Aurora",
+      "East Gwillimbury",
+      "Georgina",
+      "King",
+      "Markham",
+      "Newmarket",
+      "Richmond Hill",
+      "Vaughan"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "York Region District School Board trustees will vote on final approval for the updated First Nations, Métis and Inuit Education policy.",
+      "Trustees will consider opening six-month public comment periods for policies on student fees, trustee honoraria and board resource misuse.",
+      "The board will also approve committee appointments and meeting dates for the upcoming school year."
+    ],
+    "studentParentImpact": "York Region District School Board trustees will consider final approval of an updated Indigenous education policy that aims to strengthen culturally responsive learning and combat anti-Indigenous racism. Families can also prepare to share feedback over the next six school months on proposed updates to the student fees policy, which clarifies allowed costs for enhanced programming and field trips. Parents and community members who wish to address the board on these or other topics can submit a written application to the Board Chair or Director's Office to request a delegation standing.",
+    "policyChanges": "Trustees will vote on final approval for Policy #601.0 (First Nations, Métis and Inuit Education). The board is also sending Policy #196.0 (Misappropriation or Misuse of Board Resources), Policy #226.0 (Trustee Honoraria), and Policy #671.0 (Student/School Fees) out for six months of public comment.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/197297",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-10-27-governance-and-board-organization-commit",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-10-27",
