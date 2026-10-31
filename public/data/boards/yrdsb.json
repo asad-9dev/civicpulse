@@ -67,6 +67,27 @@
     "summarySource": "gemini"
   },
   {
+    "id": "yrdsb-2026-11-03-committee-of-the-whole-standing",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-11-03",
+    "committeeName": "Committee of the Whole - Standing",
+    "title": "YRDSB to review trustee expense limits and meeting policies",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Aurora"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "York Region District School Board trustees will consider sending updated trustee expense rules out for six months of public comment.",
+      "Trustees will review updated rules for electronic meeting participation before sending them for a final vote in December 2026.",
+      "The committee will also review routine title and process updates for board recruitment and employee leave policies."
+    ],
+    "studentParentImpact": "York Region District School Board trustees are reviewing policies that govern how trustees use public funds for technology, internet, and events. The proposed rules ban board spending on trustee association fees and optional conferences. While these updates do not directly change classroom rules, parents and community members can submit feedback on the draft policies. Input can be shared through local school councils, an online form, or by emailing policy.committee@yrdsb.ca during a six-month public comment period.",
+    "policyChanges": "Trustees will review proposed revisions to Policy #220.0 (Trustee Services), Policy #532.0 (Recruitment and Promotion), Policy #215.0 (Electronic Participation), and Policy #570.0 (Parental Leaves).",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/197429",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-10-27-governance-and-board-organization-commit",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-10-27",
