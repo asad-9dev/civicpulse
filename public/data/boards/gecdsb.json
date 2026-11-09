@@ -1,5 +1,28 @@
 [
   {
+    "id": "gecdsb-2026-11-12-special-board-meeting",
+    "boardSlug": "gecdsb",
+    "meetingDate": "2026-11-12",
+    "committeeName": "Special Board Meeting",
+    "title": "GECDSB trustees to vote on approving 2025-26 audited financial statements",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Windsor",
+      "Kingsville",
+      "LaSalle"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "GECDSB trustees will vote to approve the audited financial statements for the 2025-26 school year.",
+      "The board ended the year with a $1.7 million financial deficit as student enrolment dropped by 3.1 percent.",
+      "Staffing levels decreased by over 100 full-time positions, including teachers and support staff."
+    ],
+    "studentParentImpact": "Trustees will vote on accepting the GECDSB audited financial report for the 2025-26 school year. The report highlights a 3.1 percent drop in student enrolment, which reduced funding and contributed to a $1.7 million financial deficit. It also details reductions of over 100 staff positions, including teachers, early childhood educators, and student support workers. These financial results help guide future board decisions on school staffing, programs, and budgets in Windsor and Essex County. The agenda does not list a public consultation or specific instructions for parents to participate in this meeting.",
+    "policyChanges": "No policies or procedures are scheduled for creation, revision, or rescinding on this agenda.",
+    "originalPdfUrl": "https://www.publicboard.ca/en/about-gecdsb/November-12,-2026-Special-Board-Meeting-Agenda.pdf",
+    "summarySource": "gemini"
+  },
+  {
     "id": "gecdsb-2026-10-20-board-meeting",
     "boardSlug": "gecdsb",
     "meetingDate": "2026-10-20",
