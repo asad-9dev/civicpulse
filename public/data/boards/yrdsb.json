@@ -1,5 +1,33 @@
 [
   {
+    "id": "yrdsb-2026-11-16-inaugural-board-meeting",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-11-16",
+    "committeeName": "Inaugural Board Meeting",
+    "title": "YRDSB Trustees to Elect Board Leadership at Inaugural Meeting",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora",
+      "East Gwillimbury",
+      "Georgina",
+      "King",
+      "Markham",
+      "Newmarket",
+      "Richmond Hill",
+      "Vaughan"
+    ],
+    "category": "Policy",
+    "executiveSummary": [
+      "YRDSB trustees will take their official oaths of office on November 16, 2026.",
+      "Trustees will elect the Board Chair, Vice-Chair, and chairs for the Finance and Policy committees.",
+      "Board members will sign the Trustee Code of Conduct acknowledgement and confirm committee memberships."
+    ],
+    "studentParentImpact": "This inaugural meeting focuses on establishing leadership for the York Region District School Board rather than immediate school operational changes. Newly elected trustees will take their official oath of office, sign the Trustee Code of Conduct, and elect the Board Chair, Vice-Chair, Finance Committee Chair, and Policy Committee Chair. These elected leaders will oversee future decisions affecting schools in Aurora and across York Region. Because this is a ceremonial and organizational session, the agenda does not include public consultation opportunities or direct changes to student schedules, transportation, or school boundaries.",
+    "policyChanges": "Trustees will sign the Trustee Code of Conduct Acknowledgement and Undertaking. No policy additions, revisions, or rescissions are up for a vote on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/197967",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-11-05-special-education-advisory-committee",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-11-05",
