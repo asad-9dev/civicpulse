@@ -1,5 +1,54 @@
 [
   {
+    "id": "yrdsb-2026-11-24-governance-committee-public-session",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-11-24",
+    "committeeName": "Governance Committee - Public Session",
+    "title": "YRDSB lists high school transfer rules and boundary plans for 2027-28",
+    "urgencyScore": 2,
+    "townsAffected": [
+      "Aurora",
+      "Holland Landing",
+      "Keswick",
+      "King City",
+      "Markham",
+      "Richmond Hill",
+      "Stouffville",
+      "Sutton"
+    ],
+    "category": "Boundary Review",
+    "executiveSummary": [
+      "Trustees will review YRDSB secondary schools open or closed to student transfer requests for the 2027-28 school year.",
+      "Staff will outline planned boundary reviews for elementary schools in Holland Landing, Markham, and Richmond Hill.",
+      "The board shared its annual report showing over 11 million dollars spent on accessibility upgrades across schools."
+    ],
+    "studentParentImpact": "In early December 2026, YRDSB schools will send letters to families explaining high school transfer rules for the 2027-2028 school year. Schools such as Markville, Stephen Lewis, and Tommy Douglas will accept transfers, while others like Dr. G.W. Williams, Newmarket High, and Aurora High for French Immersion remain closed. Bayview Secondary School will lift its student enrolment cap. Families affected by upcoming elementary boundary changes in Holland Landing, Markham, or Richmond Hill can attend public meetings planned for winter 2027. Community members can also send accessibility feedback to the YRDSB Human Rights Office by email or phone.",
+    "policyChanges": "No board policy is up for a vote to be created, revised, or rescinded on this agenda. Staff noted that board by-laws and governance processes must be reviewed to align with new provincial rules under Ontario Regulation 353/26.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/198418",
+    "summarySource": "gemini"
+  },
+  {
+    "id": "yrdsb-2026-11-23-audit-committee-meeting-public-session",
+    "boardSlug": "yrdsb",
+    "meetingDate": "2026-11-23",
+    "committeeName": "Audit Committee Meeting - Public Session",
+    "title": "YRDSB Audit Committee to review 2025-2026 draft audited financial statements",
+    "urgencyScore": 1,
+    "townsAffected": [
+      "Aurora"
+    ],
+    "category": "Budget",
+    "executiveSummary": [
+      "YRDSB trustees will review the board draft audited financial statements for the 2025-2026 school year.",
+      "Regional internal auditors will present an update on current review projects and staff training plans.",
+      "Future YRDSB Audit Committee meetings will move to a new start time of 4:30 p.m."
+    ],
+    "studentParentImpact": "This meeting covers financial oversight and administrative reporting for the York Region District School Board in Aurora. Trustees will review the draft audited financial statements for the 2025-2026 school year, which show how educational funding was allocated to support student achievement, well-being, and school operations. The agenda also includes standard internal audit status updates and a schedule change moving future Audit Committee meetings to 4:30 p.m. These items deal strictly with financial governance and committee operations, so they do not directly alter daily school schedules, classroom resources, or attendance boundaries for local families.",
+    "policyChanges": "No policy or procedure creations, revisions, or rescissions are listed on this agenda.",
+    "originalPdfUrl": "https://yrdsb.civicweb.net/document/198407",
+    "summarySource": "gemini"
+  },
+  {
     "id": "yrdsb-2026-11-16-inaugural-board-meeting",
     "boardSlug": "yrdsb",
     "meetingDate": "2026-11-16",
